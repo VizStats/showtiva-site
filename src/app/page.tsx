@@ -19,6 +19,8 @@ export default function Home() {
 
   return (
     <main className={`${styles.container} ${isMinimized ? styles.lightBg : ""}`}>
+      <div className={styles.patternLeft}></div>
+      <div className={styles.patternRight}></div>
       <div className={`${styles.logoContainer} ${isMinimized ? styles.minimized : ""}`}>
         <h1 className={styles.logo}>
           <span className={styles.showText}>
