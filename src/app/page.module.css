@@ -1,142 +1,127 @@
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
-}
-
-.main {
-  display: flex;
-  flex: 1;
+.container {
   width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+  height: 100vh;
+  background-color: #000000;
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: background-color;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+.container.lightBg {
+  background-color: #ffffff;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
+.logoContainer {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+  z-index: 100;
+  transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+              top 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: left, top, transform;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.logoContainer.minimized {
+  left: 40px;
+  top: 40px;
+  transform: translate(0, 0);
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.logo {
+  font-size: clamp(3.8rem, 11vw, 7.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.35em; /* Space between Show and tiva */
+  user-select: none;
+  transition: font-size 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+              gap 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+              letter-spacing 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: font-size, gap;
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
+.logoContainer.minimized .logo {
+  font-size: 1.8rem;
+  gap: 0.15em;
+  letter-spacing: -0.03em;
+}
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
+.showText,
+.tivaText {
+  display: flex;
+}
+
+.letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(80px) scale(0.7);
+  filter: blur(8px);
+  animation: bounceEntrance 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transition: color 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              text-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: color, text-shadow;
+}
+
+.showText .letter {
+  color: #ffffff;
+  text-shadow: 0 0 45px rgba(255, 255, 255, 0.2);
+}
+
+.tivaText .letter {
+  color: #ff1e2f; /* Deep cinema red */
+  text-shadow: 0 0 55px rgba(255, 30, 47, 0.6);
+}
+
+.logoContainer.minimized .showText .letter {
+  color: #000000;
+  text-shadow: none;
+}
+
+.logoContainer.minimized .tivaText .letter {
+  color: #ff1e2f;
+  text-shadow: none;
+}
+
+@keyframes bounceEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(120px) scale(0.6) rotate(5deg);
+    filter: blur(8px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-35px) scale(1.15) rotate(-3deg);
+    filter: blur(0px);
+  }
+  75% {
+    transform: translateY(12px) scale(0.96) rotate(1deg);
+  }
+  90% {
+    transform: translateY(-4px) scale(1.02) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter: blur(0px);
   }
 }
 
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
+/* Responsive adjustments for mobile devices */
+@media (max-width: 768px) {
+  .logoContainer.minimized {
+    left: 20px;
+    top: 25px;
   }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  
+  .logoContainer.minimized .logo {
+    font-size: 1.5rem;
   }
 }
