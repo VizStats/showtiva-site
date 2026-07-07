@@ -7,16 +7,6 @@ export default function Home() {
   const showLetters = ["S", "h", "o", "w"];
   const tivaLetters = ["t", "i", "v", "a"];
   const [isMinimized, setIsMinimized] = useState(false);
-  const [showCards, setShowCards] = useState(false);
-
-  const movies = [
-    { id: 1, title: "Aero Bot", img: "/kids_movie_1.png", genre: "Sci-Fi / Adventure" },
-    { id: 2, title: "Candy Wing", img: "/kids_movie_2.png", genre: "Fantasy / Comedy" },
-    { id: 3, title: "Cosmo Paws", img: "/kids_movie_3.png", genre: "Adventure / Space" },
-    { id: 4, title: "Byte Forest", img: "/kids_movie_1.png", genre: "Sci-Fi / Nature" },
-    { id: 5, title: "Sweet Flight", img: "/kids_movie_2.png", genre: "Fantasy / Magic" },
-    { id: 6, title: "Nebula Tail", img: "/kids_movie_3.png", genre: "Space / Comedy" },
-  ];
 
   useEffect(() => {
     // Bounce finishes around 1.7s. We wait 2.2s so the bounce settles, then transition.
@@ -24,19 +14,39 @@ export default function Home() {
       setIsMinimized(true);
     }, 2200);
 
-    // Initial logo transition completes by 3.4s. 0.5s later is 3.9s.
-    const cardsTimer = setTimeout(() => {
-      setShowCards(true);
-    }, 3900);
-
     return () => {
       clearTimeout(minimizeTimer);
-      clearTimeout(cardsTimer);
     };
   }, []);
 
+  const stripes = [0, 1, 2, 3, 4];
+
   return (
     <main className={`${styles.container} ${isMinimized ? styles.lightBg : ""}`}>
+      <div className={`${styles.stripeContainer} ${isMinimized ? styles.stripeVisible : ""}`}>
+        {stripes.map((index) => (
+          <div
+            key={index}
+            className={styles.stripe}
+            style={{
+              animationDelay: `${index * 0.3}s`,
+            } as React.CSSProperties}
+          >
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className={styles.stripeVideo}
+              style={{
+                left: `-${index * 20}vw`,
+              }}
+            >
+              <source src="/bg_video.mp4" type="video/mp4" />
+            </video>
+          </div>
+        ))}
+      </div>
       <div className={styles.patternLeft}></div>
       <div className={styles.patternRight}></div>
       
@@ -69,21 +79,28 @@ export default function Home() {
         </h1>
       </div>
 
-      <div className={`${styles.cardsWrapper} ${showCards ? styles.cardsVisible : ""}`}>
-        <div className={styles.cardsTrack}>
-          {movies.map((movie) => (
-            <div key={movie.id} className={styles.card}>
-              <div className={styles.cardInner}>
-                <img src={movie.img} alt={movie.title} className={styles.cardImage} />
-                <div className={styles.cardInfo}>
-                  <h3 className={styles.cardTitle}>{movie.title}</h3>
-                  <p className={styles.cardGenre}>{movie.genre}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className={styles.writeup}>
+        <h2 className={styles.headline}>
+          The Ultimate <br />Cinema Hub
+        </h2>
+        <p className={styles.description}>
+          Stream blockbusters, host watch parties with real-time sync, and explore curated picks tailored just for you. Your screen, your theater.
+        </p>
+        <button className={styles.ctaButton}>
+          <span>Start Watching</span>
+          <svg className={styles.arrowIcon} viewBox="0 0 24 24" width="20" height="20">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </svg>
+        </button>
       </div>
+
+      <svg width="0" height="0" style={{ position: "absolute" }}>
+        <defs>
+          <clipPath id="cinematicCurve" clipPathUnits="objectBoundingBox">
+            <path d="M 0,0 L 0.85,0 C 0.6,0.3 0.4,0.7 0.15,1 L 0,1 Z" />
+          </clipPath>
+        </defs>
+      </svg>
     </main>
   );
 }
