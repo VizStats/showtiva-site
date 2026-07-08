@@ -37,7 +37,7 @@
   overflow: hidden;
   transform: translateY(-120%);
   will-change: transform;
-  border-radius: 24px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 
               inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -460,7 +460,7 @@
 .emailInput {
   flex: 1;
   padding: 15px 24px;
-  border-radius: 30px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(0, 0, 0, 0.6);
   color: #ffffff;
@@ -484,7 +484,7 @@
   justify-content: center;
   gap: 8px;
   padding: 15px 28px;
-  border-radius: 30px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 30, 47, 0.35);
   background-color: #ff1e2f;
   color: #ffffff;
