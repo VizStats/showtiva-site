@@ -10,7 +10,6 @@ export default function Home() {
   const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
-    // Bounce finishes around 1.7s. We wait 2.2s so the bounce settles, then transition.
     const minimizeTimer = setTimeout(() => {
       setIsMinimized(true);
     }, 2200);
@@ -48,6 +47,7 @@ export default function Home() {
           );
         })}
       </div>
+      
       <div className={styles.patternLeft}></div>
       <div className={styles.patternRight}></div>
       
@@ -80,6 +80,22 @@ export default function Home() {
             </span>
           </h1>
         </Link>
+      </div>
+
+      <div className={styles.writeup}>
+        <div className={styles.bannerInfo}>
+          <h2 className={styles.headline}>The Ultimate Cinema Hub</h2>
+          <span className={styles.divider}></span>
+          <p className={styles.description}>
+            Stream blockbusters, host watch parties with real-time sync, and explore curated picks.
+          </p>
+        </div>
+        <button className={styles.ctaButton}>
+          <span>Start Watching</span>
+          <svg className={styles.arrowIcon} viewBox="0 0 24 24" width="20" height="20">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </svg>
+        </button>
       </div>
 
       <svg width="0" height="0" style={{ position: "absolute" }}>
