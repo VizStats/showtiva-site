@@ -12,11 +12,13 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 65vh; /* Increased from 50vh to 65vh */
+  height: 70vh; /* Increased slightly to 70vh */
   display: flex;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  clip-path: url(#horizontalWave);
+  -webkit-clip-path: url(#horizontalWave);
 }
 
 .stripe {
@@ -107,6 +109,20 @@
   left: 40px;
   top: 40px;
   transform: translate(0, 0);
+}
+
+.logoLink {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  cursor: default;
+}
+
+.logoContainer.minimized .logoLink {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .logo {

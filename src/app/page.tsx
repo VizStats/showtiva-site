@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -51,34 +52,43 @@ export default function Home() {
       <div className={styles.patternRight}></div>
       
       <div className={`${styles.logoContainer} ${isMinimized ? styles.minimized : ""}`}>
-        <h1 className={styles.logo}>
-          <span className={styles.showText}>
-            {showLetters.map((char, index) => (
-              <span
-                key={`show-${index}`}
-                className={styles.letter}
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                {char}
-              </span>
-            ))}
-          </span>
-          <span className={styles.tivaText}>
-            {tivaLetters.map((char, index) => (
-              <span
-                key={`tiva-${index}`}
-                className={styles.letter}
-                style={{ 
-                  animationDelay: `${(showLetters.length + index) * 0.08 + 0.05}s` 
-                }}
-              >
-                {char}
-              </span>
-            ))}
-          </span>
-        </h1>
+        <Link href="/" className={styles.logoLink}>
+          <h1 className={styles.logo}>
+            <span className={styles.showText}>
+              {showLetters.map((char, index) => (
+                <span
+                  key={`show-${index}`}
+                  className={styles.letter}
+                  style={{ animationDelay: `${index * 0.08}s` }}
+                >
+                  {char}
+                </span>
+              ))}
+            </span>
+            <span className={styles.tivaText}>
+              {tivaLetters.map((char, index) => (
+                <span
+                  key={`tiva-${index}`}
+                  className={styles.letter}
+                  style={{ 
+                    animationDelay: `${(showLetters.length + index) * 0.08 + 0.05}s` 
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </span>
+          </h1>
+        </Link>
       </div>
 
+      <svg width="0" height="0" style={{ position: "absolute" }}>
+        <defs>
+          <clipPath id="horizontalWave" clipPathUnits="objectBoundingBox">
+            <path d="M 0,0 L 1,0 L 1,0.85 C 0.75,0.7 0.25,1.0 0,0.85 Z" />
+          </clipPath>
+        </defs>
+      </svg>
     </main>
   );
 }
