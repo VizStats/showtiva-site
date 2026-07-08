@@ -108,10 +108,10 @@ export default function Home() {
 
       <div className={styles.writeup}>
         <div className={styles.bannerInfo}>
-          <h2 className={styles.headline}>The Ultimate Cinema Hub</h2>
+          <h2 className={styles.headline}>The Ultimate Creator Hub</h2>
           <span className={styles.divider}></span>
           <p className={styles.description}>
-            Stream blockbusters, host watch parties with real-time sync, and explore curated picks.
+            Upload stories, co-edit with creators in real-time, and showcase films to the world.
           </p>
         </div>
         <button className={styles.ctaButton}>
