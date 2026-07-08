@@ -20,6 +20,12 @@
   padding: 20px 20px 10px;
   gap: 16px;
   box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+.stripeVisible {
+  opacity: 1;
 }
 
 .stripe {
@@ -27,7 +33,7 @@
   height: 100%;
   position: relative;
   overflow: hidden;
-  transform: translateY(-100%);
+  transform: translateY(-120%);
   will-change: transform;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -284,7 +290,7 @@
 }
 
 @keyframes strokeIn {
-  0% { transform: translateY(-100%); }
+  0% { transform: translateY(-120%); }
   100% { transform: translateY(0); }
 }
 
