@@ -46,6 +46,17 @@ export default function Home() {
             </div>
           );
         })}
+        {/* Dark blur overlay */}
+        <div className={`${styles.videoOverlay} ${isMinimized ? styles.overlayActive : ""}`}></div>
+      </div>
+
+      {/* Centered Hero Writeup */}
+      <div className={`${styles.heroWriteup} ${isMinimized ? styles.heroActive : ""}`}>
+        <h3 className={styles.heroSub}>NOW STREAMING SHOWTIVA ORIGINAL</h3>
+        <h1 className={styles.heroTitle}>Unlimited Movies, <br />TV Shows, and More</h1>
+        <p className={styles.heroDesc}>
+          Watch anywhere. Cancel anytime. Sync up with friends for the ultimate watch party.
+        </p>
       </div>
       
       <div className={styles.patternLeft}></div>
