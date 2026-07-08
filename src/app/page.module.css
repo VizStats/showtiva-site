@@ -269,7 +269,8 @@
   cursor: pointer;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(255, 30, 47, 0.15);
-  transition: transform 0.3s ease,
+  transition: color 0.3s ease,
+              transform 0.3s ease,
               box-shadow 0.3s ease;
   white-space: nowrap;
 }
@@ -299,12 +300,12 @@
   left: 1px;
   right: 1px;
   bottom: 1px;
-  background: rgba(12, 12, 20, 0.85);
+  background: #000000;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 29px;
   z-index: 1;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, background 0.3s ease;
 }
 
 .ctaButton span,
@@ -314,12 +315,13 @@
 }
 
 .ctaButton:hover {
+  color: #ff1e2f;
   box-shadow: 0 12px 30px rgba(255, 30, 47, 0.35);
   transform: translateY(-2px);
 }
 
 .ctaButton:hover::after {
-  background: rgba(20, 20, 30, 0.9);
+  background: #ffffff;
 }
 
 @keyframes rotateBorder {
