@@ -392,6 +392,73 @@
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
+.emailCollector {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 540px;
+  margin-top: 28px;
+  gap: 10px;
+  z-index: 50;
+}
+
+.emailInput {
+  flex: 1;
+  padding: 15px 24px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.emailInput:focus {
+  border-color: #ff1e2f;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.emailInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.emailButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 28px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 30, 47, 0.35);
+  background-color: #ff1e2f;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 30, 47, 0.25);
+  transition: background-color 0.3s ease,
+              transform 0.3s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.emailButton:hover {
+  background-color: #ff3343;
+  border-color: rgba(255, 30, 47, 0.7);
+  box-shadow: 0 12px 30px rgba(255, 30, 47, 0.4);
+  transform: translateY(-2px);
+}
+
+.arrowIconSmall {
+  transition: transform 0.3s ease;
+}
+
+.emailButton:hover .arrowIconSmall {
+  transform: translateX(4px);
+}
+
 /* Responsive adjustments for mobile devices */
 @media (max-width: 768px) {
   .logoContainer.minimized {
@@ -466,5 +533,20 @@
 
   .heroDesc {
     font-size: 0.85rem;
+  }
+
+  .emailCollector {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .emailInput,
+  .emailButton {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 20px;
+    font-size: 0.9rem;
   }
 }
