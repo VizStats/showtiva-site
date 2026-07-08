@@ -48,9 +48,6 @@ export default function Home() {
         })}
       </div>
       
-      <div className={styles.patternLeft}></div>
-      <div className={styles.patternRight}></div>
-      
       <div className={`${styles.logoContainer} ${isMinimized ? styles.minimized : ""}`}>
         <Link href="/" className={styles.logoLink}>
           <h1 className={styles.logo}>
@@ -98,13 +95,6 @@ export default function Home() {
         </button>
       </div>
 
-      <svg width="0" height="0" style={{ position: "absolute" }}>
-        <defs>
-          <clipPath id="horizontalWave" clipPathUnits="objectBoundingBox">
-            <path d="M 0,0 L 1,0 L 1,0.85 C 0.75,0.7 0.25,1.0 0,0.85 Z" />
-          </clipPath>
-        </defs>
-      </svg>
     </main>
   );
 }
