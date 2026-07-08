@@ -17,8 +17,6 @@
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  clip-path: url(#cinematicCurve);
-  -webkit-clip-path: url(#cinematicCurve);
 }
 
 .stripe {

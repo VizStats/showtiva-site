@@ -93,14 +93,6 @@ export default function Home() {
           </svg>
         </button>
       </div>
-
-      <svg width="0" height="0" style={{ position: "absolute" }}>
-        <defs>
-          <clipPath id="cinematicCurve" clipPathUnits="objectBoundingBox">
-            <path d="M 0,0 L 0.85,0 C 0.6,0.3 0.4,0.7 0.15,1 L 0,1 Z" />
-          </clipPath>
-        </defs>
-      </svg>
     </main>
   );
 }
