@@ -38,11 +38,10 @@
 .stripeVideo {
   position: absolute;
   top: 0;
-  width: 100vw;
-  height: 100vh; /* Restore to full height */
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  min-width: 100vw;
-  max-width: none;
   opacity: 0.85; /* Seamless blend over the deep black background */
 }
 

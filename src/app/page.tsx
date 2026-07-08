@@ -24,28 +24,28 @@ export default function Home() {
   return (
     <main className={`${styles.container} ${isMinimized ? styles.lightBg : ""}`}>
       <div className={`${styles.stripeContainer} ${isMinimized ? styles.stripeVisible : ""}`}>
-        {stripes.map((index) => (
-          <div
-            key={index}
-            className={styles.stripe}
-            style={{
-              animationDelay: `${index * 0.3}s`,
-            } as React.CSSProperties}
-          >
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className={styles.stripeVideo}
+        {stripes.map((index) => {
+          const videoSrc = `/bg_video_${index + 1}.mp4`;
+          return (
+            <div
+              key={index}
+              className={styles.stripe}
               style={{
-                left: `-${index * 20}vw`,
-              }}
+                animationDelay: `${index * 0.3}s`,
+              } as React.CSSProperties}
             >
-              <source src="/bg_video.mp4" type="video/mp4" />
-            </video>
-          </div>
-        ))}
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className={styles.stripeVideo}
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+            </div>
+          );
+        })}
       </div>
       <div className={styles.patternLeft}></div>
       <div className={styles.patternRight}></div>
