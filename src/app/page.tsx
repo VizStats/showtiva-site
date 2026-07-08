@@ -6,7 +6,7 @@ import styles from "./page.module.css";
 
 export default function Home() {
   const showLetters = ["S", "h", "o", "w"];
-  const tivaLetters = ["t", "i", "v", "a"];
+  const tivaLetters = ["T", "i", "v", "a"];
   const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
