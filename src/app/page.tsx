@@ -48,6 +48,8 @@ export default function Home() {
         })}
       </div>
       
+      <div className={styles.patternLeft}></div>
+      
       <div className={`${styles.logoContainer} ${isMinimized ? styles.minimized : ""}`}>
         <Link href="/" className={styles.logoLink}>
           <h1 className={styles.logo}>
