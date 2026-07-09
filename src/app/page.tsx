@@ -153,7 +153,10 @@ function LandingContent() {
           <h1 className={styles.heroTitle}>
             {!isCreator ? (
               <>
-                Trusted Family <FlipWords words={rotatingWords} />
+                Trusted{" "}
+                <span style={{ whiteSpace: "nowrap" }}>
+                  Family <FlipWords words={rotatingWords} />
+                </span>
               </>
             ) : (
               activeCopy.heroTitle
