@@ -92,7 +92,7 @@ function LandingContent() {
     creator: {
       heroSub: "ELITE CREATOR STUDIO ACCESS",
       heroTitle: "Co-Create the Future of Family Shows",
-      heroDesc: "Collaborate with our studio to produce trusted animations. Access is exclusive: you must be invited and pass our vetting checks to earn a spot.",
+      heroDesc: "Collaborate with our studio to produce trusted shows. Access is exclusive: you must be invited and pass our vetting checks to earn a spot.",
       emailPlaceholder: "Enter email for invite request",
       emailButtonText: "Request Invite",
       bannerHeadline: "The Ultimate Creator Hub",
