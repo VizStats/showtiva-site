@@ -722,47 +722,277 @@
 }
 
 /* --- Creator: what we create / never touch (two clean columns) --- */
-.dualList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(32px, 6vw, 96px);
-  margin-top: 48px;
+/* --- Safe Content Pipeline Infographic Diagram --- */
+
+.pipelineContainer {
+  margin-top: 36px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
-.listCol {
-  flex: 1 1 260px;
-}
-
-.listLabel {
+.pipelineTitle {
   font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  color: #ffffff;
-  margin: 0 0 18px;
+  letter-spacing: 0.1em;
+  color: #8a8a92;
+  margin-bottom: 24px;
+  font-weight: 700;
 }
 
-.checkList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.checkItem {
-  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.98rem, 1.15vw, 1.1rem);
-  line-height: 1.5;
-  color: #c9c9d1;
-  padding: 13px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+.pipelineFlow {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  align-items: flex-start;
+  position: relative;
 }
 
-.checkItem:first-child {
-  border-top: none;
+.pipelineStage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.stageLabel {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-size: 0.72rem;
+  color: #8a8a92;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mediaStackLeft,
+.mediaStackRight {
+  position: relative;
+  height: 90px;
+  width: 80px;
+}
+
+.miniCard {
+  position: absolute;
+  width: 76px;
+  height: 52px;
+  border-radius: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
+}
+
+.unfilteredCard {
+  background: rgba(255, 30, 47, 0.08);
+  border: 1px solid rgba(255, 30, 47, 0.2);
+  color: #ff9eaf;
+  animation: swingLeft 4s ease-in-out infinite alternate;
+}
+
+.filteredCard {
+  background: rgba(52, 199, 89, 0.08);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  color: #9effb6;
+  animation: floatRight 3.5s ease-in-out infinite alternate;
+}
+
+.cardStagger1 {
+  top: 15px;
+  left: 12px;
+  z-index: 2;
+  animation-delay: 0.5s;
+}
+
+.cardStagger2 {
+  top: 30px;
+  left: 24px;
+  z-index: 1;
+  animation-delay: 1s;
+}
+
+.cardGenre {
+  color: #ff9eaf;
+}
+
+.cardGenreSafe {
+  color: #9effb6;
+}
+
+.cardDotRed,
+.cardDotGreen {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  align-self: flex-end;
+}
+
+.cardDotRed {
+  background-color: #ff1e2f;
+  box-shadow: 0 0 6px #ff1e2f;
+}
+
+.cardDotGreen {
+  color: #34c759;
+  font-size: 0.75rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flowArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.flowSvg {
+  display: block;
+}
+
+.flowPathRed {
+  animation: dashRed 1.5s linear infinite;
+}
+
+.flowPathGreen {
+  animation: dashGreen 1.5s linear infinite;
+}
+
+.pipelineGate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gateShield {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(10, 10, 15, 0.9);
+  border: 2px solid #34c759;
+  box-shadow: 0 0 20px rgba(52, 199, 89, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: gatePulse 2.5s infinite;
+}
+
+.gateLogo {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.gateLogo span {
+  color: #ff1e2f;
+}
+
+.gateStatus {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  color: #34c759;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.pipelineAudience {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarCluster {
+  position: relative;
+  height: 90px;
+  width: 90px;
+}
+
+.avatarCircle {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(10, 10, 15, 0.85);
+  border: 2px solid #34c759;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(52, 199, 89, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  animation: floatAvatar 4s ease-in-out infinite alternate;
+}
+
+.avatar1 {
+  top: 5px;
+  left: 5px;
+  z-index: 3;
+}
+
+.avatar2 {
+  top: 35px;
+  left: 40px;
+  z-index: 2;
+  animation-delay: 0.7s;
+}
+
+.avatar3 {
+  top: 40px;
+  left: 2px;
+  z-index: 1;
+  animation-delay: 1.4s;
+}
+
+@keyframes swingLeft {
+  0% { transform: rotate(-3deg) translate(-2px, 0); }
+  100% { transform: rotate(3deg) translate(2px, 4px); }
+}
+
+@keyframes floatRight {
+  0% { transform: translateY(0px) rotate(-1deg); }
+  100% { transform: translateY(-6px) rotate(1deg); }
+}
+
+@keyframes dashRed {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes dashGreen {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes gatePulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(52, 199, 89, 0.3);
+    border-color: #34c759;
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(52, 199, 89, 0.6);
+    border-color: #5efc82;
+  }
+}
+
+@keyframes floatAvatar {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-4px) scale(1.02); }
 }
 
 .markYes,
@@ -1264,8 +1494,14 @@
     gap: 10px;
   }
 
-  .dualList {
-    gap: 30px;
+  .pipelineFlow {
+    flex-direction: column;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .flowArrow {
+    transform: rotate(90deg);
   }
 
   .footer {

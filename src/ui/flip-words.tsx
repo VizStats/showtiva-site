@@ -26,7 +26,7 @@ export const FlipWords = ({ words, duration = 3000, className }: FlipWordsProps)
       style={{
         display: "inline-flex",
         position: "relative",
-        verticalAlign: "bottom",
+        verticalAlign: "baseline",
         textAlign: "left",
         overflow: "hidden",
         height: "1.15em",
@@ -39,11 +39,14 @@ export const FlipWords = ({ words, duration = 3000, className }: FlipWordsProps)
       <style>{`
         @keyframes flipInChar {
           0% {
-            transform: translateY(100%);
+            transform: translateY(80%) rotateX(-90deg);
             opacity: 0;
+            filter: blur(4px);
           }
           100% {
-            transform: translateY(0);
+            transform: translateY(0) rotateX(0deg);
+            opacity: 1;
+            filter: blur(0);
           }
         }
       `}</style>
@@ -61,10 +64,11 @@ export const FlipWords = ({ words, duration = 3000, className }: FlipWordsProps)
             style={{
               display: "inline-block",
               color: "#ff1e2f",
-              animation: "flipInChar 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards",
-              animationDelay: `${letterIdx * 0.03}s`,
+              animation: "flipInChar 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+              animationDelay: `${letterIdx * 0.035}s`,
               opacity: 0,
-              transform: "translateY(100%)",
+              transform: "translateY(80%) rotateX(-90deg)",
+              transformOrigin: "bottom center",
               willChange: "transform, opacity",
             }}
           >

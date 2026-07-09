@@ -235,29 +235,87 @@ function LandingContent() {
               <span className={styles.eyebrow}>{activeCopy.section1Eyebrow}</span>
               <h2 className={styles.sectionTitle}>{activeCopy.section1Title}</h2>
               <p className={styles.sectionBody}>{activeCopy.section1Body}</p>
-              
-              <div className={styles.dualList}>
-                <div className={styles.listCol}>
-                  <h4 className={styles.listLabel}>{activeCopy.list1Label}</h4>
-                  <ul className={styles.checkList}>
-                    {activeCopy.list1Items.map((item, idx) => (
-                      <li key={idx} className={styles.checkItem}>
-                        <span className={styles.markYes}>✓</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className={styles.listCol}>
-                  <h4 className={styles.listLabel}>{activeCopy.list2Label}</h4>
-                  <ul className={styles.checkList}>
-                    {activeCopy.list2Items.map((item, idx) => (
-                      <li key={idx} className={styles.checkItem}>
-                        <span className={styles.markNo}>✗</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Live Content Pipeline Infographic Diagram */}
+              <div className={styles.pipelineContainer}>
+                <div className={styles.pipelineTitle}>Safe Content Pipeline</div>
+                <div className={styles.pipelineFlow}>
+                  
+                  {/* Stage 1: Unfiltered Media Stack */}
+                  <div className={styles.pipelineStage}>
+                    <div className={styles.stageLabel}>Web Feed</div>
+                    <div className={styles.mediaStackLeft}>
+                      <div className={`${styles.miniCard} ${styles.unfilteredCard}`}>
+                        <span className={styles.cardGenre}>Action Film</span>
+                        <span className={styles.cardDotRed}></span>
+                      </div>
+                      <div className={`${styles.miniCard} ${styles.unfilteredCard} ${styles.cardStagger1}`}>
+                        <span className={styles.cardGenre}>General Vlog</span>
+                        <span className={styles.cardDotRed}></span>
+                      </div>
+                      <div className={`${styles.miniCard} ${styles.unfilteredCard} ${styles.cardStagger2}`}>
+                        <span className={styles.cardGenre}>Unvetted Stream</span>
+                        <span className={styles.cardDotRed}></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Flow Arrow Left */}
+                  <div className={styles.flowArrow}>
+                    <svg width="32" height="16" viewBox="0 0 32 16" className={styles.flowSvg}>
+                      <path d="M0 8 h30" stroke="rgba(255, 30, 47, 0.4)" strokeWidth="2" strokeDasharray="4,4" className={styles.flowPathRed} />
+                      <path d="M26 4 l4 4 -4 4" stroke="rgba(255, 30, 47, 0.4)" strokeWidth="2" fill="none" />
+                    </svg>
+                  </div>
+
+                  {/* Stage 2: ShowTiva Gatekeeper */}
+                  <div className={styles.pipelineGate}>
+                    <div className={styles.gateShield}>
+                      <span className={styles.gateLogo}>Show<span>Tiva</span></span>
+                      <div className={styles.gateStatus}>VETTING</div>
+                    </div>
+                  </div>
+
+                  {/* Flow Arrow Right */}
+                  <div className={styles.flowArrow}>
+                    <svg width="32" height="16" viewBox="0 0 32 16" className={styles.flowSvg}>
+                      <path d="M0 8 h30" stroke="rgba(52, 199, 89, 0.6)" strokeWidth="2" strokeDasharray="4,4" className={styles.flowPathGreen} />
+                      <path d="M26 4 l4 4 -4 4" stroke="rgba(52, 199, 89, 0.6)" strokeWidth="2" fill="none" />
+                    </svg>
+                  </div>
+
+                  {/* Stage 3: Filtered Wholesome Media */}
+                  <div className={styles.pipelineStage}>
+                    <div className={styles.stageLabel}>Wholesome Shows</div>
+                    <div className={styles.mediaStackRight}>
+                      <div className={`${styles.miniCard} ${styles.filteredCard}`}>
+                        <span className={styles.cardGenreSafe}>Educational</span>
+                        <span className={styles.cardDotGreen}>✓</span>
+                      </div>
+                      <div className={`${styles.miniCard} ${styles.filteredCard} ${styles.cardStagger1}`}>
+                        <span className={styles.cardGenreSafe}>Vetted Tales</span>
+                        <span className={styles.cardDotGreen}>✓</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Flow Arrow End */}
+                  <div className={styles.flowArrow}>
+                    <svg width="24" height="16" viewBox="0 0 24 16" className={styles.flowSvg}>
+                      <path d="M0 8 h22" stroke="rgba(52, 199, 89, 0.6)" strokeWidth="2" strokeDasharray="3,3" className={styles.flowPathGreen} />
+                      <path d="M18 4 l4 4 -4 4" stroke="rgba(52, 199, 89, 0.6)" strokeWidth="2" fill="none" />
+                    </svg>
+                  </div>
+
+                  {/* Stage 4: Audience (Family Circles) */}
+                  <div className={styles.pipelineAudience}>
+                    <div className={styles.stageLabel}>Audience</div>
+                    <div className={styles.avatarCluster}>
+                      <div className={`${styles.avatarCircle} ${styles.avatar1}`} title="Parents">👪</div>
+                      <div className={`${styles.avatarCircle} ${styles.avatar2}`} title="Kids">👦</div>
+                      <div className={`${styles.avatarCircle} ${styles.avatar3}`} title="Safe Home">👧</div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
