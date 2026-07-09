@@ -232,22 +232,6 @@ function LandingContent() {
         <div className={styles.sectionInner}>
         </div>
       </section>
-
-
-      {/* Footer bar */}
-      <footer className={styles.footer}>
-        <div className={styles.footerBrand}>
-          Show<span>Tiva</span>
-        </div>
-        <div className={styles.footerNote}>
-          © 2026 ShowTiva. All rights reserved.
-        </div>
-        <div>
-          <Link href={`/?role=${isCreator ? "family" : "creator"}`} className={styles.footerLink}>
-            {isCreator ? "Switch to Family Site" : "Switch to Creator Site"}
-          </Link>
-        </div>
-      </footer>
     </main>
   );
 }
