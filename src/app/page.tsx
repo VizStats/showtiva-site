@@ -14,7 +14,7 @@ function LandingContent() {
   const showLetters = ["S", "h", "o", "w"];
   const tivaLetters = ["T", "i", "v", "a"];
   const [isMinimized, setIsMinimized] = useState(false);
-  const rotatingWords = ["Animation", "Shows", "Movies", "Entertainment", "Series", "Stories"];
+  const rotatingWords = ["Shows", "Movies", "Series", "Stories", "Shorts", "Tales"];
 
   useEffect(() => {
     const minimizeTimer = setTimeout(() => {
