@@ -53,7 +53,7 @@ function LandingContent() {
   // Dynamic content based on search parameter ?role=
   const copy = {
     family: {
-      heroSub: "100% WHOLESOME AI CARTOONS",
+      heroSub: "100% WHOLESOME SHOWS",
       heroTitle: "Trusted Animation for Your Family",
       heroDesc: "We feed families clean, safe, and trusted video cartoons. Zero explicit content, pure storytelling, and complete peace of mind for parents.",
       emailPlaceholder: "Enter your email to join waitlist",
