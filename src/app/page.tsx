@@ -68,7 +68,7 @@ function LandingContent() {
       heroDesc: "We feed families clean, safe, and trusted video shows. Zero explicit content, pure storytelling, and complete peace of mind for parents.",
       emailPlaceholder: "Enter your email to join waitlist",
       emailButtonText: "Join waitlist",
-      bannerHeadline: "Trusted Kids Studio",
+      bannerHeadline: "Trusted Entertainment Studio",
       bannerDesc: "Every single animation is fully vetted for child safety, creating a wholesome environment for your family.",
       bottomCTA: "Coming soon",
       
