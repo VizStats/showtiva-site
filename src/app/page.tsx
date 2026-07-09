@@ -5,51 +5,10 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-const contentData = {
-  family: {
-    heroSub: "0% EXPLICIT CONTENT GUARANTEE",
-    heroTitle: "Trusted Cartoon Animations, Made Safe for Kids",
-    heroDesc: "Watch wholesome cartoons screened by advanced AI and vetted by parents. Enter your email for early access to the pilot launch.",
-    emailPlaceholder: "Enter parent email address",
-    emailButton: "Get Early Access",
-    bannerHeadline: "The Ultimate Family Space",
-    bannerDesc: "Entertaining cartoons custom-crafted by verified professional creators under rigorous safety checks.",
-    sections: [
-      {
-        title: "Our Safety Standard",
-        text: "Every animation on Show Tiva passes through a double-vetting pipeline: real-time AI scanning for inappropriate content, followed by manual review by our parent panel. We guarantee a completely safe screen environment for your children, free from explicit elements, hidden mature themes, or aggressive advertising."
-      },
-      {
-        title: "Vetted Professional Animators",
-        text: "Our cartoons are not AI-generated gibberish. They are created by hand-picked professional artists and animators from around the world. These creators are carefully background-checked, vetted, and operate on an invite-only basis to ensure that only the most responsible stories reach your screen."
-      }
-    ]
-  },
-  creator: {
-    heroSub: "INVITE-ONLY CREATOR NETWORK",
-    heroTitle: "Co-Create the Future of Wholesome Cinema",
-    heroDesc: "Produce animations for families who value trust. Apply to join our vetted creator network. Enter your email to begin your vetting application.",
-    emailPlaceholder: "Enter creator email address",
-    emailButton: "Apply to Join",
-    bannerHeadline: "The Ultimate Creator Hub",
-    bannerDesc: "A vetted referral-only network for responsible animators. Get fair revenue share and co-creation tools.",
-    sections: [
-      {
-        title: "Our Aim & Content Guidelines",
-        text: "Our sole mission is to feed families premium, trusted cartoon animations. We accept beautiful, high-quality character-driven stories, educational shorts, and wholesome fantasy cartoons. We strictly reject explicit themes, mature language, violence, or unmoderated AI-generated content. All creators undergo professional background checks before being approved."
-      },
-      {
-        title: "Connecting with Trusted Families",
-        text: "Show Tiva connects vetted filmmakers directly with millions of safety-conscious parents. As a creator, you earn a spot on our platform through strict referral codes. Once vetted, you get access to fair royalty splits, real-time co-production tools, and a high-trust audience eager to watch your films."
-      }
-    ]
-  }
-};
-
-function HomeContent() {
+function LandingContent() {
   const searchParams = useSearchParams();
-  const role = searchParams.get("role") === "creator" ? "creator" : "family";
-  const content = contentData[role];
+  const role = searchParams.get("role") || "family"; // defaults to family
+  const isCreator = role === "creator";
 
   const showLetters = ["S", "h", "o", "w"];
   const tivaLetters = ["T", "i", "v", "a"];
@@ -65,15 +24,103 @@ function HomeContent() {
     };
   }, []);
 
+  // Set up scroll reveal animations
+  useEffect(() => {
+    if (!isMinimized) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add(styles.revealVisible);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    // Query selector targets elements with the reveal class
+    const revealElements = document.querySelectorAll(`.${styles.reveal}`);
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      revealElements.forEach((el) => observer.unobserve(el));
+    };
+  }, [isMinimized, role]);
+
   const stripes = [0, 1, 2, 3, 4];
 
+  // Dynamic content based on search parameter ?role=
+  const copy = {
+    family: {
+      heroSub: "100% WHOLESOME AI CARTOONS",
+      heroTitle: "Trusted Animation for Your Family",
+      heroDesc: "We feed families clean, safe, and trusted video cartoons. Zero explicit content, pure storytelling, and complete peace of mind for parents.",
+      emailPlaceholder: "Enter your email to join waitlist",
+      emailButtonText: "Join waitlist",
+      bannerHeadline: "Trusted Kids Studio",
+      bannerDesc: "Every single animation is fully vetted for child safety, creating a wholesome environment for your family.",
+      bottomCTA: "Coming soon",
+      
+      // Below the fold sections matching the page.module.css definitions
+      section1Eyebrow: "SAFETY STANDARD",
+      section1Title: "Pure Cartoons. Zero Harmful Content.",
+      section1Body: "We guarantee that your children will never encounter explicit content, inappropriate language, or aggressive algorithmic triggers on ShowTiva. Our content pipeline combines advanced AI filtering with rigorous human review to ensure a safe sanctuary.",
+      list1Label: "What We Guarantee",
+      list1Items: [
+        "100% wholesome animation streams",
+        "Age-appropriate educational themes",
+        "Complete parent-guided interface limits"
+      ],
+      list2Label: "What We Exclude",
+      list2Items: [
+        "No violence or explicit graphics",
+        "No hidden advertisements or trackers",
+        "No unvetted algorithmic auto-play feeds"
+      ],
+    },
+    creator: {
+      heroSub: "ELITE CREATOR STUDIO ACCESS",
+      heroTitle: "Co-Create the Future of Family Cartoons",
+      heroDesc: "Collaborate with our AI-powered studio to produce trusted animations. Access is exclusive: you must be invited and pass our vetting checks to earn a spot.",
+      emailPlaceholder: "Enter email for invite request",
+      emailButtonText: "Request Invite",
+      bannerHeadline: "The Ultimate Creator Hub",
+      bannerDesc: "Upload stories, co-edit with creators in real-time, and showcase films to the world.",
+      bottomCTA: "Coming soon",
+
+      // Below the fold sections matching the page.module.css definitions
+      section1Eyebrow: "VETTING & STANDARDS",
+      section1Title: "Vetted Excellence. Earned Access.",
+      section1Body: "ShowTiva works exclusively with highly vetted video creators. Access is based on referral validation and thorough background checks to maintain the absolute safety and quality standards of our platform.",
+      list1Label: "What We Demand",
+      list1Items: [
+        "Background check and reference audits",
+        "Original co-production designs",
+        "Strict adherence to child safety policies"
+      ],
+      list2Label: "What We Prohibit",
+      list2Items: [
+        "No copyright infringements or asset theft",
+        "No unverified content submissions",
+        "No explicit or borderline adult designs"
+      ],
+    }
+  };
+
+  const activeCopy = isCreator ? copy.creator : copy.family;
+
   return (
-    <main className={styles.container}>
-      {/* First Fold (Viewport Height container) */}
-      <div className={`${styles.firstFold} ${isMinimized ? styles.lightBg : ""}`}>
+    <main className={`${styles.container} ${isMinimized ? styles.lightBg : ""}`}>
+      {/* Intro viewport wrapper to contain the initial cinematic reveal */}
+      <div className={styles.intro}>
+        {/* Background Video Stripes */}
         <div className={`${styles.stripeContainer} ${isMinimized ? styles.stripeVisible : ""}`}>
           {stripes.map((index) => {
-            const videoSrc = `/bg_video_${index + 1}.mp4`;
+            // Switch video folder based on ?role=
+            const videoSrc = isCreator 
+              ? `/creator_video_${index + 1}.mp4` 
+              : `/bg_video_${index + 1}.mp4`;
             return (
               <div
                 key={index}
@@ -83,14 +130,14 @@ function HomeContent() {
                 } as React.CSSProperties}
               >
                 <video
+                  key={`${role}-${index}`}
+                  src={videoSrc}
                   autoPlay
                   loop
                   muted
                   playsInline
                   className={styles.stripeVideo}
-                >
-                  <source src={videoSrc} type="video/mp4" />
-                </video>
+                />
               </div>
             );
           })}
@@ -100,18 +147,18 @@ function HomeContent() {
 
         {/* Centered Hero Writeup */}
         <div className={`${styles.heroWriteup} ${isMinimized ? styles.heroActive : ""}`}>
-          <h3 className={styles.heroSub}>{content.heroSub}</h3>
-          <h1 className={styles.heroTitle}>{content.heroTitle}</h1>
-          <p className={styles.heroDesc}>{content.heroDesc}</p>
+          <h3 className={styles.heroSub}>{activeCopy.heroSub}</h3>
+          <h1 className={styles.heroTitle}>{activeCopy.heroTitle}</h1>
+          <p className={styles.heroDesc}>{activeCopy.heroDesc}</p>
           <form className={styles.emailCollector} onSubmit={(e) => e.preventDefault()}>
             <input
               type="email"
-              placeholder={content.emailPlaceholder}
+              placeholder={activeCopy.emailPlaceholder}
               className={styles.emailInput}
               required
             />
             <button type="submit" className={styles.emailButton}>
-              <span>{content.emailButton}</span>
+              <span>{activeCopy.emailButtonText}</span>
               <svg className={styles.arrowIconSmall} viewBox="0 0 24 24" width="18" height="18">
                 <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
@@ -119,8 +166,10 @@ function HomeContent() {
           </form>
         </div>
         
+        {/* Left pattern overlay at start */}
         <div className={styles.patternLeft}></div>
         
+        {/* Minimized Logo Link */}
         <div className={`${styles.logoContainer} ${isMinimized ? styles.minimized : ""}`}>
           <Link href={`/?role=${role}`} className={styles.logoLink}>
             <h1 className={styles.logo}>
@@ -152,70 +201,173 @@ function HomeContent() {
           </Link>
         </div>
 
+        {/* Bottom Banner Bar */}
         <div className={styles.writeup}>
           <div className={styles.bannerInfo}>
-            <h2 className={styles.headline}>{content.bannerHeadline}</h2>
+            <h2 className={styles.headline}>{activeCopy.bannerHeadline}</h2>
             <span className={styles.divider}></span>
-            <p className={styles.description}>{content.bannerDesc}</p>
+            <p className={styles.description}>{activeCopy.bannerDesc}</p>
           </div>
           <button className={styles.ctaButton}>
-            <span>Coming soon</span>
+            <span>{activeCopy.bottomCTA}</span>
           </button>
         </div>
       </div>
 
-      {/* Second Fold (Scrollable Details Area) */}
-      {isMinimized && (
-        <div className={styles.belowFold}>
-          {content.sections.map((section, idx) => (
-            <div key={idx} className={styles.foldSection}>
-              <h2 className={styles.foldTitle}>{section.title}</h2>
-              <p className={styles.foldText}>{section.text}</p>
+      {/* Scrollable details section 1 (Standards & Lists) */}
+      <section className={`${styles.section} ${styles.reveal}`}>
+        <div className={styles.sectionInner}>
+          <div className={styles.splitLayout}>
+            <div className={styles.splitText}>
+              <span className={styles.eyebrow}>{activeCopy.section1Eyebrow}</span>
+              <h2 className={styles.sectionTitle}>{activeCopy.section1Title}</h2>
+              <p className={styles.sectionBody}>{activeCopy.section1Body}</p>
+              
+              <div className={styles.dualList}>
+                <div className={styles.listCol}>
+                  <h4 className={styles.listLabel}>{activeCopy.list1Label}</h4>
+                  <ul className={styles.checkList}>
+                    {activeCopy.list1Items.map((item, idx) => (
+                      <li key={idx} className={styles.checkItem}>
+                        <span className={styles.markYes}>✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className={styles.listCol}>
+                  <h4 className={styles.listLabel}>{activeCopy.list2Label}</h4>
+                  <ul className={styles.checkList}>
+                    {activeCopy.list2Items.map((item, idx) => (
+                      <li key={idx} className={styles.checkItem}>
+                        <span className={styles.markNo}>✗</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-      )}
-    </main>
-  );
-}
 
-// Fallback skeleton loader to render cleanly during Suspense build generation
-function HomeFallback() {
-  const showLetters = ["S", "h", "o", "w"];
-  const tivaLetters = ["T", "i", "v", "a"];
-  const stripes = [0, 1, 2, 3, 4];
+            {/* Split Media Box (Animated CSS Widgets) */}
+            <div className={styles.splitMedia}>
+              {!isCreator ? (
+                <div className={styles.widgetCard}>
+                  <div className={styles.widgetHeader}>
+                    <div className={styles.widgetIndicator}>
+                      <span className={styles.widgetPulseGreen}></span>
+                      <span className={styles.widgetStatusText}>SHIELD ACTIVE</span>
+                    </div>
+                    <span className={styles.widgetLogo}>ShowTiva Safeguard™</span>
+                  </div>
+                  
+                  <div className={styles.widgetBody}>
+                    <div className={styles.widgetMetricBlock}>
+                      <span className={styles.metricLabel}>Daily Cartoon Frames Scanned</span>
+                      <span className={styles.metricValue}>142,840</span>
+                    </div>
+                    
+                    <div className={styles.widgetProgressWrapper}>
+                      <div className={styles.progressHeader}>
+                        <span>Content Integrity Check</span>
+                        <span className={styles.progressValue}>100% Secure</span>
+                      </div>
+                      <div className={styles.progressBarContainer}>
+                        <div className={`${styles.progressBar} ${styles.progressFull}`}></div>
+                      </div>
+                    </div>
 
-  return (
-    <main className={styles.container}>
-      <div className={styles.firstFold}>
-        <div className={styles.stripeContainer}>
-          {stripes.map((index) => (
-            <div key={index} className={styles.stripe}></div>
-          ))}
+                    <div className={styles.widgetTags}>
+                      <div className={styles.widgetTag}>
+                        <span className={styles.tagDotGreen}></span>
+                        <span>0% Explicit content filtered</span>
+                      </div>
+                      <div className={styles.widgetTag}>
+                        <span className={styles.tagDotGreen}></span>
+                        <span>Smart Adblock enabled</span>
+                      </div>
+                      <div className={styles.widgetTag}>
+                        <span className={styles.tagDotGreen}></span>
+                        <span>Age-Filter limits set</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.widgetCard}>
+                  <div className={styles.widgetHeader}>
+                    <div className={styles.widgetIndicator}>
+                      <span className={styles.widgetPulseRed}></span>
+                      <span className={styles.widgetStatusText}>PIPELINE VERIFYING</span>
+                    </div>
+                    <span className={styles.widgetLogo}>Creator Studio V2</span>
+                  </div>
+                  
+                  <div className={styles.widgetBody}>
+                    <div className={styles.widgetMetricBlock}>
+                      <span className={styles.metricLabel}>Active Referral Code Vetted</span>
+                      <span className={styles.metricValueCode}>ST-9482-OK</span>
+                    </div>
+                    
+                    <div className={styles.widgetProgressWrapper}>
+                      <div className={styles.progressHeader}>
+                        <span>Background Vetting Status</span>
+                        <span className={styles.progressValue}>94% Vetted</span>
+                      </div>
+                      <div className={styles.progressBarContainer}>
+                        <div className={`${styles.progressBar} ${styles.progressCreator}`}></div>
+                      </div>
+                    </div>
+
+                    <div className={styles.widgetTags}>
+                      <div className={styles.widgetTag}>
+                        <span className={styles.tagDotRed}></span>
+                        <span>AI Video Safety Sweep: PASS</span>
+                      </div>
+                      <div className={styles.widgetTag}>
+                        <span className={styles.tagDotRed}></span>
+                        <span>Vetting Reference Check: OK</span>
+                      </div>
+                      <div className={styles.widgetTag}>
+                        <span className={styles.tagDotGray}></span>
+                        <span>Invite Code Activation: PENDING</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className={styles.logoContainer}>
-          <h1 className={styles.logo}>
-            <span className={styles.showText}>
-              {showLetters.map((char, index) => (
-                <span key={`show-${index}`} className={styles.letter}>{char}</span>
-              ))}
-            </span>
-            <span className={styles.tivaText}>
-              {tivaLetters.map((char, index) => (
-                <span key={`tiva-${index}`} className={styles.letter}>{char}</span>
-              ))}
-            </span>
-          </h1>
+      </section>
+
+
+      {/* Footer bar */}
+      <footer className={styles.footer}>
+        <div className={styles.footerBrand}>
+          Show<span>Tiva</span>
         </div>
-      </div>
+        <div className={styles.footerNote}>
+          © 2026 ShowTiva. All rights reserved.
+        </div>
+        <div>
+          <Link href={`/?role=${isCreator ? "family" : "creator"}`} className={styles.footerLink}>
+            {isCreator ? "Switch to Family Site" : "Switch to Creator Site"}
+          </Link>
+        </div>
+      </footer>
     </main>
   );
 }
 
 export default function Home() {
   return (
-    <Suspense fallback={<HomeFallback />}>
-      <HomeContent />
+    <Suspense fallback={
+      <div className={styles.loadingContainer}>
+        <p className={styles.loadingText}>Loading ShowTiva...</p>
+      </div>
+    }>
+      <LandingContent />
     </Suspense>
   );
 }
