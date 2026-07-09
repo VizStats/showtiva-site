@@ -24,9 +24,10 @@ export const FlipWords = ({ words, duration = 3000, className }: FlipWordsProps)
   return (
     <span
       style={{
-        display: "inline-flex",
+        display: "inline-block",
         position: "relative",
-        verticalAlign: "bottom",
+        verticalAlign: "baseline",
+        textAlign: "left",
         overflow: "hidden",
         height: "1.15em",
         lineHeight: "1",
