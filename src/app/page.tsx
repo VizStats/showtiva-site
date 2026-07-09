@@ -161,16 +161,17 @@ function LandingContent() {
           <h1 className={styles.heroTitle}>
             {!isCreator ? (
               <>
-                Trusted{" "}
+                Trusted Media <br /> for Your Family:{" "}
                 <span className={styles.flipWrapper}>
                   <span key={wordIndex} className={styles.flipWord}>
                     {rotatingWords[wordIndex]}
                   </span>
-                </span>{" "}
-                for Your Family
+                </span>
               </>
             ) : (
-              activeCopy.heroTitle
+              <>
+                Co-Create the Future <br /> of Family Shows
+              </>
             )}
           </h1>
           <p className={styles.heroDesc}>{activeCopy.heroDesc}</p>

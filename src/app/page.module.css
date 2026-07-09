@@ -446,30 +446,33 @@
 }
 
 .flipWrapper {
-  display: inline-flex;
+  display: inline-block;
   position: relative;
   vertical-align: bottom;
   overflow: hidden;
   height: 1.15em;
   margin-bottom: -0.1em;
   padding: 0 4px;
-  align-items: center;
+  text-align: left;
+  perspective: 1000px;
 }
 
 .flipWord {
   display: inline-block;
   color: #ff1e2f;
-  animation: flipIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  transform-origin: 50% 100%;
+  animation: rotateXFlip 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   will-change: transform, opacity;
+  text-shadow: 0 0 15px rgba(255, 30, 47, 0.5);
 }
 
-@keyframes flipIn {
+@keyframes rotateXFlip {
   0% {
-    transform: translateY(100%);
+    transform: rotateX(-90deg) translateY(10px);
     opacity: 0;
   }
   100% {
-    transform: translateY(0);
+    transform: rotateX(0deg) translateY(0);
     opacity: 1;
   }
 }
@@ -622,6 +625,8 @@
     font-size: 1.8rem;
     margin-bottom: 12px;
   }
+
+
 
   .heroDesc {
     font-size: 0.85rem;
