@@ -161,10 +161,13 @@ function LandingContent() {
           <h1 className={styles.heroTitle}>
             {!isCreator ? (
               <>
-                Trusted Media <br /> for Your Family:{" "}
-                <span className={styles.flipWrapper}>
-                  <span key={wordIndex} className={styles.flipWord}>
-                    {rotatingWords[wordIndex]}
+                Trusted Media <br />
+                <span className={styles.pinnedTitleRow}>
+                  <span className={styles.pinnedTitleText}>for Your Family:</span>{" "}
+                  <span className={styles.flipWrapper}>
+                    <span key={wordIndex} className={styles.flipWord}>
+                      {rotatingWords[wordIndex]}
+                    </span>
                   </span>
                 </span>
               </>
