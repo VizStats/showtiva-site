@@ -13,6 +13,16 @@ function LandingContent() {
   const showLetters = ["S", "h", "o", "w"];
   const tivaLetters = ["T", "i", "v", "a"];
   const [isMinimized, setIsMinimized] = useState(false);
+  const rotatingWords = ["Animation", "Shows", "Movies", "Entertainment", "Series", "Stories"];
+  const [wordIndex, setWordIndex] = useState(0);
+
+  useEffect(() => {
+    if (isCreator) return;
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % rotatingWords.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [isCreator]);
 
   useEffect(() => {
     const minimizeTimer = setTimeout(() => {
@@ -55,7 +65,7 @@ function LandingContent() {
     family: {
       heroSub: "100% WHOLESOME SHOWS",
       heroTitle: "Trusted Animation for Your Family",
-      heroDesc: "We feed families clean, safe, and trusted video cartoons. Zero explicit content, pure storytelling, and complete peace of mind for parents.",
+      heroDesc: "We feed families clean, safe, and trusted video shows. Zero explicit content, pure storytelling, and complete peace of mind for parents.",
       emailPlaceholder: "Enter your email to join waitlist",
       emailButtonText: "Join waitlist",
       bannerHeadline: "Trusted Kids Studio",
@@ -64,8 +74,8 @@ function LandingContent() {
       
       // Below the fold sections matching the page.module.css definitions
       section1Eyebrow: "SAFETY STANDARD",
-      section1Title: "Pure Cartoons. Zero Harmful Content.",
-      section1Body: "We guarantee that your children will never encounter explicit content, inappropriate language, or aggressive algorithmic triggers on ShowTiva. Our content pipeline combines advanced AI filtering with rigorous human review to ensure a safe sanctuary.",
+      section1Title: "Pure Shows. Zero Harmful Content.",
+      section1Body: "We guarantee that your children will never encounter explicit content, inappropriate language, or aggressive algorithmic triggers on ShowTiva. Our content pipeline combines advanced filtering with rigorous human review to ensure a safe sanctuary.",
       list1Label: "What We Guarantee",
       list1Items: [
         "100% wholesome animation streams",
@@ -81,8 +91,8 @@ function LandingContent() {
     },
     creator: {
       heroSub: "ELITE CREATOR STUDIO ACCESS",
-      heroTitle: "Co-Create the Future of Family Cartoons",
-      heroDesc: "Collaborate with our AI-powered studio to produce trusted animations. Access is exclusive: you must be invited and pass our vetting checks to earn a spot.",
+      heroTitle: "Co-Create the Future of Family Shows",
+      heroDesc: "Collaborate with our studio to produce trusted animations. Access is exclusive: you must be invited and pass our vetting checks to earn a spot.",
       emailPlaceholder: "Enter email for invite request",
       emailButtonText: "Request Invite",
       bannerHeadline: "The Ultimate Creator Hub",
@@ -148,7 +158,21 @@ function LandingContent() {
         {/* Centered Hero Writeup */}
         <div className={`${styles.heroWriteup} ${isMinimized ? styles.heroActive : ""}`}>
           <h3 className={styles.heroSub}>{activeCopy.heroSub}</h3>
-          <h1 className={styles.heroTitle}>{activeCopy.heroTitle}</h1>
+          <h1 className={styles.heroTitle}>
+            {!isCreator ? (
+              <>
+                Trusted{" "}
+                <span className={styles.flipWrapper}>
+                  <span key={wordIndex} className={styles.flipWord}>
+                    {rotatingWords[wordIndex]}
+                  </span>
+                </span>{" "}
+                for Your Family
+              </>
+            ) : (
+              activeCopy.heroTitle
+            )}
+          </h1>
           <p className={styles.heroDesc}>{activeCopy.heroDesc}</p>
           <form className={styles.emailCollector} onSubmit={(e) => e.preventDefault()}>
             <input
@@ -263,7 +287,7 @@ function LandingContent() {
                   
                   <div className={styles.widgetBody}>
                     <div className={styles.widgetMetricBlock}>
-                      <span className={styles.metricLabel}>Daily Cartoon Frames Scanned</span>
+                      <span className={styles.metricLabel}>Daily Show Frames Scanned</span>
                       <span className={styles.metricValue}>142,840</span>
                     </div>
                     
@@ -322,7 +346,7 @@ function LandingContent() {
                     <div className={styles.widgetTags}>
                       <div className={styles.widgetTag}>
                         <span className={styles.tagDotRed}></span>
-                        <span>AI Video Safety Sweep: PASS</span>
+                        <span>Video Safety Sweep: PASS</span>
                       </div>
                       <div className={styles.widgetTag}>
                         <span className={styles.tagDotRed}></span>

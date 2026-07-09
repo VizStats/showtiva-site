@@ -445,6 +445,35 @@
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
+.flipWrapper {
+  display: inline-flex;
+  position: relative;
+  vertical-align: bottom;
+  overflow: hidden;
+  height: 1.15em;
+  margin-bottom: -0.1em;
+  padding: 0 4px;
+  align-items: center;
+}
+
+.flipWord {
+  display: inline-block;
+  color: #ff1e2f;
+  animation: flipIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes flipIn {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .heroDesc {
   font-size: clamp(1rem, 1.5vw, 1.25rem);
   font-weight: 400;
