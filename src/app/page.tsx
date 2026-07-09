@@ -13,7 +13,7 @@ function LandingContent() {
   const showLetters = ["S", "h", "o", "w"];
   const tivaLetters = ["T", "i", "v", "a"];
   const [isMinimized, setIsMinimized] = useState(false);
-  const rotatingWords = ["Animation", "Shows", "Movies", "Entertainment", "Series", "Stories"];
+  const rotatingWords = ["Shows", "Movies", "Series", "Stories", "Films", "Tales"];
   const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
