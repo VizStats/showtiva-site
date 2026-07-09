@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { FlipWords } from "../ui/flip-words";
 
 function LandingContent() {
   const searchParams = useSearchParams();
@@ -13,16 +14,7 @@ function LandingContent() {
   const showLetters = ["S", "h", "o", "w"];
   const tivaLetters = ["T", "i", "v", "a"];
   const [isMinimized, setIsMinimized] = useState(false);
-  const rotatingWords = ["Shows", "Movies", "Series", "Stories", "Films", "Tales"];
-  const [wordIndex, setWordIndex] = useState(0);
-
-  useEffect(() => {
-    if (isCreator) return;
-    const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % rotatingWords.length);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, [isCreator]);
+  const rotatingWords = ["Animation", "Shows", "Movies", "Entertainment", "Series", "Stories"];
 
   useEffect(() => {
     const minimizeTimer = setTimeout(() => {
@@ -161,20 +153,10 @@ function LandingContent() {
           <h1 className={styles.heroTitle}>
             {!isCreator ? (
               <>
-                Trusted Media <br />
-                <span className={styles.pinnedTitleRow}>
-                  <span className={styles.pinnedTitleText}>for Your Family:</span>{" "}
-                  <span className={styles.flipWrapper}>
-                    <span key={wordIndex} className={styles.flipWord}>
-                      {rotatingWords[wordIndex]}
-                    </span>
-                  </span>
-                </span>
+                Trusted Family <FlipWords words={rotatingWords} />
               </>
             ) : (
-              <>
-                Co-Create the Future <br /> of Family Shows
-              </>
+              activeCopy.heroTitle
             )}
           </h1>
           <p className={styles.heroDesc}>{activeCopy.heroDesc}</p>

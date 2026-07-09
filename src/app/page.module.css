@@ -445,49 +445,31 @@
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
-.pinnedTitleRow {
-  position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-}
-
-.pinnedTitleText {
-  display: inline-block;
-  white-space: nowrap;
-}
-
 .flipWrapper {
-  position: absolute;
-  left: 100%;
-  margin-left: 0.25em;
-  display: inline-block;
+  display: inline-flex;
+  position: relative;
   vertical-align: bottom;
   overflow: hidden;
   height: 1.15em;
   margin-bottom: -0.1em;
   padding: 0 4px;
-  text-align: left;
-  width: 250px;
-  perspective: 1000px;
+  align-items: center;
 }
 
 .flipWord {
   display: inline-block;
   color: #ff1e2f;
-  transform-origin: 50% 100%;
-  animation: rotateXFlip 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: flipIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   will-change: transform, opacity;
-  text-shadow: 0 0 15px rgba(255, 30, 47, 0.5);
 }
 
-@keyframes rotateXFlip {
+@keyframes flipIn {
   0% {
-    transform: rotateX(-90deg) translateY(10px);
+    transform: translateY(100%);
     opacity: 0;
   }
   100% {
-    transform: rotateX(0deg) translateY(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
@@ -640,29 +622,7 @@
     font-size: 1.8rem;
     margin-bottom: 12px;
   }
-  .pinnedTitleRow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
 
-  .pinnedTitleText {
-    display: block;
-  }
-
-  .flipWrapper {
-    position: relative;
-    left: auto;
-    margin-left: 0;
-    text-align: center;
-    width: 100%;
-  }
-
-  .flipWord {
-    text-align: center;
-    width: 100%;
-  }
   .heroDesc {
     font-size: 0.85rem;
   }
