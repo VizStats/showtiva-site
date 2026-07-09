@@ -96,7 +96,7 @@ function LandingContent() {
       emailPlaceholder: "Enter email for invite request",
       emailButtonText: "Request Invite",
       bannerHeadline: "The Ultimate Creator Hub",
-      bannerDesc: "Upload stories, co-edit with creators in real-time, and showcase films to the world.",
+      bannerDesc: "Upload stories, collaborate with creators, and showcase films to the world.",
       bottomCTA: "Coming soon",
 
       // Below the fold sections matching the page.module.css definitions
