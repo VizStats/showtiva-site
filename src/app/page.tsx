@@ -174,7 +174,7 @@ function LandingContent() {
       emailPlaceholder: "Enter your email to start watching",
       emailButtonText: "Start watching",
       bannerHeadline: "Trusted Entertainment Studio",
-      bannerDesc: "Every single animation is fully vetted for child safety, creating a wholesome environment for your family.",
+      bannerDesc: "Every single animation is fully vetted for our audience, creating a wholesome environment for your family.",
       bottomCTA: "Coming soon",
       
       // Below the fold sections matching the page.module.css definitions
@@ -212,7 +212,7 @@ function LandingContent() {
       list1Items: [
         "Background check and reference audits",
         "Original co-production designs",
-        "Strict adherence to child safety policies"
+        "Strict adherence to our audience policies"
       ],
       list2Label: "What We Prohibit",
       list2Items: [
