@@ -671,8 +671,7 @@
   width: 100%;
   padding: clamp(90px, 14vh, 190px) 8vw;
   border-top: none;
-  background: linear-gradient(to bottom, #000000 0%, #242220 350px);
-  background-color: #242220;
+  background-color: #000000;
 }
 
 .sectionInner {
