@@ -97,10 +97,8 @@
   flex-shrink: 0;
   position: sticky;
   top: 110px; /* Offset below sticky watch header */
-  max-height: calc(100vh - 150px);
-  overflow-y: auto;
+  overflow: hidden;
   padding-bottom: 20px;
-  scrollbar-width: none; /* Firefox */
 }
 
 .sidebar::-webkit-scrollbar {
@@ -197,8 +195,8 @@
 
 /* --- Masonry Grid Styling --- */
 .masonryGrid {
-  column-count: 4;
-  column-gap: 20px;
+  column-count: 3;
+  column-gap: 24px;
   width: 100%;
 }
 
@@ -344,15 +342,15 @@
 /* --- Responsive Breakpoints for Masonry Grid --- */
 @media (max-width: 1200px) {
   .masonryGrid {
-    column-count: 3;
-    column-gap: 16px;
+    column-count: 2;
+    column-gap: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .masonryGrid {
-    column-count: 2;
-    column-gap: 12px;
+    column-count: 1;
+    column-gap: 0;
   }
   .watchMain {
     padding-top: 24px;
