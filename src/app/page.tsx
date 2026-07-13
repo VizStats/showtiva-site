@@ -7,6 +7,7 @@ import styles from "./page.module.css";
 import { FlipWords } from "../ui/flip-words";
 import { CardStack, type CardStackItem } from "../ui/card-stack";
 import { Highlight } from "../ui/highlight";
+import { DraggableCardBody, DraggableCardContainer } from "@/components/ui/draggable-card";
 
 const FAMILY_CARDS: CardStackItem[] = [
   {
@@ -77,6 +78,44 @@ const CREATOR_CARDS: CardStackItem[] = [
         actually cares about standards, not just views.
       </p>
     ),
+  },
+];
+
+const draggableItems = [
+  {
+    title: "Starlit Dreams",
+    image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2669&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "8%", left: "8%", transform: "rotate(-6deg)" }
+  },
+  {
+    title: "Neon City Study",
+    image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=2574&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "45%", left: "14%", transform: "rotate(-9deg)" }
+  },
+  {
+    title: "Enchanted Sketch",
+    image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=2574&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "6%", left: "34%", transform: "rotate(5deg)" }
+  },
+  {
+    title: "Lost Kingdom",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2574&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "38%", left: "55%", transform: "rotate(8deg)" }
+  },
+  {
+    title: "Chibi Quest",
+    image: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=2574&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "18%", right: "8%", transform: "rotate(3deg)" }
+  },
+  {
+    title: "Cyber Legend",
+    image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=2574&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "42%", left: "36%", transform: "rotate(-6deg)" }
+  },
+  {
+    title: "Magical Forest",
+    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=2574&auto=format&fit=crop",
+    style: { position: "absolute" as const, top: "8%", right: "28%", transform: "rotate(4deg)" }
   },
 ];
 
@@ -334,6 +373,35 @@ function LandingContent() {
               <CardStack key={role} items={activeCards} />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Section 3: Interactive Draggable Cartoon Stack */}
+      <section className={`${styles.section} ${styles.reveal}`} style={{ borderTop: "none", padding: "0 0 120px 0", zIndex: 10 }}>
+        <div className={styles.sectionInner} style={{ position: "relative", minHeight: "80vh", width: "100%", overflow: "visible" }}>
+          <DraggableCardContainer className={styles.draggableContainer}>
+            <p className={styles.draggableBgText}>
+              {!isCreator 
+                ? "Drag to explore our safe family shows" 
+                : "Drag to preview our creator series catalog"}
+            </p>
+            {draggableItems.map((item) => (
+              <DraggableCardBody 
+                key={item.title} 
+                className={styles.draggableCard}
+                style={item.style}
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className={styles.draggableImage}
+                />
+                <h3 className={styles.draggableCardTitle}>
+                  {item.title}
+                </h3>
+              </DraggableCardBody>
+            ))}
+          </DraggableCardContainer>
         </div>
       </section>
     </main>
