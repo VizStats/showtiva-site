@@ -82,6 +82,46 @@
   font-weight: 400;
 }
 
+/* --- Category Sections --- */
+.categorySection {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.categorySection:first-of-type {
+  margin-top: 20px;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+}
+
+.categoryTitle {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.01em;
+}
+
+.categoryTitle::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 22px;
+  background-color: #ff1e2f;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(255, 30, 47, 0.5);
+}
+
 /* --- Masonry Grid Styling --- */
 .masonryGrid {
   column-count: 4;

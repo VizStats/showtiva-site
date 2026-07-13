@@ -4,6 +4,22 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import styles from "./watch.module.css";
 
+// 12 Wholesome categories for classification
+const CATEGORY_NAMES = [
+  "Wholesome Cartoons",
+  "Fantasy & Wonders",
+  "Action & Expeditions",
+  "Family & Friendship",
+  "Adventure Chronicles",
+  "Sci-Fi & Cosmos",
+  "Wholesome Tales",
+  "Mystery & Legends",
+  "Nature & Landscapes",
+  "Retro Pixels",
+  "Little Explorers",
+  "Creative Canvas"
+];
+
 // Pool of wholesome 2D cartoon, illustration, and digital art titles
 const TITLES_POOL = [
   "Starlit Skyward Dreams",
@@ -66,17 +82,14 @@ const UNSPLASH_IDS = [
 ];
 
 export default function WatchPage() {
-  // Generate 300 items deterministically using useMemo to avoid re-rendering layout jumps
-  const videoCards = useMemo(() => {
-    return Array.from({ length: 300 }, (_, i) => {
-      // Deterministic generation values based on index
+  // Generate and categorize 300 items deterministically using useMemo
+  const categories = useMemo(() => {
+    const cardPool = Array.from({ length: 300 }, (_, i) => {
       const title = TITLES_POOL[i % TITLES_POOL.length];
       const imageId = UNSPLASH_IDS[i % UNSPLASH_IDS.length];
       const genre = GENRES[(i * 3) % GENRES.length];
       const rating = RATINGS[(i * 7) % RATINGS.length];
       const durationMin = 5 + (i * 4) % 25; // 5 to 29 mins
-      
-      // Calculate a responsive height variation between 200px and 380px to generate the masonry layout
       const height = 200 + (i % 4) * 60; 
 
       return {
@@ -87,6 +100,16 @@ export default function WatchPage() {
         rating,
         duration: `${durationMin} mins`,
         heightStyle: { height: `${height}px` }
+      };
+    });
+
+    const chunkSize = 25;
+    return CATEGORY_NAMES.map((name, catIndex) => {
+      const start = catIndex * chunkSize;
+      const cards = cardPool.slice(start, start + chunkSize);
+      return {
+        name,
+        cards
       };
     });
   }, []);
@@ -112,50 +135,59 @@ export default function WatchPage() {
           </p>
         </div>
 
-        {/* CSS-Columns Masonry Grid */}
-        <div className={styles.masonryGrid}>
-          {videoCards.map((card) => (
-            <div key={card.id} className={styles.gridItem}>
-              <div className={styles.videoCard}>
-                
-                {/* Thumbnail and Overlay Badge */}
-                <div className={styles.imageWrapper} style={card.heightStyle}>
-                  <div className={styles.badge}>{card.rating}</div>
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    loading="lazy"
-                    className={styles.videoThumbnail}
-                  />
-                  {/* Glassmorphic Play Icon Overlay */}
-                  <div className={styles.playOverlay}>
-                    <div className={styles.playCircle}>
-                      <svg
-                        className={styles.playIcon}
-                        viewBox="0 0 24 24"
-                        width="26"
-                        height="26"
-                        fill="currentColor"
-                      >
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details Footer */}
-                <div className={styles.cardDetails}>
-                  <h3 className={styles.cardTitle}>{card.title}</h3>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.genre}>{card.genre}</span>
-                    <span className={styles.duration}>{card.duration}</span>
-                  </div>
-                </div>
-
-              </div>
+        {/* Scrollable Category Blocks */}
+        {categories.map((category) => (
+          <section key={category.name} className={styles.categorySection}>
+            <div className={styles.categoryHeader}>
+              <h2 className={styles.categoryTitle}>{category.name}</h2>
             </div>
-          ))}
-        </div>
+
+            {/* CSS-Columns Masonry Grid for this Category */}
+            <div className={styles.masonryGrid}>
+              {category.cards.map((card) => (
+                <div key={card.id} className={styles.gridItem}>
+                  <div className={styles.videoCard}>
+                    
+                    {/* Thumbnail and Overlay Badge */}
+                    <div className={styles.imageWrapper} style={card.heightStyle}>
+                      <div className={styles.badge}>{card.rating}</div>
+                      <img
+                        src={card.image}
+                        alt={card.title}
+                        loading="lazy"
+                        className={styles.videoThumbnail}
+                      />
+                      {/* Glassmorphic Play Icon Overlay */}
+                      <div className={styles.playOverlay}>
+                        <div className={styles.playCircle}>
+                          <svg
+                            className={styles.playIcon}
+                            viewBox="0 0 24 24"
+                            width="26"
+                            height="26"
+                            fill="currentColor"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Details Footer */}
+                    <div className={styles.cardDetails}>
+                      <h3 className={styles.cardTitle}>{card.title}</h3>
+                      <div className={styles.cardMeta}>
+                        <span className={styles.genre}>{card.genre}</span>
+                        <span className={styles.duration}>{card.duration}</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
       </main>
     </div>
   );
