@@ -106,12 +106,14 @@ function LandingContent() {
           </h1>
           <p className={styles.heroDesc}>{activeCopy.heroDesc}</p>
           <div className={styles.emailCollector}>
-            <button className={styles.emailButton}>
-              <span>Start watching</span>
-              <svg className={styles.arrowIconSmall} viewBox="0 0 24 24" width="18" height="18">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
-            </button>
+            <Link href="/watch" style={{ textDecoration: "none" }}>
+              <button className={styles.emailButton}>
+                <span>Start watching</span>
+                <svg className={styles.arrowIconSmall} viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                </svg>
+              </button>
+            </Link>
           </div>
         </div>
         
