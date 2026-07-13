@@ -487,6 +487,7 @@
 .emailCollector {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
   max-width: 540px;
   margin-top: 28px;
@@ -721,6 +722,43 @@
   border-radius: 2px;
   margin: 40px 0 0;
   box-shadow: 0 0 18px rgba(255, 30, 47, 0.5);
+}
+
+.listColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 48px);
+  margin-top: 40px;
+}
+
+.listLabel {
+  display: block;
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8a92;
+  margin-bottom: 16px;
+}
+
+.listItems {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #c9c9d1;
 }
 
 /* --- Creator: what we create / never touch (two clean columns) --- */
@@ -1512,6 +1550,11 @@
     align-items: flex-start;
     gap: 12px;
     padding: 36px 24px;
+  }
+
+  .listColumns {
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
 
   .splitLayout {

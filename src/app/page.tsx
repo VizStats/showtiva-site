@@ -5,6 +5,80 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { FlipWords } from "../ui/flip-words";
+import { CardStack, type CardStackItem } from "../ui/card-stack";
+import { Highlight } from "../ui/highlight";
+
+const FAMILY_CARDS: CardStackItem[] = [
+  {
+    id: 0,
+    name: "Sarah M.",
+    designation: "Parent of two",
+    content: (
+      <p>
+        Finally a place where I can let my kids browse freely.{" "}
+        <Highlight>Zero explicit content</Highlight> — just wholesome stories.
+      </p>
+    ),
+  },
+  {
+    id: 1,
+    name: "ShowTiva Safety",
+    designation: "Content Pipeline",
+    content: (
+      <p>
+        Every show passes <Highlight>human review + filtering</Highlight> before
+        it ever reaches your family screen.
+      </p>
+    ),
+  },
+  {
+    id: 2,
+    name: "James T.",
+    designation: "Homeschool parent",
+    content: (
+      <p>
+        The shows are <Highlight>age-appropriate and educational</Highlight> —
+        no aggressive auto-play or hidden ads.
+      </p>
+    ),
+  },
+];
+
+const CREATOR_CARDS: CardStackItem[] = [
+  {
+    id: 0,
+    name: "Alex R.",
+    designation: "Animation Director",
+    content: (
+      <p>
+        Getting vetted and invited was tough — but worth it.{" "}
+        <Highlight>Real studio collaboration</Highlight>, not another upload dump.
+      </p>
+    ),
+  },
+  {
+    id: 1,
+    name: "ShowTiva Studio",
+    designation: "Vetting Standard",
+    content: (
+      <p>
+        Access is earned through <Highlight>background checks and referrals</Highlight>.
+        We protect the platform&apos;s trust.
+      </p>
+    ),
+  },
+  {
+    id: 2,
+    name: "Maya K.",
+    designation: "Story Artist",
+    content: (
+      <p>
+        I co-create <Highlight>family-safe originals</Highlight> with a team that
+        actually cares about standards, not just views.
+      </p>
+    ),
+  },
+];
 
 function LandingContent() {
   const searchParams = useSearchParams();
@@ -111,6 +185,7 @@ function LandingContent() {
   };
 
   const activeCopy = isCreator ? copy.creator : copy.family;
+  const activeCards = isCreator ? CREATOR_CARDS : FAMILY_CARDS;
 
   return (
     <main className={`${styles.container} ${isMinimized ? styles.lightBg : ""}`}>
@@ -163,20 +238,14 @@ function LandingContent() {
             )}
           </h1>
           <p className={styles.heroDesc}>{activeCopy.heroDesc}</p>
-          <form className={styles.emailCollector} onSubmit={(e) => e.preventDefault()}>
-            <input
-              type="email"
-              placeholder={activeCopy.emailPlaceholder}
-              className={styles.emailInput}
-              required
-            />
-            <button type="submit" className={styles.emailButton}>
-              <span>{activeCopy.emailButtonText}</span>
+          <div className={styles.emailCollector}>
+            <button className={styles.emailButton}>
+              <span>Start watching</span>
               <svg className={styles.arrowIconSmall} viewBox="0 0 24 24" width="18" height="18">
                 <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
             </button>
-          </form>
+          </div>
         </div>
         
         {/* Left pattern overlay at start */}
@@ -230,6 +299,41 @@ function LandingContent() {
       {/* Scrollable details section 1 (Standards & Lists) */}
       <section className={`${styles.section} ${styles.reveal}`}>
         <div className={styles.sectionInner}>
+          <div className={styles.splitLayout}>
+            <div className={styles.splitText}>
+              <span className={styles.eyebrow}>{activeCopy.section1Eyebrow}</span>
+              <h2 className={styles.sectionTitle}>{activeCopy.section1Title}</h2>
+              <p className={styles.sectionBody}>{activeCopy.section1Body}</p>
+              <div className={styles.accentRule} />
+              <div className={styles.listColumns}>
+                <div>
+                  <span className={styles.listLabel}>{activeCopy.list1Label}</span>
+                  <ul className={styles.listItems}>
+                    {activeCopy.list1Items.map((item) => (
+                      <li key={item} className={styles.listItem}>
+                        <span className={styles.markYes}>✓</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <span className={styles.listLabel}>{activeCopy.list2Label}</span>
+                  <ul className={styles.listItems}>
+                    {activeCopy.list2Items.map((item) => (
+                      <li key={item} className={styles.listItem}>
+                        <span className={styles.markNo}>✕</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className={styles.splitMedia}>
+              <CardStack key={role} items={activeCards} />
+            </div>
+          </div>
         </div>
       </section>
     </main>
