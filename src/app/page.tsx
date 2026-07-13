@@ -174,7 +174,7 @@ function LandingContent() {
       emailPlaceholder: "Enter your email to start watching",
       emailButtonText: "Start watching",
       bannerHeadline: "Trusted Entertainment Studio",
-      bannerDesc: "Every single animation is fully vetted for our audience, creating a wholesome environment for your family.",
+      bannerDesc: "Every single animation is fully vetted, creating a wholesome environment for your family.",
       bottomCTA: "Coming soon",
       
       // Below the fold sections matching the page.module.css definitions
