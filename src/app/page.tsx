@@ -131,7 +131,7 @@ function LandingContent() {
     family: {
       heroSub: "100% WHOLESOME SHOWS",
       heroTitle: "Trusted Animation for Your Family",
-      heroDesc: "We feed families clean, safe, and trusted video shows. Zero explicit content, pure storytelling, and complete peace of mind for parents.",
+      heroDesc: "We feed families clean, safe, and trusted video shows. Zero explicit content, pure storytelling, and complete peace of mind for our audience.",
       emailPlaceholder: "Enter your email to start watching",
       emailButtonText: "Start watching",
       bannerHeadline: "Trusted Entertainment Studio",
