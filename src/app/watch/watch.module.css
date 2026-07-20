@@ -128,8 +128,8 @@
   position: relative;
   z-index: 10;
   padding: 0 4vw 0 11vw;
-  width: 50%;
-  max-width: 660px;
+  width: 55%;
+  max-width: 760px;
   margin-top: 40px;
 }
 
@@ -153,18 +153,18 @@
 }
 
 .heroDesc {
-  font-size: 0.98rem;
-  line-height: 1.65;
+  font-size: 1.02rem;
+  line-height: 1.7;
   color: #c4c4cc;
   margin-bottom: 32px;
   font-weight: 400;
-  max-width: 540px;
+  max-width: 680px;
 }
 
 .heroBtnGroup {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: nowrap;
   flex-direction: row;
 }
@@ -173,15 +173,15 @@
   background-color: #ff1e2f;
   color: #ffffff;
   border: none;
-  border-radius: 30px;
-  padding: 14px 28px;
-  font-size: 0.9rem;
+  border-radius: 35px;
+  padding: 16px 38px;
+  font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   box-shadow: 0 8px 25px rgba(255, 30, 47, 0.4);
   transition: all 0.3s ease;
@@ -198,15 +198,15 @@
   background-color: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 30px;
-  padding: 14px 28px;
-  font-size: 0.9rem;
+  border-radius: 35px;
+  padding: 16px 38px;
+  font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
