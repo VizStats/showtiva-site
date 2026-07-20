@@ -8,25 +8,24 @@
   position: relative;
 }
 
-/* --- Header Styling --- */
+/* --- Top Navbar --- */
 .watchHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 4vw;
-  position: sticky;
+  padding: 24px 5vw;
+  position: absolute;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
 .logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 1.65rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
   color: #ffffff;
   cursor: pointer;
   user-select: none;
@@ -37,49 +36,264 @@
   color: #ff1e2f;
 }
 
-.signUpBtn {
-  background-color: #ff1e2f;
-  color: #ffffff;
-  border: 1px solid rgba(255, 30, 47, 0.35);
-  padding: 10px 24px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(255, 30, 47, 0.2);
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
-.signUpBtn:hover {
-  background-color: #ff3343;
-  box-shadow: 0 6px 20px rgba(255, 30, 47, 0.35);
+.iconBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
   transform: translateY(-1px);
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background-color: #ff1e2f;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 30, 47, 0.8);
+}
+
+/* --- Hero Banner Carousel --- */
+.heroBanner {
+  position: relative;
+  width: 100%;
+  height: clamp(520px, 78vh, 720px);
+  overflow: hidden;
+  background-color: #000000;
+  display: flex;
+  align-items: center;
+}
+
+.slideContainer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.activeSlide {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.heroImageLayer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 65%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 1;
+}
+
+.heroGradientOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(to right, #000000 0%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.2) 70%, transparent 100%),
+              linear-gradient(to top, #000000 0%, transparent 35%);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 10;
+  padding: 0 5vw;
+  max-width: 620px;
+  margin-top: 40px;
+}
+
+.durationTag {
+  font-size: 0.88rem;
+  color: #999999;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+
+.heroTitle {
+  font-size: clamp(2.8rem, 5.5vw, 4.6rem);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+}
+
+.heroDesc {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #c4c4cc;
+  margin-bottom: 32px;
+  font-weight: 400;
+  max-width: 540px;
+}
+
+.heroBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.watchNowBtn {
+  background-color: #ff1e2f;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 32px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(255, 30, 47, 0.4);
+  transition: all 0.3s ease;
+}
+
+.watchNowBtn:hover {
+  background-color: #ff3343;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(255, 30, 47, 0.55);
+}
+
+.addListBtn {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 30px;
+  padding: 14px 32px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.addListBtn:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+/* --- Dash Pagination Controls --- */
+.carouselDashContainer {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 20;
+}
+
+.dashBar {
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.activeDashBar {
+  width: 50px;
+  background: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
 }
 
 /* --- Main Layout Section --- */
 .watchMain {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 4vw 80px;
+  padding: 40px 5vw 80px;
 }
 
-.titleArea {
+/* --- Trending Section Toolbar --- */
+.trendingHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 36px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.pageTitle {
-  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+.trendingTitle {
+  font-size: clamp(2rem, 3.5vw, 2.6rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #ffffff;
   margin: 0;
 }
 
-.pageSubtitle {
-  font-size: 1rem;
+.filterTabs {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filterTabBtn {
+  background: transparent;
+  border: none;
   color: #8a8a93;
-  margin-top: 8px;
-  font-weight: 400;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.activeFilterTabBtn {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.filterTabBtn:hover {
+  color: #ffffff;
 }
 
 /* --- Split Layout Content Wrapper --- */
@@ -96,13 +310,15 @@
   width: 240px;
   flex-shrink: 0;
   position: sticky;
-  top: 110px; /* Offset below sticky watch header */
-  overflow: hidden;
+  top: 100px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
   padding-bottom: 20px;
+  scrollbar-width: none;
 }
 
 .sidebar::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
 }
 
 .sidebarSticky {
@@ -150,13 +366,13 @@
 /* --- Right Main Feed --- */
 .mainFeed {
   flex: 1;
-  min-width: 0; /* Prevents CSS Grid/Flexbox items from overflowing */
+  min-width: 0;
 }
 
 /* --- Category Sections --- */
 .categorySection {
   margin-bottom: 70px;
-  scroll-margin-top: 110px; /* Aligns section top nicely below header when navigated */
+  scroll-margin-top: 100px;
 }
 
 .categorySection:first-of-type {
@@ -195,8 +411,8 @@
 
 /* --- Masonry Grid Styling --- */
 .masonryGrid {
-  column-count: 3;
-  column-gap: 24px;
+  column-count: 4;
+  column-gap: 20px;
   width: 100%;
 }
 
@@ -241,7 +457,6 @@
   transform: scale(1.04);
 }
 
-/* --- Card Badge --- */
 .badge {
   position: absolute;
   top: 12px;
@@ -259,13 +474,9 @@
   z-index: 10;
 }
 
-/* --- Hover Play Overlay --- */
 .playOverlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
@@ -300,7 +511,6 @@
   color: #ffffff;
 }
 
-/* --- Card Details --- */
 .cardDetails {
   padding: 16px;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.03));
@@ -339,39 +549,19 @@
   font-weight: 600;
 }
 
-/* --- Responsive Breakpoints for Masonry Grid --- */
+/* --- Responsive Breakpoints --- */
 @media (max-width: 1200px) {
   .masonryGrid {
-    column-count: 2;
-    column-gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .masonryGrid {
-    column-count: 1;
-    column-gap: 0;
-  }
-  .watchMain {
-    padding-top: 24px;
-    padding-bottom: 40px;
-  }
-  .gridItem {
-    margin-bottom: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .masonryGrid {
-    column-count: 1;
-    column-gap: 0;
-  }
-  .watchHeader {
-    padding: 16px 20px;
+    column-count: 3;
+    column-gap: 16px;
   }
 }
 
 @media (max-width: 1024px) {
+  .heroImageLayer {
+    width: 80%;
+  }
+
   .watchContentWrapper {
     flex-direction: column;
     gap: 30px;
@@ -391,11 +581,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     max-height: none;
-    scrollbar-width: none;
-  }
-
-  .sidebar::-webkit-scrollbar {
-    display: none;
   }
 
   .sidebarTitle {
@@ -416,12 +601,60 @@
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 8px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   .sidebarLink:hover {
     padding-left: 12px;
     background: rgba(255, 30, 47, 0.1);
     border-color: #ff1e2f;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroBanner {
+    height: 520px;
+  }
+
+  .heroImageLayer {
+    width: 100%;
+    opacity: 0.5;
+  }
+
+  .heroContent {
+    padding: 0 4vw;
+    margin-top: 60px;
+  }
+
+  .masonryGrid {
+    column-count: 2;
+    column-gap: 12px;
+  }
+
+  .gridItem {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2.4rem;
+  }
+
+  .heroBtnGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .watchNowBtn, .addListBtn {
+    justify-content: center;
+  }
+
+  .masonryGrid {
+    column-count: 1;
+    column-gap: 0;
+  }
+
+  .watchHeader {
+    padding: 16px 20px;
   }
 }
