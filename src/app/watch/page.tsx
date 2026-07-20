@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./watch.module.css";
 
-// 4 Hero Slider Movies matching the Figma Design specification
+// 4 Hero Carousel Slides matching the Figma Design
 const HERO_SLIDES = [
   {
     id: "slide-1",
@@ -40,64 +40,186 @@ const HERO_SLIDES = [
   },
 ];
 
-// 12 Wholesome categories for classification
-const CATEGORY_NAMES = [
-  "Wholesome Cartoons",
-  "Fantasy & Wonders",
-  "Action & Expeditions",
-  "Family & Friendship",
-  "Adventure Chronicles",
-  "Sci-Fi & Cosmos",
-  "Wholesome Tales",
-  "Mystery & Legends",
-  "Nature & Landscapes",
-  "Retro Pixels",
-  "Little Explorers",
-  "Creative Canvas"
-];
-
-const TITLES_POOL = [
-  "Starlit Skyward Dreams",
-  "Neon City Midnight Sketch",
-  "Enchanted Forest Journey",
-  "The Lost Kingdom Gates",
-  "Chibi Quest & The Magic Key",
-  "Cyber Legend Chronicles",
-  "Magical Forest Path",
-  "Little Panda Chronicles",
-  "Cosmic Stardust Voyage",
-  "Undersea Kingdom Secrets",
-  "Skyward Balloon Escapade",
-  "Winter Wonderland Magic",
-  "Cozy Woodside Cottage",
-  "Retro Arcade Pixels",
-  "Magical Bookstore Mystery",
-  "Dreamland Express Train",
-  "Whimsical Garden Party",
-  "Curious Fox Explorers",
-  "Flying Castle Expedition",
-  "Robot Buddy Adventures"
-];
-
-const GENRES = ["Animation", "Family Story", "Adventure", "Fantasy", "Sci-Fi", "Comedy", "Wholesome"];
-const RATINGS = ["TV-G", "TV-Y7", "TV-Y", "G"];
-
-const UNSPLASH_IDS = [
-  "photo-1534447677768-be436bb09401",
-  "photo-1607604276583-eef5d076aa5f",
-  "photo-1581833971358-2c8b550f87b3",
-  "photo-1518709268805-4e9042af9f23",
-  "photo-1618336753974-aae8e04506aa",
-  "photo-1569003339405-ea396a5a8a90",
-  "photo-1579783900882-c0d3dad7b119",
-  "photo-1541562232579-512a21360020",
-  "photo-1501854140801-50d01698950b",
-  "photo-1518173946687-a4c8892bbd9f"
+// Sections Data matching the Figma design screenshot
+const MOVIE_SECTIONS = [
+  {
+    id: "trending-now",
+    title: "Trending Now",
+    titleColor: "normal",
+    movies: [
+      {
+        id: "t1",
+        title: "Soul",
+        image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2018",
+      },
+      {
+        id: "t2",
+        title: "Vivo",
+        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2024",
+      },
+      {
+        id: "t3",
+        title: "Home",
+        image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2025",
+      },
+      {
+        id: "t4",
+        title: "Luca",
+        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2024",
+      },
+      {
+        id: "t5",
+        title: "Small Foot",
+        image: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2020",
+      },
+    ],
+  },
+  {
+    id: "movies",
+    title: "Movies",
+    titleColor: "yellow",
+    movies: [
+      {
+        id: "m1",
+        title: "The Good Dinosaur",
+        image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2024",
+      },
+      {
+        id: "m2",
+        title: "David",
+        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2026",
+      },
+      {
+        id: "m3",
+        title: "Wall-E",
+        image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2023",
+      },
+      {
+        id: "m4",
+        title: "Soul",
+        image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2018",
+      },
+      {
+        id: "m5",
+        title: "Vivo",
+        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop",
+        rating: "6.6",
+        year: "2024",
+      },
+    ],
+  },
+  {
+    id: "cartoons-animation",
+    title: "Cartoons & Animation",
+    titleColor: "normal",
+    movies: [
+      {
+        id: "c1",
+        title: "Inside Out 2",
+        image: "https://images.unsplash.com/photo-1608889175123-8ec330b86f84?q=80&w=600&auto=format&fit=crop",
+        rating: "8.1",
+        year: "2024",
+      },
+      {
+        id: "c2",
+        title: "Moana 2",
+        image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=600&auto=format&fit=crop",
+        rating: "7.8",
+        year: "2024",
+      },
+      {
+        id: "c3",
+        title: "Across Spider-Verse",
+        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop",
+        rating: "8.7",
+        year: "2023",
+      },
+      {
+        id: "c4",
+        title: "Elemental",
+        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop",
+        rating: "7.0",
+        year: "2023",
+      },
+      {
+        id: "c5",
+        title: "Turning Red",
+        image: "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=600&auto=format&fit=crop",
+        rating: "7.0",
+        year: "2022",
+      },
+    ],
+  },
+  {
+    id: "wholesome-series",
+    title: "Wholesome Series",
+    titleColor: "yellow",
+    movies: [
+      {
+        id: "s1",
+        title: "Bluey Adventures",
+        image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop",
+        rating: "9.5",
+        year: "2024",
+      },
+      {
+        id: "s2",
+        title: "Airbender Chronicles",
+        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop",
+        rating: "9.2",
+        year: "2024",
+      },
+      {
+        id: "s3",
+        title: "Hilda Tales",
+        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop",
+        rating: "8.6",
+        year: "2023",
+      },
+      {
+        id: "s4",
+        title: "Gravity Falls",
+        image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop",
+        rating: "8.9",
+        year: "2022",
+      },
+      {
+        id: "s5",
+        title: "DuckTales",
+        image: "https://images.unsplash.com/photo-1620428268482-cf1851a36764?q=80&w=600&auto=format&fit=crop",
+        rating: "8.2",
+        year: "2023",
+      },
+    ],
+  },
 ];
 
 export default function WatchPage() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [activeTab, setActiveTab] = useState("popular");
+  const [activeTabs, setActiveTabs] = useState<{ [key: string]: string }>({
+    "trending-now": "popular",
+    movies: "popular",
+    "cartoons-animation": "popular",
+    "wholesome-series": "popular",
+  });
 
   // Auto-advance hero slides every 6 seconds
   useEffect(() => {
@@ -107,39 +229,9 @@ export default function WatchPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Generate and categorize 300 items deterministically using useMemo
-  const categories = useMemo(() => {
-    const cardPool = Array.from({ length: 300 }, (_, i) => {
-      const title = TITLES_POOL[i % TITLES_POOL.length];
-      const imageId = UNSPLASH_IDS[i % UNSPLASH_IDS.length];
-      const genre = GENRES[(i * 3) % GENRES.length];
-      const rating = RATINGS[(i * 7) % RATINGS.length];
-      const durationMin = 5 + (i * 4) % 25;
-      const height = 200 + (i % 4) * 60;
-
-      return {
-        id: `show-card-${i}`,
-        title: `${title} - Episode ${Math.floor(i / TITLES_POOL.length) + 1}`,
-        image: `https://images.unsplash.com/${imageId}?q=80&w=600&auto=format&fit=crop`,
-        genre,
-        rating,
-        duration: `${durationMin} mins`,
-        heightStyle: { height: `${height}px` }
-      };
-    });
-
-    const chunkSize = 25;
-    return CATEGORY_NAMES.map((name, catIndex) => {
-      const start = catIndex * chunkSize;
-      const cards = cardPool.slice(start, start + chunkSize);
-      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      return {
-        id,
-        name,
-        cards
-      };
-    });
-  }, []);
+  const handleTabChange = (sectionId: string, tabKey: string) => {
+    setActiveTabs((prev) => ({ ...prev, [sectionId]: tabKey }));
+  };
 
   return (
     <div className={styles.watchContainer}>
@@ -148,10 +240,9 @@ export default function WatchPage() {
         <Link href="/" className={styles.logo}>
           SHOW<span>TIVA</span>
         </Link>
-        
+
         {/* Right Nav Utility Icons */}
         <div className={styles.navActions}>
-          {/* Search Icon Button */}
           <button className={styles.iconBtn} aria-label="Search">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
@@ -159,7 +250,6 @@ export default function WatchPage() {
             </svg>
           </button>
 
-          {/* Bell Notifications Button */}
           <button className={styles.iconBtn} aria-label="Notifications">
             <span className={styles.notificationBadge} />
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -168,7 +258,6 @@ export default function WatchPage() {
             </svg>
           </button>
 
-          {/* User Profile Button */}
           <button className={styles.iconBtn} aria-label="Profile">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -222,7 +311,7 @@ export default function WatchPage() {
           );
         })}
 
-        {/* Carousel Pagination Controls (Dash Lines) */}
+        {/* Carousel Pagination Controls */}
         <div className={styles.carouselDashContainer}>
           {HERO_SLIDES.map((_, index) => (
             <button
@@ -237,104 +326,77 @@ export default function WatchPage() {
 
       {/* Main Browse Section */}
       <main className={styles.watchMain}>
-        {/* Trending Now Header & Filters Row */}
-        <div className={styles.trendingHeaderRow}>
-          <h2 className={styles.trendingTitle}>Trending Now</h2>
-          <div className={styles.filterTabs}>
-            <button
-              onClick={() => setActiveTab("popular")}
-              className={`${styles.filterTabBtn} ${activeTab === "popular" ? styles.activeFilterTabBtn : ""}`}
-            >
-              <span>🔥</span> Popular
-            </button>
-            <button
-              onClick={() => setActiveTab("premieres")}
-              className={`${styles.filterTabBtn} ${activeTab === "premieres" ? styles.activeFilterTabBtn : ""}`}
-            >
-              <span>★</span> Premieres
-            </button>
-            <button
-              onClick={() => setActiveTab("recent")}
-              className={`${styles.filterTabBtn} ${activeTab === "recent" ? styles.activeFilterTabBtn : ""}`}
-            >
-              <span>+</span> Recently Added
-            </button>
-          </div>
-        </div>
+        {MOVIE_SECTIONS.map((section) => {
+          const currentTab = activeTabs[section.id] || "popular";
+          const isYellowTitle = section.titleColor === "yellow";
 
-        {/* Content wrapper splitting sidebar and feed */}
-        <div className={styles.watchContentWrapper}>
-          
-          {/* Left Navigation Sidebar */}
-          <aside className={styles.sidebar}>
-            <div className={styles.sidebarSticky}>
-              <div className={styles.sidebarTitle}>Categories</div>
-              <nav className={styles.sidebarNav}>
-                {categories.map((category) => (
-                  <a
-                    key={category.id}
-                    href={`#${category.id}`}
-                    className={styles.sidebarLink}
+          return (
+            <section key={section.id} id={section.id} className={styles.movieSection}>
+              {/* Section Header with Filter Toolbar */}
+              <div className={styles.sectionHeaderRow}>
+                <h2 className={`${styles.sectionTitle} ${isYellowTitle ? styles.sectionTitleYellow : ""}`}>
+                  {section.title}
+                </h2>
+
+                <div className={styles.filterTabs}>
+                  <button
+                    onClick={() => handleTabChange(section.id, "popular")}
+                    className={`${styles.filterTabBtn} ${currentTab === "popular" ? styles.activeFilterTabBtn : ""}`}
                   >
-                    {category.name}
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </aside>
-
-          {/* Right Main Feed */}
-          <div className={styles.mainFeed}>
-            {categories.map((category) => (
-              <section key={category.id} id={category.id} className={styles.categorySection}>
-                <div className={styles.categoryHeader}>
-                  <h3 className={styles.categoryTitle}>{category.name}</h3>
+                    <span>🔥</span> Popular
+                  </button>
+                  <button
+                    onClick={() => handleTabChange(section.id, "premieres")}
+                    className={`${styles.filterTabBtn} ${currentTab === "premieres" ? styles.activeFilterTabBtn : ""}`}
+                  >
+                    <span>★</span> Premieres
+                  </button>
+                  <button
+                    onClick={() => handleTabChange(section.id, "recent")}
+                    className={`${styles.filterTabBtn} ${currentTab === "recent" ? styles.activeFilterTabBtn : ""}`}
+                  >
+                    <span>+</span> Recently Added
+                  </button>
                 </div>
+              </div>
 
-                <div className={styles.masonryGrid}>
-                  {category.cards.map((card) => (
-                    <div key={card.id} className={styles.gridItem}>
-                      <div className={styles.videoCard}>
-                        
-                        <div className={styles.imageWrapper} style={card.heightStyle}>
-                          <div className={styles.badge}>{card.rating}</div>
-                          <img
-                            src={card.image}
-                            alt={card.title}
-                            loading="lazy"
-                            className={styles.videoThumbnail}
-                          />
-                          <div className={styles.playOverlay}>
-                            <div className={styles.playCircle}>
-                              <svg
-                                className={styles.playIcon}
-                                viewBox="0 0 24 24"
-                                width="26"
-                                height="26"
-                                fill="currentColor"
-                              >
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                          </div>
+              {/* 5-Column Movie Poster Grid */}
+              <div className={styles.posterGrid}>
+                {section.movies.map((movie) => (
+                  <div key={movie.id} className={styles.posterCard}>
+                    <div className={styles.posterWrapper}>
+                      <img
+                        src={movie.image}
+                        alt={movie.title}
+                        loading="lazy"
+                        className={styles.posterImg}
+                      />
+                      <div className={styles.posterOverlay}>
+                        <div className={styles.playBtnCircle}>
+                          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
                         </div>
-
-                        <div className={styles.cardDetails}>
-                          <h4 className={styles.cardTitle}>{card.title}</h4>
-                          <div className={styles.cardMeta}>
-                            <span className={styles.genre}>{card.genre}</span>
-                            <span className={styles.duration}>{card.duration}</span>
-                          </div>
-                        </div>
-
                       </div>
                     </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        </div>
+
+                    <div className={styles.posterInfo}>
+                      <h4 className={styles.posterTitle}>{movie.title}</h4>
+                      <div className={styles.posterMeta}>
+                        <div className={styles.metaLeft}>
+                          <span className={styles.metaHeart}>♥</span>
+                          <span className={styles.metaEye}>👁</span>
+                          <span className={styles.ratingStar}>★ {movie.rating}</span>
+                        </div>
+                        <span className={styles.metaYear}>{movie.year}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </main>
     </div>
   );
