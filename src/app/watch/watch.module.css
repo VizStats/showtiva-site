@@ -509,46 +509,162 @@
 }
 
 /* --- Responsive Breakpoints --- */
-@media (max-width: 1280px) {
-  .posterGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
-}
 
-@media (max-width: 960px) {
-  .posterGrid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-  }
+@media (max-width: 1024px) {
   .heroImageLayer {
-    width: 75%;
+    width: 80%;
+    opacity: 0.65;
+  }
+
+  .heroGradientOverlay {
+    background: linear-gradient(to right, #000000 0%, #000000 35%, rgba(0, 0, 0, 0.7) 65%, transparent 100%),
+                linear-gradient(to top, #000000 0%, transparent 40%);
+  }
+
+  .heroContent {
+    width: 80%;
+    max-width: 600px;
+    padding: 0 5vw;
+  }
+
+  .posterCard {
+    flex: 0 0 180px;
+    width: 180px;
   }
 }
 
-@media (max-width: 680px) {
-  .posterGrid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 768px) {
+  .watchHeader {
+    padding: 18px 4vw;
+  }
+
+  .logo {
+    font-size: 1.35rem;
+  }
+
+  .navActions {
+    gap: 12px;
+  }
+
+  .iconBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .heroBanner {
+    height: 480px;
+  }
+
+  .heroImageLayer {
+    width: 100%;
+    opacity: 0.45;
+  }
+
+  .heroGradientOverlay {
+    background: linear-gradient(to top, #000000 10%, rgba(0, 0, 0, 0.75) 50%, rgba(0, 0, 0, 0.5) 100%);
+  }
+
+  .heroContent {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 5vw;
+    margin-top: 50px;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    white-space: normal;
+  }
+
+  .heroDesc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-bottom: 24px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .watchNowBtn, .addListBtn {
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    border-radius: 25px;
+  }
+
+  .posterCard {
+    flex: 0 0 150px;
+    width: 150px;
+  }
+
+  .posterRow {
     gap: 14px;
   }
-  .heroBanner {
-    height: 520px;
+
+  .posterTitle {
+    font-size: 0.88rem;
   }
-  .heroContent {
-    padding: 0 5vw;
-    width: 90%;
+
+  .maxBanner {
+    padding: 30px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .maxBannerCharacterImg {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    height: 120px;
+    align-self: flex-end;
+    margin-top: -30px;
   }
 }
 
 @media (max-width: 480px) {
-  .posterGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .watchMain {
+    padding: 24px 4vw 60px;
+  }
+
+  .sectionHeaderRow {
+    margin-bottom: 20px;
     gap: 12px;
   }
-  .heroTitle {
-    font-size: 2.2rem;
+
+  .sectionTitle {
+    font-size: 1.5rem;
   }
-  .watchHeader {
-    padding: 16px 20px;
+
+  .filterTabs {
+    gap: 10px;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 4px;
+  }
+
+  .filterTabBtn {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  .heroTitle {
+    font-size: 1.8rem;
+  }
+
+  .watchNowBtn, .addListBtn {
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+
+  .posterCard {
+    flex: 0 0 135px;
+    width: 135px;
+  }
+
+  .posterWrapper {
+    border-radius: 12px;
   }
 }
