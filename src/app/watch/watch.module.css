@@ -319,15 +319,26 @@
   color: #ffffff;
 }
 
-/* --- 5-Column Movie Cards Grid --- */
-.posterGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
+/* --- Horizontal Scroll Movie Cards Row --- */
+.posterRow {
+  display: flex;
+  gap: 22px;
   width: 100%;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 16px;
+  padding-top: 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.posterRow::-webkit-scrollbar {
+  display: none;
 }
 
 .posterCard {
+  flex: 0 0 220px;
+  width: 220px;
   display: flex;
   flex-direction: column;
   cursor: pointer;

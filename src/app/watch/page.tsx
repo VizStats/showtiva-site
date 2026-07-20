@@ -40,48 +40,23 @@ const HERO_SLIDES = [
   },
 ];
 
-// Sections Data matching the Figma design screenshot
+// Expanded Sections Data for Horizontal Scrolling Rows
 const MOVIE_SECTIONS = [
   {
     id: "trending-now",
     title: "Trending Now",
     titleColor: "normal",
     movies: [
-      {
-        id: "t1",
-        title: "Soul",
-        image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2018",
-      },
-      {
-        id: "t2",
-        title: "Vivo",
-        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2024",
-      },
-      {
-        id: "t3",
-        title: "Home",
-        image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2025",
-      },
-      {
-        id: "t4",
-        title: "Luca",
-        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2024",
-      },
-      {
-        id: "t5",
-        title: "Small Foot",
-        image: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2020",
-      },
+      { id: "t1", title: "Soul", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2018" },
+      { id: "t2", title: "Vivo", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2024" },
+      { id: "t3", title: "Home", image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2025" },
+      { id: "t4", title: "Luca", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2024" },
+      { id: "t5", title: "Small Foot", image: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2020" },
+      { id: "t6", title: "The Good Dinosaur", image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop", rating: "7.1", year: "2023" },
+      { id: "t7", title: "Encanto", image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop", rating: "8.2", year: "2022" },
+      { id: "t8", title: "Raya & Dragon", image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=600&auto=format&fit=crop", rating: "7.5", year: "2021" },
+      { id: "t9", title: "Onward", image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=600&auto=format&fit=crop", rating: "7.3", year: "2020" },
+      { id: "t10", title: "Frozen II", image: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=600&auto=format&fit=crop", rating: "8.0", year: "2019" },
     ],
   },
   {
@@ -89,41 +64,16 @@ const MOVIE_SECTIONS = [
     title: "Movies",
     titleColor: "yellow",
     movies: [
-      {
-        id: "m1",
-        title: "The Good Dinosaur",
-        image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2024",
-      },
-      {
-        id: "m2",
-        title: "David",
-        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2026",
-      },
-      {
-        id: "m3",
-        title: "Wall-E",
-        image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2023",
-      },
-      {
-        id: "m4",
-        title: "Soul",
-        image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2018",
-      },
-      {
-        id: "m5",
-        title: "Vivo",
-        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop",
-        rating: "6.6",
-        year: "2024",
-      },
+      { id: "m1", title: "The Good Dinosaur", image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2024" },
+      { id: "m2", title: "David", image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2026" },
+      { id: "m3", title: "Wall-E", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2023" },
+      { id: "m4", title: "Soul", image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2018" },
+      { id: "m5", title: "Vivo", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2024" },
+      { id: "m6", title: "Zootopia", image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop", rating: "8.0", year: "2016" },
+      { id: "m7", title: "Moana", image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=600&auto=format&fit=crop", rating: "7.6", year: "2016" },
+      { id: "m8", title: "Big Hero 6", image: "https://images.unsplash.com/photo-1608889175123-8ec330b86f84?q=80&w=600&auto=format&fit=crop", rating: "7.8", year: "2014" },
+      { id: "m9", title: "Wreck-It Ralph", image: "https://images.unsplash.com/photo-1620428268482-cf1851a36764?q=80&w=600&auto=format&fit=crop", rating: "7.7", year: "2012" },
+      { id: "m10", title: "Tangled", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", rating: "7.7", year: "2010" },
     ],
   },
   {
@@ -131,41 +81,16 @@ const MOVIE_SECTIONS = [
     title: "Cartoons & Animation",
     titleColor: "normal",
     movies: [
-      {
-        id: "c1",
-        title: "Inside Out 2",
-        image: "https://images.unsplash.com/photo-1608889175123-8ec330b86f84?q=80&w=600&auto=format&fit=crop",
-        rating: "8.1",
-        year: "2024",
-      },
-      {
-        id: "c2",
-        title: "Moana 2",
-        image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=600&auto=format&fit=crop",
-        rating: "7.8",
-        year: "2024",
-      },
-      {
-        id: "c3",
-        title: "Across Spider-Verse",
-        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop",
-        rating: "8.7",
-        year: "2023",
-      },
-      {
-        id: "c4",
-        title: "Elemental",
-        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop",
-        rating: "7.0",
-        year: "2023",
-      },
-      {
-        id: "c5",
-        title: "Turning Red",
-        image: "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=600&auto=format&fit=crop",
-        rating: "7.0",
-        year: "2022",
-      },
+      { id: "c1", title: "Inside Out 2", image: "https://images.unsplash.com/photo-1608889175123-8ec330b86f84?q=80&w=600&auto=format&fit=crop", rating: "8.1", year: "2024" },
+      { id: "c2", title: "Moana 2", image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=600&auto=format&fit=crop", rating: "7.8", year: "2024" },
+      { id: "c3", title: "Across Spider-Verse", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop", rating: "8.7", year: "2023" },
+      { id: "c4", title: "Elemental", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", rating: "7.0", year: "2023" },
+      { id: "c5", title: "Turning Red", image: "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=600&auto=format&fit=crop", rating: "7.0", year: "2022" },
+      { id: "c6", title: "Puss in Boots", image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop", rating: "7.9", year: "2022" },
+      { id: "c7", title: "Sing 2", image: "https://images.unsplash.com/photo-1620428268482-cf1851a36764?q=80&w=600&auto=format&fit=crop", rating: "7.4", year: "2021" },
+      { id: "c8", title: "The Bad Guys", image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=600&auto=format&fit=crop", rating: "6.8", year: "2022" },
+      { id: "c9", title: "Minions: Rise", image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop", rating: "6.5", year: "2022" },
+      { id: "c10", title: "DC Super Pets", image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop", rating: "7.2", year: "2022" },
     ],
   },
   {
@@ -173,41 +98,16 @@ const MOVIE_SECTIONS = [
     title: "Wholesome Series",
     titleColor: "yellow",
     movies: [
-      {
-        id: "s1",
-        title: "Bluey Adventures",
-        image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop",
-        rating: "9.5",
-        year: "2024",
-      },
-      {
-        id: "s2",
-        title: "Airbender Chronicles",
-        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop",
-        rating: "9.2",
-        year: "2024",
-      },
-      {
-        id: "s3",
-        title: "Hilda Tales",
-        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop",
-        rating: "8.6",
-        year: "2023",
-      },
-      {
-        id: "s4",
-        title: "Gravity Falls",
-        image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop",
-        rating: "8.9",
-        year: "2022",
-      },
-      {
-        id: "s5",
-        title: "DuckTales",
-        image: "https://images.unsplash.com/photo-1620428268482-cf1851a36764?q=80&w=600&auto=format&fit=crop",
-        rating: "8.2",
-        year: "2023",
-      },
+      { id: "s1", title: "Bluey Adventures", image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop", rating: "9.5", year: "2024" },
+      { id: "s2", title: "Airbender Chronicles", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop", rating: "9.2", year: "2024" },
+      { id: "s3", title: "Hilda Tales", image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop", rating: "8.6", year: "2023" },
+      { id: "s4", title: "Gravity Falls", image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop", rating: "8.9", year: "2022" },
+      { id: "s5", title: "DuckTales", image: "https://images.unsplash.com/photo-1620428268482-cf1851a36764?q=80&w=600&auto=format&fit=crop", rating: "8.2", year: "2023" },
+      { id: "s6", title: "Kipo & Wonderbeasts", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop", rating: "8.3", year: "2021" },
+      { id: "s7", title: "She-Ra Legends", image: "https://images.unsplash.com/photo-1608889175123-8ec330b86f84?q=80&w=600&auto=format&fit=crop", rating: "8.4", year: "2020" },
+      { id: "s8", title: "Amphibia", image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?q=80&w=600&auto=format&fit=crop", rating: "8.1", year: "2022" },
+      { id: "s9", title: "The Owl House", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop", rating: "9.0", year: "2023" },
+      { id: "s10", title: "Green Eggs & Ham", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", rating: "8.2", year: "2022" },
     ],
   },
 ];
@@ -360,8 +260,8 @@ export default function WatchPage() {
                 </div>
               </div>
 
-              {/* 5-Column Movie Poster Grid */}
-              <div className={styles.posterGrid}>
+              {/* Horizontal Scroll Movie Poster Row */}
+              <div className={styles.posterRow}>
                 {section.movies.map((movie) => (
                   <div key={movie.id} className={styles.posterCard}>
                     <div className={styles.posterWrapper}>
