@@ -266,6 +266,59 @@
   padding-bottom: 0;
 }
 
+/* --- SHOWTIVA MAX Promo Banner --- */
+.maxBanner {
+  width: 100%;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ff8c00 0%, #ff4500 45%, #ff1e2f 100%);
+  padding: 44px 50px;
+  margin-top: 54px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(255, 69, 0, 0.35);
+}
+
+.maxBannerContent {
+  position: relative;
+  z-index: 10;
+  max-width: 600px;
+}
+
+.maxBannerSubtitle {
+  font-size: clamp(0.95rem, 1.8vw, 1.25rem);
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.maxBannerTitle {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.05;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.maxBannerCharacterImg {
+  position: absolute;
+  right: 25px;
+  bottom: -10px;
+  height: 130%;
+  max-height: 270px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+}
+
 /* --- Section Header Row --- */
 .sectionHeaderRow {
   display: flex;

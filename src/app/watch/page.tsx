@@ -110,6 +110,21 @@ const MOVIE_SECTIONS = [
       { id: "s10", title: "Green Eggs & Ham", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", rating: "8.2", year: "2022" },
     ],
   },
+  {
+    id: "new-release",
+    title: "New Release",
+    titleColor: "normal",
+    movies: [
+      { id: "nr1", title: "The Good Dinosaur", image: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2024" },
+      { id: "nr2", title: "David", image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2026" },
+      { id: "nr3", title: "Wall-E", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2023" },
+      { id: "nr4", title: "Soul", image: "https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2018" },
+      { id: "nr5", title: "Vivo", image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2024" },
+      { id: "nr6", title: "Luca", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop", rating: "7.5", year: "2024" },
+      { id: "nr7", title: "Small Foot", image: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2020" },
+      { id: "nr8", title: "Home", image: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?q=80&w=600&auto=format&fit=crop", rating: "6.6", year: "2025" },
+    ],
+  },
 ];
 
 export default function WatchPage() {
@@ -119,6 +134,7 @@ export default function WatchPage() {
     movies: "popular",
     "cartoons-animation": "popular",
     "wholesome-series": "popular",
+    "new-release": "popular",
   });
 
   // Auto-advance hero slides every 6 seconds
@@ -297,6 +313,21 @@ export default function WatchPage() {
             </section>
           );
         })}
+
+        {/* SHOWTIVA MAX Promo Banner */}
+        <div className={styles.maxBanner}>
+          <div className={styles.maxBannerContent}>
+            <div className={styles.maxBannerSubtitle}>
+              Enjoy unlimited blockbuster movies & series only on
+            </div>
+            <h2 className={styles.maxBannerTitle}>SHOWTIVA MAX</h2>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=800&auto=format&fit=crop"
+            alt="SHOWTIVA MAX Characters"
+            className={styles.maxBannerCharacterImg}
+          />
+        </div>
       </main>
     </div>
   );
