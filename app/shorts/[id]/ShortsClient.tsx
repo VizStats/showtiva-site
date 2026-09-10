@@ -127,17 +127,17 @@ export default function ShortsClient({ shorts, startIndex, brand }: ShortsClient
   return (
     <div className="fixed inset-0 z-0 bg-black font-body text-ink">
       {/* Chrome sits above the feed and never scrolls with it. */}
-      <header className="pointer-events-none absolute top-0 right-0 left-0 z-20 flex items-center justify-between gap-3 bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.72),transparent)] px-4 pt-[max(0.9rem,env(safe-area-inset-top))] pb-8">
+      <header className="pointer-events-none absolute top-0 right-0 left-0 z-20 grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.72),transparent)] px-4 pt-[max(0.9rem,env(safe-area-inset-top))] pb-8">
         <Link
           href="/watch"
-          aria-label="Back to catalog"
-          className="pointer-events-auto grid size-11 place-items-center rounded-[999px] bg-[rgba(0,0,0,0.38)] text-ink backdrop-blur-[10px] transition-[background-color] duration-200 ease-[ease] hover:bg-[rgba(255,255,255,0.16)] max-[768px]:bg-transparent max-[768px]:backdrop-blur-none max-[768px]:drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] max-[768px]:hover:bg-transparent"
+          className="pointer-events-auto inline-flex h-11 w-fit items-center gap-[5px] rounded-[999px] bg-[rgba(0,0,0,0.38)] pr-4 pl-3 text-ink backdrop-blur-[10px] transition-[background-color] duration-200 ease-[ease] hover:bg-[rgba(255,255,255,0.16)] max-[768px]:bg-transparent max-[768px]:px-0 max-[768px]:backdrop-blur-none max-[768px]:drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] max-[768px]:hover:bg-transparent"
         >
           {/* Bare angle on a phone: the disc is there to hold the glyph off a
               bright frame, and a shadow does that without the furniture. */}
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6" />
           </svg>
+          <span className="font-heading text-[0.8rem] font-bold tracking-[0.01em]">Movies</span>
         </Link>
 
         <span className="pointer-events-none inline-flex items-center gap-[7px]">
@@ -151,7 +151,7 @@ export default function ShortsClient({ shorts, startIndex, brand }: ShortsClient
           aria-label={muted ? "Unmute" : "Mute"}
           aria-pressed={muted}
           onClick={() => setMuted((value) => !value)}
-          className="pointer-events-auto grid size-11 place-items-center rounded-[999px] bg-[rgba(0,0,0,0.38)] text-ink backdrop-blur-[10px] transition-[background-color] duration-200 ease-[ease] hover:bg-[rgba(255,255,255,0.16)]"
+          className="pointer-events-auto grid size-11 justify-self-end place-items-center rounded-[999px] bg-[rgba(0,0,0,0.38)] text-ink backdrop-blur-[10px] transition-[background-color] duration-200 ease-[ease] hover:bg-[rgba(255,255,255,0.16)]"
         >
           {muted ? (
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

@@ -153,9 +153,22 @@ export default function LandingClient({
           <div className="z-50 mt-7 flex w-full max-w-[540px] items-center justify-center gap-[10px] max-[768px]:mt-5 max-[768px]:w-full max-[768px]:flex-col max-[768px]:gap-3">
             {/* The link is the button: a <button> inside an <a> is invalid HTML
                 and gives keyboard users two tab stops for one action. */}
+            {/* A phone opens straight into the feed; a pointer gets the
+                catalog. Both are rendered and CSS picks, because deciding
+                this in JS would have the server render one answer and the
+                client swap it after hydration. */}
+            <Link
+              href="/shorts"
+              className="group/go flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[rgba(255,30,47,0.35)] bg-[#ff1e2f] px-7 py-[15px] text-[0.95rem] font-bold whitespace-nowrap text-ink no-underline shadow-[0_8px_24px_rgba(255,30,47,0.25)] transition-[background-color,transform,box-shadow,border-color] duration-300 ease-[ease] hover:border-[rgba(255,30,47,0.7)] hover:bg-[#ff3343] hover:shadow-[0_12px_30px_rgba(255,30,47,0.4)] hover:[transform:translateY(-2px)] max-[768px]:box-border max-[768px]:w-full max-[768px]:max-w-[260px] max-[768px]:px-5 max-[768px]:py-3 max-[768px]:text-[0.9rem] max-[768px]:flex min-[769px]:hidden"
+            >
+              <span>Start watching</span>
+              <svg className="transition-[transform] duration-300 ease-[ease] group-hover/go:[transform:translateX(4px)]" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+            </Link>
             <Link
               href="/watch"
-              className="group/go flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[rgba(255,30,47,0.35)] bg-[#ff1e2f] px-7 py-[15px] text-[0.95rem] font-bold whitespace-nowrap text-ink no-underline shadow-[0_8px_24px_rgba(255,30,47,0.25)] transition-[background-color,transform,box-shadow,border-color] duration-300 ease-[ease] hover:border-[rgba(255,30,47,0.7)] hover:bg-[#ff3343] hover:shadow-[0_12px_30px_rgba(255,30,47,0.4)] hover:[transform:translateY(-2px)] max-[768px]:box-border max-[768px]:w-full max-[768px]:max-w-[260px] max-[768px]:px-5 max-[768px]:py-3 max-[768px]:text-[0.9rem]"
+              className="group/go flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[rgba(255,30,47,0.35)] bg-[#ff1e2f] px-7 py-[15px] text-[0.95rem] font-bold whitespace-nowrap text-ink no-underline shadow-[0_8px_24px_rgba(255,30,47,0.25)] transition-[background-color,transform,box-shadow,border-color] duration-300 ease-[ease] hover:border-[rgba(255,30,47,0.7)] hover:bg-[#ff3343] hover:shadow-[0_12px_30px_rgba(255,30,47,0.4)] hover:[transform:translateY(-2px)] max-[768px]:box-border max-[768px]:w-full max-[768px]:max-w-[260px] max-[768px]:px-5 max-[768px]:py-3 max-[768px]:text-[0.9rem] max-[768px]:hidden"
             >
               <span>Start watching</span>
               <svg className="transition-[transform] duration-300 ease-[ease] group-hover/go:[transform:translateX(4px)]" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
