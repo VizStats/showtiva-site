@@ -8,6 +8,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 
 import { getContent, getSections } from "@/lib/content";
+import { SHORTS_SECTION_ID } from "@/lib/content-types";
 import type { Movie, Section } from "@/lib/content-types";
 import { getChrome } from "@/lib/site";
 import type {
@@ -50,11 +51,17 @@ export interface BrowseData {
 }
 
 export async function loadBrowse(sectionId?: string): Promise<BrowseData> {
-  const [sections, content, chrome] = await Promise.all([
+  const [allSections, content, chrome] = await Promise.all([
     getSections(),
     getContent(),
     getChrome(),
   ]);
+
+  // Shorts is a surface, not a shelf: nothing points a "View All" at it and
+  // its cards open the feed, so it is neither browsable nor listed in the
+  // rail. Filtering here covers both — the rail reads this list, and an
+  // unknown id falls through to notFound below.
+  const sections = allSections.filter((section) => section.id !== SHORTS_SECTION_ID);
 
   const wanted = sectionId || DEFAULT_SECTION_ID;
   const section = sections.find((s) => s.id === wanted);

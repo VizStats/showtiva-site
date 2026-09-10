@@ -112,12 +112,6 @@ const ROWS = [
     query: { with_genres: String(G.animation), sort_by: "vote_average.desc", "vote_count.gte": 2000 },
   },
   {
-    id: "wholesome-series",
-    keep: 10,
-    pages: 3,
-    query: { with_genres: `${G.family}`, sort_by: "vote_average.desc", "vote_count.gte": 1500 },
-  },
-  {
     id: "new-release",
     keep: 12,
     pages: 4,

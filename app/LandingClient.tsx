@@ -80,10 +80,10 @@ export default function LandingClient({
   const { heroTitle } = content;
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-black font-[family-name:system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
-      {/* First screen: the cinematic intro, locked to 100vh so its absolutely
+    <main className="relative h-dvh w-full overflow-hidden bg-black font-[family-name:system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
+      {/* First screen: the cinematic intro, locked to the visible viewport so
           positioned children anchor to it. */}
-      <div className="relative h-screen w-full overflow-hidden">
+      <div className="relative h-dvh w-full overflow-hidden">
         {/* Background video stripes: hidden until the intro minimises, then
             each drops in from above on a stagger. Only the first shows on
             phones. */}
