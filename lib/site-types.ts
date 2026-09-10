@@ -44,6 +44,17 @@ export interface LandingContent {
 }
 
 /** Brand assets shared by the header, footer and landing logo. */
+/**
+ * Set once the intro has actually played through, and read on the way in.
+ *
+ * A cookie rather than localStorage because the decision has to be made on
+ * the server: localStorage would mean rendering the landing, discovering it
+ * was already seen, and bouncing — a flash of the thing we are trying not to
+ * show. The cookie arrives with the request, so the redirect happens before
+ * anything renders.
+ */
+export const INTRO_SEEN_COOKIE = "showtiva_intro_seen";
+
 export interface Brand {
   /**
    * Logo mark image path, served from public/. Sits before the wordmark to

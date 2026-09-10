@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { cx } from "@/lib/cx";
+import { INTRO_SEEN_COOKIE } from "@/lib/site-types";
 import type { LandingRole, LandingRoleContent } from "@/lib/site-types";
 import { FlipWords } from "../ui/flip-words";
 
@@ -70,6 +71,15 @@ export default function LandingClient({
   useEffect(() => {
     const minimizeTimer = setTimeout(() => {
       setIsMinimized(true);
+
+      // Marked at the end of the intro rather than on arrival, so it means
+      // "you have seen this" rather than "you loaded the page once". A year,
+      // Lax, so it survives a session but never rides a cross-site request.
+      try {
+        document.cookie = `${INTRO_SEEN_COOKIE}=1; path=/; max-age=31536000; samesite=lax`;
+      } catch {
+        // A browser refusing cookies just means the intro plays again.
+      }
     }, introMinimizeDelayMs);
 
     return () => {
