@@ -121,7 +121,7 @@ export default function TitlePopover({
     >
       {/* Backdrop header image */}
       <div className="relative h-[48%] w-full overflow-hidden bg-[#101010]">
-        <img src={movie.image} alt={movie.title} className="h-full w-full object-cover" />
+        <img src={movie.backdrop || movie.image} alt={movie.title} className="h-full w-full object-cover" />
         <div className="absolute inset-0 z-[1] bg-[image:linear-gradient(to_top,#0d0d0d_0%,rgba(0,0,0,0.4)_60%,transparent_100%)]" />
 
         <div className="absolute right-0 bottom-0 left-0 z-[2] flex flex-col gap-1 px-[14px] py-3">

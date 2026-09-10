@@ -89,7 +89,7 @@ export default function PosterCard({
       <div className={cx(FRAME_BASE, FRAME[aspect])}>
         {/* Decorative: the stretched link below carries the title. */}
         <img
-          src={movie.image}
+          src={aspect === "landscape" ? movie.backdrop || movie.image : movie.image}
           alt=""
           loading="lazy"
           className="h-full w-full object-cover transition-[transform] duration-400 ease-[ease] group-hover:[transform:scale(1.04)]"
