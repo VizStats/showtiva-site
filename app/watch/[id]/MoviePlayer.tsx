@@ -640,8 +640,12 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
     const onFullscreenChange = () => {
       const open = document.fullscreenElement === root;
       setIsFullscreen(open);
-      // Leaving fullscreen releases the lock with it.
-      if (!open) setIsLandscape(false);
+      // Leaving fullscreen releases the lock with it, and takes the episodes
+      // panel along, since its button only exists in fullscreen.
+      if (!open) {
+        setIsLandscape(false);
+        setMenu((current) => (current === "episodes" ? null : current));
+      }
     };
     const onEnterPip = () => setInPip(true);
     const onLeavePip = () => setInPip(false);
@@ -759,7 +763,7 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
 
   // With the episodes panel open, the picture and the panel are the whole
   // screen: transport steps aside, and only the title stays.
-  const panelOpen = menu === "episodes" && !!series;
+  const panelOpen = menu === "episodes" && !!series && isFullscreen;
   const barFade = panelOpen ? "pointer-events-none opacity-0 transition-opacity duration-300" : fade;
   const barLive = panelOpen ? "pointer-events-none" : live;
 
@@ -1164,10 +1168,11 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
               )}
             </div>
 
-            {/* Right beside Settings and labelled, so it reads as a thing to
-                press rather than one more icon. On a phone the label goes and
-                it becomes a disc like its neighbours. */}
-            {series && (
+            {/* Fullscreen only. In the page the episode row sits right under
+                the player, so a second way in would only crowd the bar; in
+                fullscreen that row is out of reach, and this is the way to it.
+                Beside Settings and labelled; on a phone just the disc. */}
+            {series && isFullscreen && (
               <button
                 type="button"
                 className={EPISODES_PILL}
