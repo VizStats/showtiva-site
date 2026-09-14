@@ -27,7 +27,7 @@
      but stops the words hard-cutting mid-sentence. */
   --animate-hero-copy-swap: heroCopySwap 0.2s ease-out;
   /* Detail page: the lockup travels in from the left instead of snapping
-     into the centre; the skip pulse flashes ±10 over the theatre. */
+     into the centre; the skip pulse flashes ±10 over the player. */
   --animate-lockup-glide-in: lockupGlideIn 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-skip-flash: skipFlash 0.62s ease both;
   /* Landing page intro: the video stripes drop in, the logo bounces in, the
@@ -101,103 +101,50 @@
   mask-image: radial-gradient(circle at top left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.45) 30%, rgba(0, 0, 0, 0) 65%);
 }
 
-/* The theatre's progress slider on the detail page. Vendor pseudo-elements
-   for two engines, plus the thumb revealing on the frame's hover or focus,
-   read far better as one rule than as forty stacked variants. The fill is
-   driven by --player-progress, set inline by the component; `.group/frame`
-   is the theatre frame. */
-@utility player-range {
-  --player-progress: 38%;
+/* The volume slider in the detail page's player. Vendor pseudo-elements for
+   two engines read far better as one rule than as stacked variants. The fill
+   is driven by --fill, set inline by the component. */
+@utility player-volume {
+  --fill: 100%;
   display: block;
-  width: 100%;
   height: 20px;
-  margin: 0 0 clamp(0.65rem, 1.2vw, 0.9rem);
   appearance: none;
   background: transparent;
   cursor: pointer;
 
   &::-webkit-slider-runnable-track {
-    height: 5px;
+    height: 3px;
     border-radius: 999px;
-    background: linear-gradient(
-      to right,
-      #ff3040 0%,
-      #ff3040 var(--player-progress),
-      rgba(250, 250, 250, 0.32) var(--player-progress),
-      rgba(250, 250, 250, 0.32) 100%
-    );
+    background: linear-gradient(to right, #ffffff 0%, #ffffff var(--fill), rgba(255, 255, 255, 0.3) var(--fill));
   }
-
   &::-webkit-slider-thumb {
-    width: 16px;
-    height: 16px;
-    margin-top: -5.5px;
+    width: 12px;
+    height: 12px;
+    margin-top: -4.5px;
     appearance: none;
-    border: 2px solid #ffffff;
+    border: 0;
     border-radius: 50%;
-    background: #ff3040;
-    box-shadow: 0 0 0 5px rgba(255, 48, 64, 0.2);
-    opacity: 0;
-    transform: scale(0.78);
-    transition: opacity 0.18s ease, transform 0.18s ease;
+    background: #ffffff;
   }
-
   &::-moz-range-track {
-    height: 5px;
+    height: 3px;
     border-radius: 999px;
-    background: rgba(250, 250, 250, 0.32);
+    background: rgba(255, 255, 255, 0.3);
   }
-
   &::-moz-range-progress {
-    height: 5px;
+    height: 3px;
     border-radius: 999px;
-    background: #ff3040;
+    background: #ffffff;
   }
-
   &::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #ffffff;
+    width: 12px;
+    height: 12px;
+    border: 0;
     border-radius: 50%;
-    background: #ff3040;
-    box-shadow: 0 0 0 5px rgba(255, 48, 64, 0.2);
-    opacity: 0;
-    transform: scale(0.78);
-    transition: opacity 0.18s ease, transform 0.18s ease;
+    background: #ffffff;
   }
-
-  &:hover::-webkit-slider-thumb,
-  &:focus-visible::-webkit-slider-thumb,
-  .group\/frame:hover &::-webkit-slider-thumb,
-  .group\/frame:focus-within &::-webkit-slider-thumb {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  &:hover::-moz-range-thumb,
-  &:focus-visible::-moz-range-thumb,
-  .group\/frame:hover &::-moz-range-thumb,
-  .group\/frame:focus-within &::-moz-range-thumb {
-    opacity: 1;
-    transform: scale(1);
-  }
-
   &:focus-visible {
-    outline: 1px solid #ffffe1;
-    outline-offset: 6px;
-  }
-
-  /* Coarse pointers never get hover, so the thumb cannot hide. */
-  @media (hover: none) {
-    &::-webkit-slider-thumb,
-    &::-moz-range-thumb {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
+    outline: none;
   }
 }
 

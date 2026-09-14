@@ -9,7 +9,7 @@
 //
 // Spacing runs on a single rhythm unit (--step) and its halves, so every
 // section lands on the same vertical grid at every breakpoint.
-import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ import ProfileMenu from "../../_auth/ProfileMenu";
 import type { Movie } from "@/lib/content-types";
 import type { Brand, DetailLabels, FooterContent, PopoverLabels } from "@/lib/site-types";
 import PosterCard from "../PosterCard";
+import MoviePlayer from "./MoviePlayer";
 import SearchOverlay from "../SearchOverlay";
 import SiteFooter from "../SiteFooter";
 import TitlePopover, { useTitlePopover } from "../TitlePopover";
@@ -49,29 +50,6 @@ const FOCUS_RING = "focus-visible:outline-1 focus-visible:outline-offset-4 focus
    makes while holding a phone never do. */
 const DRAG_RELEASE_PX = 80;
 
-/* Rotation is only offered where it can be honoured: something to call lock()
-   on, and a screen for which sideways means anything. Android has both; iOS
-   Safari has no lock, so the control never appears there. */
-const COARSE_QUERY = "(pointer: coarse)";
-
-/** The lock half of the Screen Orientation API, which the DOM lib omits. */
-type LockableOrientation = ScreenOrientation & {
-  lock?: (orientation: string) => Promise<void>;
-  unlock?: () => void;
-};
-
-function subscribeToPointerKind(onChange: () => void) {
-  if (typeof window === "undefined") return () => undefined;
-  const query = window.matchMedia(COARSE_QUERY);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
-
-function readCanRotate() {
-  const orientation = window.screen?.orientation as LockableOrientation | undefined;
-  return typeof orientation?.lock === "function" && window.matchMedia(COARSE_QUERY).matches;
-}
-
 /* The action pair: see the slant utilities in globals.css.
 
    The pair only reads as one unit split by a single diagonal while the two
@@ -80,27 +58,28 @@ function readCanRotate() {
    parallelogram. So rather than going full-width on a narrow screen, the pair
    shrinks enough to stay on one line: at these metrics it measures ~248px,
    which clears the 280px a 320px viewport leaves inside the gutter. */
+/* Stand-in footage. No title in the store has a playable file yet (a TMDB
+   trailer is a YouTube page, which a <video> cannot play), so the player runs
+   Big Buck Bunny — an open-licence (CC BY 3.0, Blender Foundation), all-ages
+   short in landscape — from Wikimedia Commons. VP9 first; a 10-second H.264
+   cut for browsers without WebM (older iPhones); the site's own clip last,
+   which is portrait, so it is only there if both hosts are unreachable. (The
+   W3C's copy fails to decode in current Chrome, so it is not used.) A real
+   file on a title replaces all three. */
+const STAND_IN_SOURCES = [
+  "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.720p.vp9.webm",
+  "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
+  "/bg_video_5.mp4",
+];
+const PLAYABLE = /\.(mp4|webm|m4v)(\?|#|$)/i;
+
+function videoSourcesFor(movie: Movie) {
+  return movie.trailerUrl && PLAYABLE.test(movie.trailerUrl) ? [movie.trailerUrl] : STAND_IN_SOURCES;
+}
+
 const ACTION =
   "[--btn-h:3.25rem] [--slant:calc(var(--btn-h)/3)] inline-flex h-(--btn-h) cursor-pointer items-center justify-center gap-[0.7rem] rounded-none border-0 text-[0.78rem] font-semibold tracking-[0.16em] uppercase transition-[background-color,border-color,color] duration-300 ease-[ease] max-[480px]:[--btn-h:2.75rem] max-[480px]:gap-2 max-[480px]:text-[0.7rem] max-[480px]:tracking-[0.12em] motion-reduce:transition-none " +
   FOCUS_RING;
-
-/* Everything inside the theatre frame reveals on the frame's hover or focus,
-   and stays revealed on coarse pointers, which never hover. */
-const REVEAL = "group-hover/frame:opacity-100 group-focus-within/frame:opacity-100 [@media(hover:none)]:opacity-100";
-
-const CONTROL =
-  "inline-grid aspect-square flex-none cursor-pointer place-items-center rounded-[50%] border backdrop-blur-[12px] transition-[background,border-color,color,transform] duration-200 ease-[ease] hover:[transform:scale(1.12)] active:[transform:scale(0.95)] motion-reduce:transition-none " +
-  FOCUS_RING;
-const CONTROL_NEUTRAL =
-  "border-[rgba(250,250,250,0.32)] bg-[rgba(0,0,0,0.42)] text-ink hover:border-[rgba(250,250,250,0.72)] hover:bg-[rgba(250,250,250,0.15)] hover:text-white";
-const CONTROL_SKIP =
-  "w-[clamp(3.8rem,6.5vw,4.8rem)] max-[560px]:w-[3.05rem] [&_svg]:h-[62%] [&_svg]:w-[62%] [&_svg]:overflow-visible [&_text]:fill-current [&_text]:font-body [&_text]:[font-size:7.6px] [&_text]:font-bold [&_text]:tracking-[-0.02em]";
-const CONTROL_PRIMARY =
-  "w-[clamp(4.15rem,7vw,5rem)] border-[rgba(255,48,64,0.65)] bg-[#ff3040] text-white shadow-[0_10px_28px_rgba(255,48,64,0.34)] hover:border-[rgba(255,255,255,0.8)] hover:bg-[#ff4f5f] max-[560px]:w-[3.3rem] [&_svg]:h-[46%] [&_svg]:w-[46%] [&_svg]:overflow-visible";
-const CONTROL_FULLSCREEN = "w-[clamp(2.55rem,4vw,3rem)] [&_svg]:h-[56%] [&_svg]:w-[56%] [&_svg]:overflow-visible";
-
-const SKIP_FEEDBACK =
-  "pointer-events-none absolute top-1/2 z-[4] grid aspect-square w-[clamp(5rem,9vw,7rem)] animate-skip-flash place-items-center rounded-[50%] border border-[rgba(255,48,64,0.45)] bg-[rgba(0,0,0,0.58)] font-heading text-[clamp(1.3rem,2.5vw,2rem)] font-medium text-[#ff3040] [text-shadow:0_0_20px_rgba(255,48,64,0.45)] motion-reduce:animate-none motion-reduce:opacity-100";
 
 /* ----------------------------------------------------------- component -- */
 
@@ -121,20 +100,7 @@ export default function DetailClient({
   // of the viewport, so the screen is what you are looking at rather than
   // something below the fold.
   const [playing, setPlaying] = useState(false);
-  const [playerPaused, setPlayerPaused] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  // Whether we have asked the device to hold the screen sideways. Only
-  // meaningful where the Screen Orientation API can lock, which in practice
-  // means Android; iOS Safari has no lock, so the control hides there.
-  const [isLandscape, setIsLandscape] = useState(false);
-  // A device capability is something outside React to subscribe to, not state
-  // to set from an effect. The server snapshot is false, so the control is
-  // absent until the client has looked.
-  const canRotate = useSyncExternalStore(subscribeToPointerKind, readCanRotate, () => false);
-  const [skipPulse, setSkipPulse] = useState<"backward" | "forward" | null>(null);
-  const [playerProgress, setPlayerProgress] = useState(38);
   const plateRef = useRef<HTMLDivElement | null>(null);
-  const skipPulseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // A title opens at its title, not part way down it.
   //
@@ -209,27 +175,6 @@ export default function DetailClient({
     };
   }, [playing]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      const open = document.fullscreenElement === plateRef.current;
-      setIsFullscreen(open);
-      // Leaving fullscreen releases the lock with it, so the button must not
-      // keep claiming the screen is held sideways.
-      if (!open) setIsLandscape(false);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (skipPulseTimeoutRef.current) clearTimeout(skipPulseTimeoutRef.current);
-    };
-  }, []);
-
   // --- related grid state ---
   const [bookmarked, setBookmarked] = useState<{ [key: string]: boolean }>({});
   const popover = useTitlePopover();
@@ -253,7 +198,6 @@ export default function DetailClient({
   };
 
   const startPlayer = () => {
-    setPlayerPaused(false);
     setPlaying(true);
   };
 
@@ -261,69 +205,15 @@ export default function DetailClient({
     requireAuth(() => setSaved((value) => !value));
   };
 
+  // The player exits fullscreen and picture-in-picture as it unmounts.
   const closePlayer = () => {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => undefined);
-    }
-    setPlayerPaused(false);
     setPlaying(false);
-  };
-
-  const flashSkip = (direction: "backward" | "forward") => {
-    if (skipPulseTimeoutRef.current) clearTimeout(skipPulseTimeoutRef.current);
-    setPlayerProgress((value) => {
-      const nextValue = direction === "forward" ? value + 10 : value - 10;
-      return Math.min(100, Math.max(0, nextValue));
-    });
-    setSkipPulse(direction);
-    skipPulseTimeoutRef.current = setTimeout(() => {
-      setSkipPulse(null);
-    }, 620);
-  };
-
-  const toggleFullscreen = () => {
-    const frame = plateRef.current;
-    if (!frame) return;
-
-    if (document.fullscreenElement) {
-      void document.exitFullscreen().catch(() => undefined);
-      return;
-    }
-
-    void frame.requestFullscreen().catch(() => undefined);
-  };
-
-  // Turning the phone sideways is a fullscreen affair: the orientation lock
-  // is only granted to a fullscreen element, so this enters fullscreen first
-  // and then asks for landscape. Going back releases both.
-  const toggleOrientation = async () => {
-    const frame = plateRef.current;
-    const orientation = window.screen?.orientation as LockableOrientation | undefined;
-    if (!frame || typeof orientation?.lock !== "function") return;
-
-    if (isLandscape) {
-      orientation.unlock?.();
-      setIsLandscape(false);
-      if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
-      return;
-    }
-
-    if (!document.fullscreenElement) {
-      await frame.requestFullscreen().catch(() => undefined);
-    }
-    // A refused lock leaves the video fullscreen and upright, which is still a
-    // better place to watch from than where it started.
-    await orientation.lock("landscape").then(
-      () => setIsLandscape(true),
-      () => setIsLandscape(false),
-    );
   };
 
   // `||`, not `??`, throughout: the store's validator accepts "" as well as
   // null for the nullable fields, and an empty string would slip past `??` —
   // printing a blank meta cell, or a broken image for an empty src.
   const kind = movie.type || labels.typeFallback;
-  const plateSrc = movie.trailerUrl || movie.backdrop;
 
   // Built as a list so a blank field drops out entirely rather than leaving a
   // hairline divider with nothing beside it.
@@ -335,10 +225,6 @@ export default function DetailClient({
     { key: "type", text: kind },
     { key: "quality", text: labels.qualityBadge },
   ].filter((item) => item.text.trim().length > 0);
-  const playerProgressStyle = {
-    "--player-progress": `${playerProgress}%`,
-  } as React.CSSProperties;
-
   return (
     // Relative on purpose: the hover popover is positioned in document
     // coordinates and resolves against this element, which starts at 0,0 and
@@ -527,239 +413,12 @@ export default function DetailClient({
                   "max-h-[88vh] min-h-[68vh] bg-[#101010] aspect-[21/9] after:pointer-events-none after:absolute after:inset-0 after:bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0)_30%,rgba(0,0,0,0)_58%,#000000_100%)] after:content-[''] max-[899px]:max-h-none max-[899px]:min-h-0 max-[899px]:aspect-[16/10] max-[760px]:aspect-[4/3]",
             )}
           >
-            {/* contain, not cover, while playing: a film frame must never be cropped. */}
-            <img
-              className={playing ? "block h-full w-full bg-black object-contain" : "block h-full w-full object-cover object-[center_40%]"}
-              src={plateSrc}
-              alt={movie.title}
-            />
-
             {playing ? (
-              <>
-                <button
-                  type="button"
-                  className={cx(
-                    "absolute top-[clamp(0.75rem,1.6vw,1.25rem)] right-[clamp(0.75rem,1.6vw,1.25rem)] z-[5] inline-flex h-10 cursor-pointer items-center gap-[0.55rem] border-0 bg-[rgba(0,0,0,0.62)] pr-4 pl-[0.85rem] text-[0.7rem] font-semibold tracking-[0.14em] text-[#ff3040] uppercase backdrop-blur-[10px] transition-[background,color,transform] duration-250 ease-[ease] hover:bg-[rgba(0,0,0,0.85)] hover:text-[#ff4f5f] hover:[transform:translateY(-1px)] motion-reduce:transition-none",
-                    FOCUS_RING,
-                  )}
-                  onClick={closePlayer}
-                >
-                  <svg
-                    className="h-[11px] w-[11px] flex-none"
-                    viewBox="0 0 12 12"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      d="M1 1l10 10M11 1L1 11"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <span>Close</span>
-                </button>
-
-                <div
-                  className={cx(
-                    "pointer-events-none absolute inset-0 z-[3] opacity-0 transition-opacity duration-[0.28s] ease-[ease] before:pointer-events-none before:absolute before:inset-0 before:bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.78),rgba(0,0,0,0)_33%),linear-gradient(to_top,rgba(0,0,0,0.88),rgba(0,0,0,0)_45%)] before:content-[''] motion-reduce:transition-none",
-                    REVEAL,
-                  )}
-                >
-                  <div
-                    className={cx(
-                      "absolute top-0 left-0 z-[1] px-[clamp(1rem,3vw,2.5rem)] py-[clamp(1rem,2.4vw,1.7rem)] opacity-0 [transition:opacity_0.3s_ease,transform_0.35s_cubic-bezier(0.2,0.7,0.2,1)] [transform:translateY(-34px)] group-hover/frame:[transform:translateY(0)] group-focus-within/frame:[transform:translateY(0)] [@media(hover:none)]:[transform:none] max-[560px]:right-[5.75rem] max-[560px]:px-4 max-[560px]:py-[0.9rem] motion-reduce:transition-none right-[clamp(8.8rem,12vw,10rem)]",
-                      REVEAL,
-                    )}
-                  >
-                    <h2 className="m-0 font-heading text-[clamp(1.35rem,3vw,2.4rem)] leading-[1.05] font-normal tracking-[-0.018em] break-words text-balance text-ink [text-shadow:0_8px_28px_rgba(0,0,0,0.78)]">
-                      {movie.title}
-                    </h2>
-                  </div>
-
-                  <div
-                    className={cx(
-                      "pointer-events-none absolute top-1/2 left-1/2 z-[1] flex items-center justify-center gap-[clamp(1rem,2.5vw,1.75rem)] opacity-0 [transition:opacity_0.24s_ease,transform_0.32s_cubic-bezier(0.2,0.7,0.2,1)] [transform:translate(-50%,-44%)_scale(0.96)] group-hover/frame:pointer-events-auto group-hover/frame:[transform:translate(-50%,-50%)_scale(1)] group-focus-within/frame:pointer-events-auto group-focus-within/frame:[transform:translate(-50%,-50%)_scale(1)] [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:[transform:translate(-50%,-50%)_scale(1)] max-[560px]:gap-[0.7rem] motion-reduce:transition-none",
-                      REVEAL,
-                    )}
-                  >
-                    <button
-                      type="button"
-                      className={cx(CONTROL, CONTROL_NEUTRAL, CONTROL_SKIP)}
-                      aria-label="Rewind 10 seconds"
-                      onClick={() => flashSkip("backward")}
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path
-                          d="M15.6 6.3A8 8 0 1 1 10.1 5.2"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.9"
-                          strokeLinecap="round"
-                        />
-                        <path d="M10.5 2.5 6.3 5.5l4.2 3z" fill="currentColor" stroke="none" />
-                        <text x="12" y="16" textAnchor="middle">
-                          10
-                        </text>
-                      </svg>
-                    </button>
-
-                    <button
-                      type="button"
-                      className={cx(CONTROL, CONTROL_PRIMARY)}
-                      aria-label={playerPaused ? "Play movie" : "Pause movie"}
-                      aria-pressed={!playerPaused}
-                      onClick={() => setPlayerPaused((value) => !value)}
-                    >
-                      {playerPaused ? (
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M8 5v14l11-7z" fill="currentColor" />
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor" />
-                        </svg>
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      className={cx(CONTROL, CONTROL_NEUTRAL, CONTROL_SKIP)}
-                      aria-label="Forward 10 seconds"
-                      onClick={() => flashSkip("forward")}
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path
-                          d="M8.4 6.3A8 8 0 1 0 13.9 5.2"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.9"
-                          strokeLinecap="round"
-                        />
-                        <path d="M13.5 2.5 17.7 5.5l-4.2 3z" fill="currentColor" stroke="none" />
-                        <text x="12" y="16" textAnchor="middle">
-                          10
-                        </text>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <div
-                    className={cx(
-                      "pointer-events-none absolute right-0 bottom-0 left-0 z-[1] px-[clamp(1rem,3vw,2.5rem)] py-[clamp(1rem,2.2vw,1.7rem)] opacity-0 [transition:opacity_0.25s_ease,transform_0.35s_cubic-bezier(0.2,0.7,0.2,1)] [transform:translateY(28px)] group-hover/frame:pointer-events-auto group-hover/frame:[transform:translateY(0)] group-focus-within/frame:pointer-events-auto group-focus-within/frame:[transform:translateY(0)] [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:[transform:none] max-[560px]:px-4 max-[560px]:py-[0.9rem] motion-reduce:transition-none",
-                      REVEAL,
-                    )}
-                  >
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={playerProgress}
-                      className="player-range"
-                      style={playerProgressStyle}
-                      aria-label="Movie progress"
-                      onChange={(event) => setPlayerProgress(Number(event.currentTarget.value))}
-                    />
-
-                    <div className="flex items-center justify-end gap-[clamp(0.5rem,1.2vw,0.85rem)]">
-                      {canRotate && (
-                        <button
-                          type="button"
-                          className={cx(CONTROL, CONTROL_NEUTRAL, CONTROL_FULLSCREEN)}
-                          aria-label={isLandscape ? "Back to portrait" : "Watch in landscape"}
-                          aria-pressed={isLandscape}
-                          onClick={toggleOrientation}
-                        >
-                          {/* A phone turning: the handset outline sits upright
-                              or on its side, with a curved arrow showing which
-                              way the next press takes it. */}
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <rect
-                              x={isLandscape ? "2.5" : "7.5"}
-                              y={isLandscape ? "7.5" : "2.5"}
-                              width={isLandscape ? "19" : "9"}
-                              height={isLandscape ? "9" : "19"}
-                              rx="1.8"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                            />
-                            <path
-                              d="M4.4 20.6a6.6 6.6 0 0 0 6 3.1"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                            />
-                            <path
-                              d="M2.2 18.2l2.4 2.6 2.9-1.9"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        className={cx(CONTROL, CONTROL_NEUTRAL, CONTROL_FULLSCREEN)}
-                        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-                        aria-pressed={isFullscreen}
-                        onClick={toggleFullscreen}
-                      >
-                        {isFullscreen ? (
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path
-                              d="M9 4v5H4M4 9l6-6M15 20v-5h5M20 15l-6 6M20 9h-5V4M15 4l6 6M4 15h5v5M9 20l-6-6"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        ) : (
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path
-                              d="M4 9V4h5M4 4l6 6M20 15v5h-5M20 20l-6-6M15 4h5v5M20 4l-6 6M9 20H4v-5M4 20l6-6"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {skipPulse && (
-                  <div
-                    className={cx(
-                      SKIP_FEEDBACK,
-                      skipPulse === "backward" ? "left-[28%] max-[560px]:left-[12%]" : "right-[28%] max-[560px]:right-[12%]",
-                    )}
-                    aria-hidden="true"
-                  >
-                    {skipPulse === "backward" ? "-10" : "+10"}
-                  </div>
-                )}
-
-                {/* A quiet note rather than a blocking overlay: the screen still
-                    shows the key art, so covering it would defeat the point. The
-                    store carries no video file for a title yet — only key art. */}
-                <p className="absolute bottom-[clamp(5.7rem,9vw,7rem)] left-1/2 z-[2] max-w-[calc(100%-2rem)] bg-[rgba(0,0,0,0.62)] px-4 py-[0.55rem] text-center text-[0.74rem] tracking-[0.06em] text-[#8a8a8a] backdrop-blur-[10px] [transform:translateX(-50%)] max-[560px]:bottom-[4.9rem] max-[560px]:text-[0.68rem]">
-                  No video source attached to this title yet.
-                </p>
-              </>
+              <MoviePlayer title={movie.title} sources={videoSourcesFor(movie)} poster={movie.backdrop} onClose={closePlayer} />
             ) : (
-              <button
+              <>
+                <img className="block h-full w-full object-cover object-[center_40%]" src={movie.backdrop} alt={movie.title} />
+                <button
                 type="button"
                 className={cx(
                   "absolute top-1/2 left-1/2 z-[1] grid aspect-square w-[clamp(58px,7vw,84px)] cursor-pointer place-items-center rounded-[50%] border border-[rgba(250,250,250,0.5)] bg-[rgba(0,0,0,0.15)] text-ink transition-[background-color,border-color] duration-[0.35s] ease-[ease] [transform:translate(-50%,-50%)] hover:border-ink hover:bg-[rgba(250,250,250,0.12)] motion-reduce:transition-none",
@@ -777,6 +436,7 @@ export default function DetailClient({
                   <path d="M0 0v14l12-7z" fill="currentColor" />
                 </svg>
               </button>
+              </>
             )}
           </div>
 
