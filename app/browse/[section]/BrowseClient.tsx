@@ -282,7 +282,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
     // Relative on purpose: the hover popover is positioned in document
     // coordinates and resolves against this element. The gutter narrows in
     // two steps on small screens.
-    <div className="relative flex min-h-screen flex-col bg-black font-body text-ink [--gutter:48px] [--maxw:1480px] [--mono:ui-monospace,SFMono-Regular,'SF_Mono',Menlo,Consolas,monospace] max-[900px]:[--gutter:28px] max-[480px]:[--gutter:18px]">
+    <div className="relative flex min-h-screen flex-col bg-black font-body text-ink [--gutter:48px] [--maxw:calc(1190px+2*var(--gutter))] [--mono:ui-monospace,SFMono-Regular,'SF_Mono',Menlo,Consolas,monospace] max-[900px]:[--gutter:28px] max-[480px]:[--gutter:18px]">
       {/* ------------------------------------------------------ top bar -- */}
       <header className={cx("sticky top-0 z-40 border-b bg-[rgba(0,0,0,0.92)] backdrop-blur-[14px]", LINE)}>
         <div className="mx-auto flex h-[66px] max-w-(--maxw) items-center justify-between gap-5 px-(--gutter) max-[480px]:gap-3">
@@ -502,17 +502,17 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
         {/* ------------------------------------------------------- grid --
             Fixed 190px tracks, not minmax(...,1fr): a fr track stretches the
             card to fill the row, which made these boxes noticeably larger than
-            the catalog's. 190px and the 10px column gap are the card's own
-            values, so a box is the same size on every page. Left-aligned so
-            the first column lands on the page gutter. Below 640px a fixed
-            track would leave a lone column with a big hole beside it, so there
-            the cards do fill the row — two up on a phone. */}
+            the catalog's. At full width the column is exactly six 190px cards
+            and their 10px gaps, so a box is the same size as on the catalog.
+            Narrower, the tracks stretch a little to fill the row rather than
+            leave a hole down the right-hand side, which made the page look
+            pushed to the left. Two up on a phone. */}
         {/* Posters throughout, whichever group the row belongs to. A grid is
             read by scanning down a column, and mixing shapes between rows
             would break that alignment for nothing — the still shape earns its
             place on the catalog, where rows scroll sideways. */}
         {visible.length > 0 ? (
-          <ul className="mt-[30px] grid list-none grid-cols-[repeat(auto-fill,190px)] gap-x-[10px] gap-y-[26px] [justify-content:start] max-[640px]:grid-cols-[repeat(auto-fill,minmax(144px,1fr))] max-[640px]:gap-x-3 max-[640px]:gap-y-[22px]">
+          <ul className="mt-[30px] grid list-none grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-x-[10px] gap-y-[26px] max-[640px]:grid-cols-[repeat(auto-fill,minmax(144px,1fr))] max-[640px]:gap-x-3 max-[640px]:gap-y-[22px]">
             {visible.map((movie) => (
               <li
                 key={movie.id}
