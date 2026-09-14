@@ -62,6 +62,16 @@ export interface StoredSection {
    * cost the first one the distinction.
    */
   branded?: boolean;
+  /**
+   * The genres this row's filter offers, in the order they should appear.
+   *
+   * A catalog-wide list is wrong for rows that are sub-divided their own way:
+   * Documentaries splits into True Crime, Nature & Wildlife and so on, which
+   * mean nothing on the Movies page, and Movies' Musical or Mystery mean
+   * nothing on Documentaries. Absent, the row falls back to every genre in the
+   * catalog that no row has claimed for itself.
+   */
+  genres?: string[];
   movieIds: string[];
 }
 

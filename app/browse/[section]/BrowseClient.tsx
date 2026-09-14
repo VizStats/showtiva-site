@@ -396,7 +396,11 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
             <FilterMenu
               label="Genre"
               value={genre}
-              options={[{ value: "", label: "All genres" }, ...facets.genres.map((g) => ({ value: g, label: g }))]}
+              options={[
+                { value: "", label: "All genres" },
+                // A row that names its own genres offers those, in its order.
+                ...(section.genres ?? facets.genres).map((g) => ({ value: g, label: g })),
+              ]}
               onChange={(v) => {
                 setGenre(v);
                 setPage(1);

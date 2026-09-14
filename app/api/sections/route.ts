@@ -29,7 +29,7 @@ export async function GET() {
 /**
  * POST /api/sections — create a catalog row.
  *
- * Body: { id, title, accent, aspect?, titleColor?, branded?, movieIds?, position? }
+ * Body: { id, title, accent, aspect?, titleColor?, branded?, genres?, movieIds?, position? }
  * `position` inserts at a specific index; omitted appends.
  */
 export async function POST(request: NextRequest) {
@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
     if (input.movieIds !== undefined && !Array.isArray(input.movieIds)) {
       return fail(400, '"movieIds" must be an array of movie ids');
     }
+    if (input.genres !== undefined && (!Array.isArray(input.genres) || (input.genres as unknown[]).some((g) => typeof g !== "string" || !g))) {
+      return fail(400, '"genres" must be an array of non-empty strings');
+    }
     if (input.position !== undefined && typeof input.position !== "number") {
       return fail(400, '"position" must be a number');
     }
@@ -72,6 +75,7 @@ export async function POST(request: NextRequest) {
       titleColor: (input.titleColor as string) ?? "normal",
       aspect: (input.aspect as SectionAspect) ?? "portrait",
       branded: input.branded === true,
+      ...(Array.isArray(input.genres) ? { genres: input.genres as string[] } : {}),
       accent: input.accent as string,
       movieIds,
     };

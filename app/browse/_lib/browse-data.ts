@@ -69,7 +69,13 @@ export async function loadBrowse(sectionId?: string): Promise<BrowseData> {
 
   const allMovies = Object.values(content.movies);
 
-  const genres = [...new Set(allMovies.flatMap((m) => m.genres))].filter(Boolean).sort();
+  // A genre a row has claimed for itself (Anime, True Crime) belongs to that
+  // row's filter. Leaving it in the shared list would put Anime on the Movies
+  // page, where it matches nothing the row is about.
+  const claimed = new Set(allSections.flatMap((s) => s.genres ?? []));
+  const genres = [...new Set(allMovies.flatMap((m) => m.genres))]
+    .filter((g) => g && !claimed.has(g))
+    .sort();
   const years = [...new Set(allMovies.map((m) => m.year))].filter(Boolean).sort().reverse();
   const types = [...new Set(allMovies.map((m) => m.type).filter((t): t is string => Boolean(t)))].sort();
 

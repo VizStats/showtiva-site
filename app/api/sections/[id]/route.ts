@@ -16,7 +16,7 @@ const ASPECTS: SectionAspect[] = ["portrait", "landscape"];
  * Fields a client may change. `id` is immutable — rename by creating a new row
  * and deleting the old one, so nothing silently loses its movie list.
  */
-const EDITABLE = ["title", "accent", "aspect", "titleColor", "branded", "movieIds"] as const;
+const EDITABLE = ["title", "accent", "aspect", "titleColor", "branded", "genres", "movieIds"] as const;
 
 /** GET /api/sections/:id — one row with its movies resolved. */
 export async function GET(_request: Request, { params }: Context) {
@@ -70,6 +70,9 @@ export async function PUT(request: Request, { params }: Context) {
     }
     if (patch.movieIds !== undefined && !Array.isArray(patch.movieIds)) {
       return fail(400, '"movieIds" must be an array of movie ids');
+    }
+    if (patch.genres !== undefined && (!Array.isArray(patch.genres) || (patch.genres as unknown[]).some((g) => typeof g !== "string" || !g))) {
+      return fail(400, '"genres" must be an array of non-empty strings');
     }
 
     const saved = await mutateContent((current) => {

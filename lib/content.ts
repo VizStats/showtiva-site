@@ -113,6 +113,9 @@ function assertContent(value: unknown): Content {
     if (!Array.isArray(s.movieIds) || s.movieIds.some((m) => typeof m !== "string")) {
       throw new ContentError(`sections[${i}].movieIds must be an array of strings`);
     }
+    if (s.genres !== undefined && (!Array.isArray(s.genres) || s.genres.some((g) => typeof g !== "string" || !g))) {
+      throw new ContentError(`sections[${i}].genres must be an array of non-empty strings`);
+    }
   }
 
   for (const [i, hero] of (c.heroSlideIds as unknown[]).entries()) {

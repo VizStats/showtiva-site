@@ -125,6 +125,11 @@
         "c8",
         "c9",
         "c10"
+      ],
+      "genres": [
+        "Animated Movies",
+        "Animated Series",
+        "Anime"
       ]
     },
     {
@@ -167,6 +172,12 @@
         "mf10",
         "mf11",
         "mf12"
+      ],
+      "genres": [
+        "TV Shows",
+        "Web Series",
+        "Mini-Series",
+        "Reality Shows"
       ]
     },
     {
@@ -185,6 +196,14 @@
         "s8",
         "s9",
         "s10"
+      ],
+      "genres": [
+        "True Crime",
+        "Nature & Wildlife",
+        "History",
+        "Biography",
+        "Social Issues",
+        "Sports Documentary"
       ]
     },
     {
@@ -672,7 +691,8 @@
       "backdrop": "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop",
       "genres": [
         "Sci-Fi",
-        "Drama"
+        "Drama",
+        "Animated Movies"
       ],
       "cast": [],
       "trailerUrl": null
@@ -691,7 +711,8 @@
       "genres": [
         "Mystery",
         "Sci-Fi",
-        "Drama"
+        "Drama",
+        "Animated Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -710,7 +731,8 @@
       "genres": [
         "Family",
         "Fantasy",
-        "Comedy"
+        "Comedy",
+        "Anime"
       ],
       "cast": [],
       "trailerUrl": null
@@ -729,7 +751,8 @@
       "genres": [
         "Fantasy",
         "Animation",
-        "Mystery"
+        "Mystery",
+        "Animated Movies"
       ],
       "cast": [],
       "trailerUrl": null
@@ -748,7 +771,8 @@
       "genres": [
         "Comedy",
         "Action",
-        "Musical"
+        "Musical",
+        "Animated Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -766,7 +790,8 @@
       "backdrop": "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop",
       "genres": [
         "Adventure",
-        "Family"
+        "Family",
+        "Anime"
       ],
       "cast": [],
       "trailerUrl": null
@@ -785,7 +810,8 @@
       "genres": [
         "Animation",
         "Adventure",
-        "Family"
+        "Family",
+        "Animated Movies"
       ],
       "cast": [],
       "trailerUrl": null
@@ -804,7 +830,8 @@
       "genres": [
         "Drama",
         "Musical",
-        "Action"
+        "Action",
+        "Animated Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -823,7 +850,8 @@
       "genres": [
         "Musical",
         "Mystery",
-        "Animation"
+        "Animation",
+        "Anime"
       ],
       "cast": [],
       "trailerUrl": null
@@ -842,7 +870,8 @@
       "genres": [
         "Musical",
         "Mystery",
-        "Animation"
+        "Animation",
+        "Animated Movies"
       ],
       "cast": [],
       "trailerUrl": null
@@ -861,7 +890,8 @@
       "genres": [
         "Animation",
         "Adventure",
-        "Family"
+        "Family",
+        "True Crime"
       ],
       "cast": [],
       "trailerUrl": null
@@ -880,7 +910,8 @@
       "genres": [
         "Drama",
         "Musical",
-        "Action"
+        "Action",
+        "Nature & Wildlife"
       ],
       "cast": [],
       "trailerUrl": null
@@ -899,7 +930,8 @@
       "genres": [
         "Musical",
         "Mystery",
-        "Animation"
+        "Animation",
+        "History"
       ],
       "cast": [],
       "trailerUrl": null
@@ -918,7 +950,8 @@
       "genres": [
         "Action",
         "Comedy",
-        "Fantasy"
+        "Fantasy",
+        "Biography"
       ],
       "cast": [],
       "trailerUrl": null
@@ -955,7 +988,8 @@
       "genres": [
         "Mystery",
         "Sci-Fi",
-        "Drama"
+        "Drama",
+        "Social Issues"
       ],
       "cast": [],
       "trailerUrl": null
@@ -974,7 +1008,8 @@
       "genres": [
         "Family",
         "Fantasy",
-        "Comedy"
+        "Comedy",
+        "Sports Documentary"
       ],
       "cast": [],
       "trailerUrl": null
@@ -993,7 +1028,8 @@
       "genres": [
         "Fantasy",
         "Animation",
-        "Mystery"
+        "Mystery",
+        "True Crime"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1012,7 +1048,8 @@
       "genres": [
         "Comedy",
         "Action",
-        "Musical"
+        "Musical",
+        "Nature & Wildlife"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1031,7 +1068,8 @@
       "genres": [
         "Comedy",
         "Action",
-        "Musical"
+        "Musical",
+        "History"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1275,7 +1313,8 @@
       "genres": [
         "Family",
         "Fantasy",
-        "Comedy"
+        "Comedy",
+        "TV Shows"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1294,7 +1333,8 @@
       "genres": [
         "Fantasy",
         "Animation",
-        "Mystery"
+        "Mystery",
+        "Web Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1313,7 +1353,8 @@
       "genres": [
         "Comedy",
         "Action",
-        "Musical"
+        "Musical",
+        "Mini-Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1331,7 +1372,8 @@
       "backdrop": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?q=80&w=600&auto=format&fit=crop",
       "genres": [
         "Adventure",
-        "Family"
+        "Family",
+        "Reality Shows"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1350,7 +1392,8 @@
       "genres": [
         "Animation",
         "Adventure",
-        "Family"
+        "Family",
+        "TV Shows"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1369,7 +1412,8 @@
       "genres": [
         "Drama",
         "Musical",
-        "Action"
+        "Action",
+        "Web Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1388,7 +1432,8 @@
       "genres": [
         "Musical",
         "Mystery",
-        "Animation"
+        "Animation",
+        "Mini-Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1407,7 +1452,8 @@
       "genres": [
         "Action",
         "Comedy",
-        "Fantasy"
+        "Fantasy",
+        "Reality Shows"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1425,7 +1471,8 @@
       "backdrop": "https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=600&auto=format&fit=crop",
       "genres": [
         "Sci-Fi",
-        "Drama"
+        "Drama",
+        "TV Shows"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1443,7 +1490,8 @@
       "backdrop": "https://images.unsplash.com/photo-1482862549707-f63cb32c5fd9?q=80&w=600&auto=format&fit=crop",
       "genres": [
         "Sci-Fi",
-        "Drama"
+        "Drama",
+        "Web Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1462,7 +1510,8 @@
       "genres": [
         "Mystery",
         "Sci-Fi",
-        "Drama"
+        "Drama",
+        "Mini-Series"
       ],
       "cast": [],
       "trailerUrl": null
@@ -1481,7 +1530,8 @@
       "genres": [
         "Family",
         "Fantasy",
-        "Comedy"
+        "Comedy",
+        "Reality Shows"
       ],
       "cast": [],
       "trailerUrl": null
