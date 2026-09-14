@@ -24,12 +24,27 @@ export interface PlayerSeries {
   onSelect: (pick: PlayerPick) => void;
 }
 
+/** One encode of the same film at a given frame height. */
+export interface Rendition {
+  height: number;
+  url: string;
+}
+
+/** What to play, and at which qualities. */
+export interface PlayerMedia {
+  /** Lowest first. Empty for a title with a single file: Quality offers Auto only. */
+  renditions: Rendition[];
+  /** Tried after the chosen rendition, in order, if it cannot play. */
+  fallbacks: string[];
+  /** Seconds into the renditions to open at. */
+  startAt?: number;
+}
+
 interface MoviePlayerProps {
   title: string;
   /** Follows the title in the top bar, e.g. "S1:E4 · The Secret Door". */
   episodeLabel?: string;
-  /** Tried in order; the browser moves on to the next if one fails. */
-  sources: string[];
+  media: PlayerMedia;
   poster: string;
   onClose: () => void;
   /** Series only: powers the episodes panel. */
@@ -92,6 +107,31 @@ function formatTime(seconds: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
 }
 
+/** 2160 → "4K", 1440 → "1440p". */
+function qualityLabel(height: number) {
+  return height >= 2160 ? "4K" : `${height}p`;
+}
+
+function qualityBadge(height: number) {
+  if (height >= 2160) return "UHD";
+  if (height >= 1440) return "QHD";
+  if (height >= 720) return "HD";
+  return null;
+}
+
+/* Auto picks the smallest encode that still covers the screen's pixels, and
+   stops at 1080p: past that the file grows fourfold for a difference few
+   screens show, which is what choosing 1440p or 4K by hand is for. */
+const AUTO_CAP = 1080;
+
+function autoRendition(renditions: Rendition[]) {
+  if (renditions.length === 0) return undefined;
+  const needed = typeof window === "undefined" ? 720 : Math.min(window.innerWidth * 0.5625, window.innerHeight) * (window.devicePixelRatio || 1);
+  const allowed = renditions.filter((r) => r.height <= AUTO_CAP);
+  const pool = allowed.length ? allowed : renditions.slice(0, 1);
+  return pool.find((r) => r.height >= needed * 0.9) ?? pool[pool.length - 1];
+}
+
 function seekBy(video: HTMLVideoElement, delta: number) {
   const end = Number.isFinite(video.duration) ? video.duration : video.currentTime + delta;
   video.currentTime = Math.min(end, Math.max(0, video.currentTime + delta));
@@ -113,7 +153,7 @@ const DISC_SKIP_CENTRE = DISC_BASE + " size-12 min-[561px]:hidden [&_svg]:size-6
 const DISC_HERO = DISC_BASE + " size-[clamp(4.5rem,8vw,6rem)] max-[560px]:size-[4.25rem] [&_svg]:size-[42%]";
 
 const MENU =
-  "absolute right-0 bottom-[calc(100%+0.75rem)] z-[8] w-[15rem] max-w-[calc(100vw-2rem)] animate-menu-in rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[rgba(18,18,18,0.86)] p-2 text-left shadow-[0_18px_48px_rgba(0,0,0,0.55)] backdrop-blur-[18px] motion-reduce:animate-none";
+  "absolute right-0 bottom-[calc(100%+0.75rem)] z-[8] max-h-[min(34rem,calc(100dvh-7rem))] overflow-y-auto overscroll-contain [scrollbar-width:thin] w-[15rem] max-w-[calc(100vw-2rem)] animate-menu-in rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[rgba(18,18,18,0.86)] p-2 text-left shadow-[0_18px_48px_rgba(0,0,0,0.55)] backdrop-blur-[18px] motion-reduce:animate-none";
 const MENU_HEADING = "px-3 pt-2 pb-1 text-[0.62rem] font-semibold tracking-[0.2em] text-[rgba(255,255,255,0.5)] uppercase";
 const MENU_ITEM =
   "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border-0 bg-transparent px-3 py-2 text-left text-[0.86rem] text-white transition-[background-color] duration-150 hover:bg-[rgba(255,255,255,0.1)] disabled:cursor-default disabled:text-[rgba(255,255,255,0.4)] disabled:hover:bg-transparent " +
@@ -246,7 +286,7 @@ const CheckIcon = () => (
 
 /* ------------------------------------------------------------- component -- */
 
-export default function MoviePlayer({ title, episodeLabel, sources, poster, onClose, series, onNext }: MoviePlayerProps) {
+export default function MoviePlayer({ title, episodeLabel, media, poster, onClose, series, onNext }: MoviePlayerProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -262,6 +302,11 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [speed, setSpeed] = useState(1);
+  // "auto", or the height chosen by hand. Kept across episodes, the way a
+  // chosen quality is everywhere else.
+  const [quality, setQuality] = useState<"auto" | number>("auto");
+  // Where to pick up after a quality change reloads the file.
+  const resumeRef = useRef<{ time: number; playing: boolean } | null>(null);
 
   const [awake, setAwake] = useState(true);
   const [menu, setMenu] = useState<"language" | "settings" | "episodes" | null>(null);
@@ -332,9 +377,40 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
     video.muted = value === 0;
   };
 
+  const changeQuality = (next: "auto" | number) => {
+    const video = videoRef.current;
+    setMenu(null);
+    if (next === quality) return;
+    if (video && video.currentSrc) resumeRef.current = { time: video.currentTime, playing: !video.paused };
+    setQuality(next);
+  };
+
+  // Close means stop, not hide. Unmounting alone leaves a detached element
+  // that some browsers keep playing or downloading, a pending play() that can
+  // still start it, and a picture-in-picture window that keeps it alive; so
+  // the film is paused and its file released before the player goes.
+  const stopAndClose = () => {
+    const video = videoRef.current;
+    if (video) {
+      resumeRef.current = null;
+      video.pause();
+      if (document.pictureInPictureElement === video) void document.exitPictureInPicture().catch(() => undefined);
+      video.querySelectorAll("source").forEach((source) => source.removeAttribute("src"));
+      video.removeAttribute("src");
+      video.load();
+    }
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+    onClose();
+  };
+
   const changeSpeed = (value: number) => {
     const video = videoRef.current;
-    if (video) video.playbackRate = value;
+    if (video) {
+      // load() resets playbackRate to the default, so set both, or a new
+      // episode or quality would quietly drop back to normal speed.
+      video.defaultPlaybackRate = value;
+      video.playbackRate = value;
+    }
     setMenu(null);
   };
 
@@ -465,11 +541,21 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
   // Keyed on the sources, so picking another episode swaps the film inside
   // the same player: fullscreen, volume and speed all carry over. <source>
   // children are only re-read on load(), so changing them alone does nothing.
+  const chosen =
+    quality === "auto"
+      ? autoRendition(media.renditions)
+      : (media.renditions.find((r) => r.height === quality) ?? autoRendition(media.renditions));
+  const sources = [
+    ...(chosen ? [media.startAt ? `${chosen.url}#t=${media.startAt}` : chosen.url] : []),
+    ...media.fallbacks,
+  ];
   const sourceKey = sources.join("|");
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !sourceKey) return;
     video.load();
+    // A quality change that happened while paused stays paused.
+    if (resumeRef.current && !resumeRef.current.playing) return;
     void video.play().catch(() => undefined);
   }, [sourceKey]);
 
@@ -495,6 +581,8 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
       video?.removeEventListener("enterpictureinpicture", onEnterPip);
       video?.removeEventListener("leavepictureinpicture", onLeavePip);
       // Closing the theatre takes every borrowed screen mode with it.
+      // Also covers leaving the page without pressing close.
+      video?.pause();
       if (document.fullscreenElement === root) void document.exitFullscreen().catch(() => undefined);
       if (document.pictureInPictureElement === video) void document.exitPictureInPicture().catch(() => undefined);
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
@@ -633,11 +721,23 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
         onWaiting={() => setWaiting(true)}
         onPlaying={() => setWaiting(false)}
         onCanPlay={() => setWaiting(false)}
-        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+        onLoadedMetadata={(event) => {
+          const video = event.currentTarget;
+          setDuration(video.duration);
+          // After a quality change, carry on from the same moment.
+          const resume = resumeRef.current;
+          if (resume) {
+            resumeRef.current = null;
+            video.currentTime = Math.min(resume.time, video.duration || resume.time);
+            setCurrent(video.currentTime);
+          }
+        }}
         onDurationChange={(event) => setDuration(event.currentTarget.duration)}
         // A new episode empties the element first; start its clock from zero
         // rather than showing the last one's position until metadata lands.
         onEmptied={() => {
+          // A quality change keeps its place; only a new episode starts over.
+          if (resumeRef.current) return;
           setCurrent(0);
           setDuration(0);
           setBuffered(0);
@@ -693,7 +793,7 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
             {episodeLabel && <span className="font-medium"> · {episodeLabel}</span>}
           </h2>
         </div>
-        <button type="button" className={cx(DISC, panelOpen && "invisible")} aria-label="Close player" onClick={onClose}>
+        <button type="button" className={cx(DISC, panelOpen && "invisible")} aria-label="Close player" onClick={stopAndClose}>
           <CloseIcon />
         </button>
       </div>
@@ -925,10 +1025,51 @@ export default function MoviePlayer({ title, episodeLabel, sources, poster, onCl
                     ))}
                   </div>
                   <p className={cx(MENU_HEADING, "mt-1")}>Quality</p>
-                  <button type="button" role="menuitemradio" aria-checked="true" className={MENU_ITEM} onClick={() => setMenu(null)}>
-                    Auto
-                    <CheckIcon />
+                  <button
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={quality === "auto"}
+                    className={MENU_ITEM}
+                    onClick={() => changeQuality("auto")}
+                  >
+                    <span>
+                      Auto
+                      {quality === "auto" && chosen && (
+                        <span className="ml-1.5 text-[0.74rem] text-[rgba(255,255,255,0.5)]">{qualityLabel(chosen.height)}</span>
+                      )}
+                    </span>
+                    {quality === "auto" && <CheckIcon />}
                   </button>
+                  {/* Lowest to highest, the way the files step up. */}
+                  {media.renditions.map((rendition) => {
+                    const badge = qualityBadge(rendition.height);
+                    const active = quality === rendition.height;
+                    return (
+                      <button
+                        key={rendition.height}
+                        type="button"
+                        role="menuitemradio"
+                        aria-checked={active}
+                        className={MENU_ITEM}
+                        onClick={() => changeQuality(rendition.height)}
+                      >
+                        <span className="flex items-center gap-2 tabular-nums">
+                          {qualityLabel(rendition.height)}
+                          {badge && (
+                            <span
+                              className={cx(
+                                "rounded-[4px] px-1 py-px text-[0.56rem] leading-none font-bold tracking-[0.06em]",
+                                rendition.height >= 2160 ? "bg-[#ff3040] text-white" : "bg-[rgba(255,255,255,0.16)] text-[rgba(255,255,255,0.85)]",
+                              )}
+                            >
+                              {badge}
+                            </span>
+                          )}
+                        </span>
+                        {active && <CheckIcon />}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

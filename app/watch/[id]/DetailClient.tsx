@@ -20,7 +20,7 @@ import ProfileMenu from "../../_auth/ProfileMenu";
 import type { Episode, Movie } from "@/lib/content-types";
 import type { Brand, DetailLabels, FooterContent, PopoverLabels } from "@/lib/site-types";
 import PosterCard from "../PosterCard";
-import MoviePlayer, { episodeCode, type PlayerPick } from "./MoviePlayer";
+import MoviePlayer, { episodeCode, type PlayerMedia, type PlayerPick, type Rendition } from "./MoviePlayer";
 import SearchOverlay from "../SearchOverlay";
 import SiteFooter from "../SiteFooter";
 import TitlePopover, { useTitlePopover } from "../TitlePopover";
@@ -53,27 +53,31 @@ const DRAG_RELEASE_PX = 80;
 /* Stand-in footage. No title in the store has a playable file yet (a TMDB
    trailer is a YouTube page, which a <video> cannot play), so the player runs
    Big Buck Bunny — an open-licence (CC BY 3.0, Blender Foundation), all-ages
-   short in landscape — from Wikimedia Commons. VP9 first; a 10-second H.264
-   cut for browsers without WebM (older iPhones); the site's own clip last,
-   which is portrait, so it is only there if both hosts are unreachable. (The
-   W3C's copy fails to decode in current Chrome, so it is not used.) A real
-   file on a title replaces all three. */
-const STAND_IN_SOURCES = [
-  "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.720p.vp9.webm",
+   short in landscape — from Wikimedia Commons, which serves it at every size
+   from 240p to 4K, so the quality menu switches real files. After those, a
+   10-second H.264 cut for browsers without WebM (older iPhones), and the
+   site's own clip last, which is portrait, so it is only there if both hosts
+   are unreachable. (The W3C's copy fails to decode in current Chrome.) A real
+   file on a title replaces all of it. */
+const STAND_IN_RENDITIONS: Rendition[] = [240, 360, 480, 720, 1080, 1440, 2160].map((height) => ({
+  height,
+  url: `https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.${height}p.vp9.webm`,
+}));
+const STAND_IN_FALLBACKS = [
   "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
   "/bg_video_5.mp4",
 ];
 const PLAYABLE = /\.(mp4|webm|m4v)(\?|#|$)/i;
 
 /**
- * What to play for a file URL that may be missing. `offset` starts the
+ * What to play for a file URL that may be missing. `startAt` opens the
  * stand-in part way through, so each episode opens on a different scene
  * instead of every one looking like the same video restarted. Only the long
- * WebM takes it; the ten-second fallback would run off its own end.
+ * renditions take it; the ten-second fallback would run off its own end.
  */
-function sourcesFor(url: string | null, offset = 0) {
-  if (url && PLAYABLE.test(url)) return [url];
-  return offset > 0 ? [`${STAND_IN_SOURCES[0]}#t=${offset}`, ...STAND_IN_SOURCES.slice(1)] : STAND_IN_SOURCES;
+function mediaFor(url: string | null, startAt = 0): PlayerMedia {
+  if (url && PLAYABLE.test(url)) return { renditions: [], fallbacks: [url] };
+  return { renditions: STAND_IN_RENDITIONS, fallbacks: STAND_IN_FALLBACKS, startAt };
 }
 
 function standInOffset(season: number, episode: number) {
@@ -469,10 +473,10 @@ export default function DetailClient({
                       ? "Trailer"
                       : undefined
                 }
-                sources={
+                media={
                   pickedEpisode && pick !== "trailer"
-                    ? sourcesFor(pickedEpisode.videoUrl, standInOffset(pick.season, pick.episode))
-                    : sourcesFor(movie.trailerUrl)
+                    ? mediaFor(pickedEpisode.videoUrl, standInOffset(pick.season, pick.episode))
+                    : mediaFor(movie.trailerUrl)
                 }
                 poster={pickedEpisode?.still || movie.backdrop}
                 onClose={closePlayer}
