@@ -93,6 +93,8 @@ export async function POST(request: NextRequest) {
       genres: Array.isArray(fields.genres) ? (fields.genres as string[]) : [],
       cast: Array.isArray(fields.cast) ? (fields.cast as Movie["cast"]) : [],
       trailerUrl: (fields.trailerUrl as string) ?? null,
+      // Validated with the rest of the store on write, like every other field.
+      ...(Array.isArray(fields.seasons) ? { seasons: fields.seasons as Movie["seasons"] } : {}),
     };
 
     // Re-check inside the lock: another request could have claimed this id

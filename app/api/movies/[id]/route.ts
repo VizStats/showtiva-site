@@ -24,6 +24,7 @@ const EDITABLE = [
   "genres",
   "cast",
   "trailerUrl",
+  "seasons",
 ] as const;
 
 /** Refresh the pages that render this title. */

@@ -30,6 +30,8 @@
      into the centre; the skip pulse flashes ±10 over the player. */
   --animate-lockup-glide-in: lockupGlideIn 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-skip-flash: skipFlash 0.62s ease both;
+  /* The player's episodes panel glides in from the right edge. */
+  --animate-sheet-in: sheetIn 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   /* Landing page intro: the video stripes drop in, the logo bounces in, the
      rotating headline word flips in letter by letter, and the "Coming soon"
      button wears a rotating conic border. */
@@ -70,6 +72,10 @@
     0% { opacity: 0; transform: translateY(-50%) scale(0.72); }
     28% { opacity: 1; transform: translateY(-50%) scale(1); }
     100% { opacity: 0; transform: translateY(-50%) scale(1.16); }
+  }
+  @keyframes sheetIn {
+    from { opacity: 0; transform: translateX(32px); }
+    to { opacity: 1; transform: translateX(0); }
   }
   @keyframes strokeIn {
     0% { transform: translateY(-120%); }

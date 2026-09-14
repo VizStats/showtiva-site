@@ -40,7 +40,11 @@ export default async function MovieDetailPage({ params }: PageProps) {
   ]);
 
   return (
+    // Keyed by title: moving from one title to another through the related
+    // grid keeps this component mounted, which would carry the open player
+    // and the chosen episode across into a different show.
     <DetailClient
+      key={movie.id}
       movie={movie}
       related={related}
       allMovies={allMovies}

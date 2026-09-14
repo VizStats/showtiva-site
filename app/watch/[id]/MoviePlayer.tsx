@@ -11,13 +11,36 @@
 import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { cx } from "@/lib/cx";
+import type { Season } from "@/lib/content-types";
+
+/** What the player is showing for a series: an episode, or the trailer. */
+export type PlayerPick = { season: number; episode: number } | "trailer";
+
+export interface PlayerSeries {
+  seasons: Season[];
+  current: PlayerPick;
+  /** Thumbnail for anything without a still of its own. */
+  fallbackStill: string;
+  onSelect: (pick: PlayerPick) => void;
+}
 
 interface MoviePlayerProps {
   title: string;
+  /** Follows the title in the top bar, e.g. "S1:E4 · The Secret Door". */
+  episodeLabel?: string;
   /** Tried in order; the browser moves on to the next if one fails. */
   sources: string[];
   poster: string;
   onClose: () => void;
+  /** Series only: powers the episodes panel. */
+  series?: PlayerSeries;
+  /** Present when there is a next episode to go to. */
+  onNext?: () => void;
+}
+
+/** "S03E04", the way episode lists label them. */
+export function episodeCode(season: number, episode: number) {
+  return `S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`;
 }
 
 /* ------------------------------------------------------------- behaviour -- */
@@ -201,6 +224,20 @@ const CloseIcon = () => (
     <path d="M6 6l12 12M18 6L6 18" {...strokeProps} strokeWidth={2.1} />
   </svg>
 );
+/* A stack of episodes: one frame in front of two behind. */
+const EpisodesIcon = () => (
+  <svg {...svgProps}>
+    <rect x="3" y="8" width="14" height="12" rx="2" {...strokeProps} />
+    <path d="M6.5 5h11A2.5 2.5 0 0 1 20 7.5V16" {...strokeProps} />
+    <path d="M8.5 11.6v4.8l4-2.4z" fill="currentColor" />
+  </svg>
+);
+const NextIcon = () => (
+  <svg {...svgProps}>
+    <path d="M5.5 5.6v12.8a.8.8 0 0 0 1.2.7l9.6-6.4a.8.8 0 0 0 0-1.4L6.7 4.9a.8.8 0 0 0-1.2.7z" fill="currentColor" />
+    <rect x="17.4" y="5" width="2.4" height="14" rx="1" fill="currentColor" />
+  </svg>
+);
 const CheckIcon = () => (
   <svg {...svgProps} className="size-4 flex-none">
     <path d="M5 12.5l4.5 4.5L19 7.5" {...strokeProps} strokeWidth={2.2} />
@@ -209,7 +246,7 @@ const CheckIcon = () => (
 
 /* ------------------------------------------------------------- component -- */
 
-export default function MoviePlayer({ title, sources, poster, onClose }: MoviePlayerProps) {
+export default function MoviePlayer({ title, episodeLabel, sources, poster, onClose, series, onNext }: MoviePlayerProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -227,7 +264,7 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
   const [speed, setSpeed] = useState(1);
 
   const [awake, setAwake] = useState(true);
-  const [menu, setMenu] = useState<"language" | "settings" | null>(null);
+  const [menu, setMenu] = useState<"language" | "settings" | "episodes" | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
   const [hoverRatio, setHoverRatio] = useState<number | null>(null);
   const [pulse, setPulse] = useState<"back" | "forward" | null>(null);
@@ -424,11 +461,17 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
 
   // Play was the gesture that opened the theatre, so starting with sound is
   // allowed. If the browser refuses anyway, the big play button is waiting.
+  //
+  // Keyed on the sources, so picking another episode swaps the film inside
+  // the same player: fullscreen, volume and speed all carry over. <source>
+  // children are only re-read on load(), so changing them alone does nothing.
+  const sourceKey = sources.join("|");
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !sourceKey) return;
+    video.load();
     void video.play().catch(() => undefined);
-  }, []);
+  }, [sourceKey]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -552,13 +595,19 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
   // beats none on its parent, so a hidden button would still take the tap.
   const live = showControls ? "pointer-events-auto" : "pointer-events-none";
 
+  // With the episodes panel open, the picture and the panel are the whole
+  // screen: transport steps aside, and only the title stays.
+  const panelOpen = menu === "episodes" && !!series;
+  const barFade = panelOpen ? "pointer-events-none opacity-0 transition-opacity duration-300" : fade;
+  const barLive = panelOpen ? "pointer-events-none" : live;
+
   const centreLabel = ended ? "Replay" : paused ? "Play" : "Pause";
 
   return (
     <div
       ref={rootRef}
       className={cx(
-        "absolute inset-0 z-[2] overflow-hidden bg-black font-body text-white select-none",
+        "absolute inset-0 z-[2] overflow-hidden bg-black font-body text-white select-none [--panel-w:min(28rem,44%)] max-[900px]:[--panel-w:min(26rem,60%)]",
         !showControls && "cursor-none",
       )}
       onPointerMove={(event) => {
@@ -586,6 +635,15 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
         onCanPlay={() => setWaiting(false)}
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
         onDurationChange={(event) => setDuration(event.currentTarget.duration)}
+        // A new episode empties the element first; start its clock from zero
+        // rather than showing the last one's position until metadata lands.
+        onEmptied={() => {
+          setCurrent(0);
+          setDuration(0);
+          setBuffered(0);
+          setEnded(false);
+          setWaiting(true);
+        }}
         onTimeUpdate={(event) => {
           if (!scrubbing) setCurrent(event.currentTarget.currentTime);
         }}
@@ -602,7 +660,7 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
         {sources.map((source) => (
           // The type lets a browser skip a format it cannot play without
           // downloading it first.
-          <source key={source} src={source} type={source.endsWith(".webm") ? "video/webm" : "video/mp4"} />
+          <source key={source} src={source} type={/\.webm(\?|#|$)/i.test(source) ? "video/webm" : "video/mp4"} />
         ))}
       </video>
 
@@ -621,7 +679,9 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
       {/* ---- top: close, and what is playing ---- */}
       <div
         className={cx(
-          "absolute inset-x-0 top-0 z-[3] grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-start gap-3 px-[clamp(1rem,3vw,2.25rem)] pt-[clamp(0.9rem,2.2vw,1.6rem)] max-[560px]:grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] max-[560px]:px-3 max-[560px]:pt-3",
+          "absolute inset-x-0 top-0 z-[3] grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-start gap-3 px-[clamp(1rem,3vw,2.25rem)] pt-[clamp(0.9rem,2.2vw,1.6rem)] transition-[padding] duration-300 max-[560px]:grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] max-[560px]:px-3 max-[560px]:pt-3",
+          // The title re-centres in the picture left beside the panel.
+          panelOpen && "pr-[calc(var(--panel-w)+1rem)]",
           fade,
         )}
       >
@@ -630,9 +690,10 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
           <p className="text-[0.72rem] font-medium tracking-[0.04em] text-[rgba(255,255,255,0.72)] max-[560px]:text-[0.66rem]">Now playing</p>
           <h2 className="mt-1 truncate font-heading text-[clamp(1.05rem,2vw,1.5rem)] leading-tight font-semibold tracking-[-0.01em] text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.5)]">
             {title}
+            {episodeLabel && <span className="font-medium"> · {episodeLabel}</span>}
           </h2>
         </div>
-        <button type="button" className={DISC} aria-label="Close player" onClick={onClose}>
+        <button type="button" className={cx(DISC, panelOpen && "invisible")} aria-label="Close player" onClick={onClose}>
           <CloseIcon />
         </button>
       </div>
@@ -641,12 +702,12 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
       <div
         className={cx(
           "pointer-events-none absolute inset-0 z-[3] flex items-center justify-center gap-[clamp(2rem,6vw,4.5rem)]",
-          fade,
+          barFade,
         )}
       >
         <button
           type="button"
-          className={cx(DISC_SKIP_CENTRE, live)}
+          className={cx(DISC_SKIP_CENTRE, barLive)}
           aria-label={`Back ${SKIP_SECONDS} seconds`}
           onClick={() => skip("back")}
         >
@@ -655,7 +716,7 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
 
         <button
           type="button"
-          className={cx(DISC_HERO, live, waiting && !paused && "opacity-0")}
+          className={cx(DISC_HERO, barLive, waiting && !paused && "opacity-0")}
           aria-label={centreLabel}
           onClick={() => {
             togglePlay();
@@ -667,7 +728,7 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
 
         <button
           type="button"
-          className={cx(DISC_SKIP_CENTRE, live)}
+          className={cx(DISC_SKIP_CENTRE, barLive)}
           aria-label={`Forward ${SKIP_SECONDS} seconds`}
           onClick={() => skip("forward")}
         >
@@ -696,7 +757,7 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
       <div
         className={cx(
           "absolute inset-x-0 bottom-0 z-[4] px-[clamp(1rem,3vw,2.25rem)] pb-[clamp(0.9rem,2.2vw,1.6rem)] max-[560px]:px-3 max-[560px]:pb-3",
-          fade,
+          barFade,
         )}
       >
         <div className="flex items-center gap-[clamp(0.7rem,1.4vw,1.1rem)] text-[0.8rem] font-medium text-white tabular-nums max-[560px]:gap-2.5 max-[560px]:text-[0.72rem]">
@@ -779,6 +840,26 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
           </div>
 
           <div className="flex items-center gap-[clamp(0.45rem,0.9vw,0.7rem)] max-[560px]:gap-1.5">
+            {onNext && (
+              <button type="button" className={DISC} aria-label="Next episode" onClick={onNext}>
+                <NextIcon />
+              </button>
+            )}
+
+            {series && (
+              <button
+                type="button"
+                className={DISC}
+                aria-label="Episodes"
+                aria-haspopup="dialog"
+                aria-expanded={panelOpen}
+                data-player-menu
+                onClick={() => setMenu((open) => (open === "episodes" ? null : "episodes"))}
+              >
+                <EpisodesIcon />
+              </button>
+            )}
+
             <div className="relative" data-player-menu>
               <button
                 type="button"
@@ -853,7 +934,7 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
             </div>
 
             {canPip && (
-              <button type="button" className={DISC} aria-label={inPip ? "Exit picture-in-picture" : "Picture-in-picture"} aria-pressed={inPip} onClick={togglePip}>
+              <button type="button" className={cx(DISC, series && "max-[400px]:hidden")} aria-label={inPip ? "Exit picture-in-picture" : "Picture-in-picture"} aria-pressed={inPip} onClick={togglePip}>
                 <PipIcon />
               </button>
             )}
@@ -876,6 +957,204 @@ export default function MoviePlayer({ title, sources, poster, onClose }: MoviePl
           </div>
         </div>
       </div>
+
+      {panelOpen && series && (
+        <EpisodesPanel series={series} progress={progress} onDismiss={() => setMenu(null)} />
+      )}
     </div>
+  );
+}
+
+/* --------------------------------------------------------- episodes panel -- */
+
+/* Light glass: the picture stays legible through it, so switching episodes
+   never feels like leaving the film. */
+const TAB = "cursor-pointer rounded-lg border-0 px-3 py-1.5 text-[0.8rem] font-semibold transition-[background-color,color] duration-200 " + FOCUS_RING;
+
+function EpisodesPanel({
+  series,
+  progress,
+  onDismiss,
+}: {
+  series: PlayerSeries;
+  progress: number;
+  onDismiss: () => void;
+}) {
+  const { seasons, current, fallbackStill, onSelect } = series;
+  const [tab, setTab] = useState<"episodes" | "extras">(current === "trailer" ? "extras" : "episodes");
+  // Opens on the season being watched, not the first one.
+  const [seasonNumber, setSeasonNumber] = useState(current === "trailer" ? seasons[0]?.number : current.season);
+  const season = seasons.find((s) => s.number === seasonNumber) ?? seasons[0];
+  const listRef = useRef<HTMLDivElement | null>(null);
+
+  // Bring the playing episode into view when the panel opens on its season.
+  useEffect(() => {
+    listRef.current?.querySelector("[aria-current='true']")?.scrollIntoView({ block: "center" });
+  }, [seasonNumber, tab]);
+
+  return (
+    <div
+      role="dialog"
+      aria-label="Episodes"
+      data-player-menu
+      className="absolute inset-y-0 right-0 z-[6] flex w-(--panel-w) max-w-full animate-sheet-in flex-col border-l border-[rgba(255,255,255,0.12)] bg-[rgba(52,52,56,0.42)] shadow-[-24px_0_60px_rgba(0,0,0,0.35)] backdrop-blur-[26px] backdrop-saturate-150 motion-reduce:animate-none max-[560px]:w-full max-[560px]:border-l-0"
+    >
+      <div className="flex items-center justify-between gap-3 px-3 pt-3">
+        <div className="flex items-center gap-1" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "episodes"}
+            className={cx(TAB, tab === "episodes" ? "bg-[rgba(255,255,255,0.16)] text-white" : "bg-transparent text-[rgba(255,255,255,0.6)] hover:text-white")}
+            onClick={() => setTab("episodes")}
+          >
+            Episodes
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "extras"}
+            className={cx(TAB, tab === "extras" ? "bg-[rgba(255,255,255,0.16)] text-white" : "bg-transparent text-[rgba(255,255,255,0.6)] hover:text-white")}
+            onClick={() => setTab("extras")}
+          >
+            Trailers &amp; extras
+          </button>
+        </div>
+        <button
+          type="button"
+          className={cx("inline-grid size-9 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-white transition-[background-color] duration-200 hover:bg-[rgba(255,255,255,0.14)] [&_svg]:size-[18px]", FOCUS_RING)}
+          aria-label="Close episodes"
+          onClick={onDismiss}
+        >
+          <CloseIcon />
+        </button>
+      </div>
+
+      {tab === "episodes" && seasons.length > 0 && (
+        <div className="flex items-center gap-1 overflow-x-auto px-4 pt-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="mr-2 text-[0.66rem] font-bold tracking-[0.14em] text-[rgba(255,255,255,0.6)] uppercase">Season</span>
+          {seasons.map((s) => (
+            <button
+              key={s.number}
+              type="button"
+              aria-pressed={s.number === season?.number}
+              aria-label={`Season ${s.number}`}
+              className={cx(
+                "inline-grid h-7 min-w-7 flex-none cursor-pointer place-items-center rounded-md border-0 px-1.5 text-[0.8rem] font-semibold tabular-nums transition-[background-color,color] duration-200",
+                FOCUS_RING,
+                s.number === season?.number ? "bg-[#ff3040] text-white" : "bg-transparent text-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.12)] hover:text-white",
+              )}
+              onClick={() => setSeasonNumber(s.number)}
+            >
+              {s.number}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div ref={listRef} className={cx("flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-3 pb-3", tab === "extras" && "pt-4")}>
+        {tab === "episodes" &&
+          season?.episodes.map((episode) => {
+            const isCurrent = current !== "trailer" && current.season === season.number && current.episode === episode.number;
+            return (
+              <EpisodeCard
+                key={episode.number}
+                still={episode.still || fallbackStill}
+                meta={`${episodeCode(season.number, episode.number)} · ${episode.duration}`}
+                title={episode.title}
+                number={String(episode.number)}
+                isCurrent={isCurrent}
+                progress={isCurrent ? progress : 0}
+                onPick={() => onSelect({ season: season.number, episode: episode.number })}
+              />
+            );
+          })}
+
+        {tab === "extras" && (
+          <EpisodeCard
+            still={fallbackStill}
+            meta="Trailer"
+            title="Official trailer"
+            isCurrent={current === "trailer"}
+            progress={current === "trailer" ? progress : 0}
+            onPick={() => onSelect("trailer")}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EpisodeCard({
+  still,
+  meta,
+  title,
+  number,
+  isCurrent,
+  progress,
+  onPick,
+}: {
+  still: string;
+  meta: string;
+  title: string;
+  number?: string;
+  isCurrent: boolean;
+  progress: number;
+  onPick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-current={isCurrent}
+      className={cx(
+        "group/ep grid w-full flex-none cursor-pointer grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)_auto] items-center gap-4 rounded-xl border p-3.5 text-left transition-[background-color,border-color] duration-200 max-[400px]:grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)_auto] max-[400px]:gap-3 max-[400px]:p-2.5",
+        FOCUS_RING,
+        isCurrent
+          ? "border-[rgba(255,255,255,0.22)] bg-[rgba(255,255,255,0.2)]"
+          : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.15)]",
+      )}
+      onClick={onPick}
+    >
+      <span className="relative block aspect-video overflow-hidden rounded-md bg-[rgba(0,0,0,0.3)]">
+        {/* eslint-disable-next-line @next/next/no-img-element -- remote stills, same as every card */}
+        <img src={still} alt="" loading="lazy" className="block h-full w-full object-cover" />
+        <span
+          className={cx(
+            "absolute inset-0 grid place-items-center bg-[rgba(0,0,0,0.18)] text-white transition-opacity duration-200 [&_svg]:size-6 [&_svg]:drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]",
+            isCurrent ? "opacity-100 [&_svg]:text-[#ff3040]" : "opacity-0 group-hover/ep:opacity-100 group-focus-visible/ep:opacity-100",
+          )}
+          aria-hidden="true"
+        >
+          <PlayIcon />
+        </span>
+        {isCurrent && (
+          <span className="absolute inset-x-0 bottom-0 h-[3px] bg-[rgba(255,255,255,0.25)]" aria-hidden="true">
+            <span className="block h-full bg-[#ff3040]" style={{ width: `${progress * 100}%` }} />
+          </span>
+        )}
+      </span>
+
+      <span className="min-w-0">
+        <span className="block text-[0.62rem] font-bold tracking-[0.08em] text-[rgba(255,255,255,0.62)] uppercase">
+          {isCurrent ? <span className="text-[#ff3040]">Playing · </span> : null}
+          {meta}
+        </span>
+        <span className="mt-1 line-clamp-2 block text-[0.94rem] leading-snug font-semibold text-white max-[400px]:text-[0.86rem]">{title}</span>
+      </span>
+
+      {number ? (
+        <span
+          className={cx(
+            "pr-1 font-heading text-[2.6rem] leading-none font-bold tabular-nums max-[400px]:text-[2rem]",
+            isCurrent ? "text-[#ff3040]" : "text-[rgba(255,255,255,0.22)]",
+          )}
+          aria-hidden="true"
+        >
+          {number}
+        </span>
+      ) : (
+        <span aria-hidden="true" />
+      )}
+    </button>
   );
 }

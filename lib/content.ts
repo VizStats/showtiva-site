@@ -43,6 +43,58 @@ function assertCast(value: unknown, at: string): void {
   }
 }
 
+/** Validate a seasons array in place, naming the offending path on failure. */
+function assertSeasons(value: unknown, at: string): void {
+  if (!Array.isArray(value)) throw new ContentError(`${at} must be an array`);
+
+  const seasonNumbers = new Set<number>();
+  for (const [i, entry] of value.entries()) {
+    const here = `${at}[${i}]`;
+    if (typeof entry !== "object" || entry === null) throw new ContentError(`${here} must be an object`);
+    const season = entry as Record<string, unknown>;
+
+    if (!Number.isInteger(season.number) || (season.number as number) < 1) {
+      throw new ContentError(`${here}.number must be a positive integer`);
+    }
+    if (seasonNumbers.has(season.number as number)) {
+      throw new ContentError(`${here}.number duplicates season ${String(season.number)}`);
+    }
+    seasonNumbers.add(season.number as number);
+
+    if (!Array.isArray(season.episodes) || season.episodes.length === 0) {
+      throw new ContentError(`${here}.episodes must be a non-empty array`);
+    }
+    const episodeNumbers = new Set<number>();
+    for (const [j, item] of season.episodes.entries()) {
+      const there = `${here}.episodes[${j}]`;
+      if (typeof item !== "object" || item === null) throw new ContentError(`${there} must be an object`);
+      const episode = item as Record<string, unknown>;
+
+      if (!Number.isInteger(episode.number) || (episode.number as number) < 1) {
+        throw new ContentError(`${there}.number must be a positive integer`);
+      }
+      if (episodeNumbers.has(episode.number as number)) {
+        throw new ContentError(`${there}.number duplicates episode ${String(episode.number)}`);
+      }
+      episodeNumbers.add(episode.number as number);
+
+      for (const field of ["title", "duration"]) {
+        if (typeof episode[field] !== "string" || !episode[field]) {
+          throw new ContentError(`${there}.${field} must be a non-empty string`);
+        }
+      }
+      if (typeof episode.description !== "string") {
+        throw new ContentError(`${there}.description must be a string`);
+      }
+      for (const field of ["still", "videoUrl"]) {
+        if (episode[field] !== null && typeof episode[field] !== "string") {
+          throw new ContentError(`${there}.${field} must be a string or null`);
+        }
+      }
+    }
+  }
+}
+
 /**
  * Narrow the parsed JSON to `Content`, failing loudly with the offending
  * path. JSON.parse returns `any`, so without this the first sign of a bad
@@ -98,6 +150,7 @@ function assertContent(value: unknown): Content {
     }
 
     assertCast(m.cast, `movies.${id}.cast`);
+    if (m.seasons !== undefined) assertSeasons(m.seasons, `movies.${id}.seasons`);
   }
 
   for (const [i, section] of (c.sections as unknown[]).entries()) {

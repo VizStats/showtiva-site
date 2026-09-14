@@ -10,6 +10,26 @@ export interface CastMember {
   image: string | null;
 }
 
+/** One episode of a series. */
+export interface Episode {
+  /** 1-based, unique within its season. */
+  number: number;
+  title: string;
+  /** Runtime as shown, e.g. "24m". */
+  duration: string;
+  description: string;
+  /** 16:9 frame from the episode; null falls back to the series backdrop. */
+  still: string | null;
+  /** A playable file (.mp4 / .webm). Null plays the stand-in footage. */
+  videoUrl: string | null;
+}
+
+export interface Season {
+  /** 1-based, unique within the series. */
+  number: number;
+  episodes: Episode[];
+}
+
 export interface Movie {
   id: string;
   title: string;
@@ -28,8 +48,14 @@ export interface Movie {
   genres: string[];
   /** Empty means "use the store's defaultCast". */
   cast: CastMember[];
-  /** Null means the UI falls back to a poster thumbnail. */
+  /** A playable file (.mp4 / .webm); null plays the stand-in footage. */
   trailerUrl: string | null;
+  /**
+   * Present on series only, and what makes a title one: the detail page lists
+   * the episodes under the player and the player can switch between them.
+   * Absent (or empty) on films.
+   */
+  seasons?: Season[];
 }
 
 /**

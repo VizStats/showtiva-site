@@ -17,10 +17,10 @@ import { useRouter } from "next/navigation";
 import { cx } from "@/lib/cx";
 import { getSignupHref, isDemoSignedIn } from "../../_auth/demo-auth";
 import ProfileMenu from "../../_auth/ProfileMenu";
-import type { Movie } from "@/lib/content-types";
+import type { Episode, Movie } from "@/lib/content-types";
 import type { Brand, DetailLabels, FooterContent, PopoverLabels } from "@/lib/site-types";
 import PosterCard from "../PosterCard";
-import MoviePlayer from "./MoviePlayer";
+import MoviePlayer, { episodeCode, type PlayerPick } from "./MoviePlayer";
 import SearchOverlay from "../SearchOverlay";
 import SiteFooter from "../SiteFooter";
 import TitlePopover, { useTitlePopover } from "../TitlePopover";
@@ -50,14 +50,6 @@ const FOCUS_RING = "focus-visible:outline-1 focus-visible:outline-offset-4 focus
    makes while holding a phone never do. */
 const DRAG_RELEASE_PX = 80;
 
-/* The action pair: see the slant utilities in globals.css.
-
-   The pair only reads as one unit split by a single diagonal while the two
-   buttons sit side by side — stacked, the lead's right-hand cut and the
-   trail's left-hand cut face nothing and each button is just a lone
-   parallelogram. So rather than going full-width on a narrow screen, the pair
-   shrinks enough to stay on one line: at these metrics it measures ~248px,
-   which clears the 280px a 320px viewport leaves inside the gutter. */
 /* Stand-in footage. No title in the store has a playable file yet (a TMDB
    trailer is a YouTube page, which a <video> cannot play), so the player runs
    Big Buck Bunny — an open-licence (CC BY 3.0, Blender Foundation), all-ages
@@ -73,10 +65,29 @@ const STAND_IN_SOURCES = [
 ];
 const PLAYABLE = /\.(mp4|webm|m4v)(\?|#|$)/i;
 
-function videoSourcesFor(movie: Movie) {
-  return movie.trailerUrl && PLAYABLE.test(movie.trailerUrl) ? [movie.trailerUrl] : STAND_IN_SOURCES;
+/**
+ * What to play for a file URL that may be missing. `offset` starts the
+ * stand-in part way through, so each episode opens on a different scene
+ * instead of every one looking like the same video restarted. Only the long
+ * WebM takes it; the ten-second fallback would run off its own end.
+ */
+function sourcesFor(url: string | null, offset = 0) {
+  if (url && PLAYABLE.test(url)) return [url];
+  return offset > 0 ? [`${STAND_IN_SOURCES[0]}#t=${offset}`, ...STAND_IN_SOURCES.slice(1)] : STAND_IN_SOURCES;
 }
 
+function standInOffset(season: number, episode: number) {
+  return (season * 97 + episode * 53) % 560;
+}
+
+/* The action pair: see the slant utilities in globals.css.
+
+   The pair only reads as one unit split by a single diagonal while the two
+   buttons sit side by side — stacked, the lead's right-hand cut and the
+   trail's left-hand cut face nothing and each button is just a lone
+   parallelogram. So rather than going full-width on a narrow screen, the pair
+   shrinks enough to stay on one line: at these metrics it measures ~248px,
+   which clears the 280px a 320px viewport leaves inside the gutter. */
 const ACTION =
   "[--btn-h:3.25rem] [--slant:calc(var(--btn-h)/3)] inline-flex h-(--btn-h) cursor-pointer items-center justify-center gap-[0.7rem] rounded-none border-0 text-[0.78rem] font-semibold tracking-[0.16em] uppercase transition-[background-color,border-color,color] duration-300 ease-[ease] max-[480px]:[--btn-h:2.75rem] max-[480px]:gap-2 max-[480px]:text-[0.7rem] max-[480px]:tracking-[0.12em] motion-reduce:transition-none " +
   FOCUS_RING;
@@ -101,6 +112,17 @@ export default function DetailClient({
   // something below the fold.
   const [playing, setPlaying] = useState(false);
   const plateRef = useRef<HTMLDivElement | null>(null);
+
+  // A series plays episodes; Play starts wherever the pick is, S1:E1 until
+  // something else is chosen. A film only ever plays its trailer.
+  const seasons = movie.seasons ?? [];
+  const isSeries = seasons.length > 0 && seasons[0].episodes.length > 0;
+  const [pick, setPick] = useState<PlayerPick>(() =>
+    isSeries ? { season: seasons[0].number, episode: seasons[0].episodes[0].number } : "trailer",
+  );
+  // The season the page's list shows. Follows the player when it moves on,
+  // but browsing another season on the page does not change what is playing.
+  const [listSeasonNumber, setListSeasonNumber] = useState(seasons[0]?.number ?? 1);
 
   // A title opens at its title, not part way down it.
   //
@@ -199,6 +221,30 @@ export default function DetailClient({
 
   const startPlayer = () => {
     setPlaying(true);
+  };
+
+  // Every episode in watching order, for "next".
+  const episodeOrder: { season: number; episode: number }[] = seasons.flatMap((season) =>
+    season.episodes.map((episode) => ({ season: season.number, episode: episode.number })),
+  );
+  const pickedEpisode: Episode | null =
+    pick === "trailer"
+      ? null
+      : (seasons.find((season) => season.number === pick.season)?.episodes.find((episode) => episode.number === pick.episode) ?? null);
+  const pickIndex = pick === "trailer" ? -1 : episodeOrder.findIndex((e) => e.season === pick.season && e.episode === pick.episode);
+  const nextPick = pickIndex >= 0 ? episodeOrder[pickIndex + 1] : undefined;
+
+  const choose = (next: PlayerPick) => {
+    setPick(next);
+    if (next !== "trailer") setListSeasonNumber(next.season);
+  };
+
+  // From the list on the page: the player may be out of sight, so bring it
+  // back up as well as starting the episode.
+  const playFromList = (next: PlayerPick) => {
+    choose(next);
+    if (playing) plateRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    else setPlaying(true);
   };
 
   const toggleCurrentSaved = () => {
@@ -414,7 +460,25 @@ export default function DetailClient({
             )}
           >
             {playing ? (
-              <MoviePlayer title={movie.title} sources={videoSourcesFor(movie)} poster={movie.backdrop} onClose={closePlayer} />
+              <MoviePlayer
+                title={movie.title}
+                episodeLabel={
+                  pickedEpisode && pick !== "trailer"
+                    ? `S${pick.season}:E${pick.episode} · ${pickedEpisode.title}`
+                    : isSeries
+                      ? "Trailer"
+                      : undefined
+                }
+                sources={
+                  pickedEpisode && pick !== "trailer"
+                    ? sourcesFor(pickedEpisode.videoUrl, standInOffset(pick.season, pick.episode))
+                    : sourcesFor(movie.trailerUrl)
+                }
+                poster={pickedEpisode?.still || movie.backdrop}
+                onClose={closePlayer}
+                series={isSeries ? { seasons, current: pick, fallbackStill: movie.backdrop, onSelect: choose } : undefined}
+                onNext={nextPick ? () => choose(nextPick) : undefined}
+              />
             ) : (
               <>
                 <img className="block h-full w-full object-cover object-[center_40%]" src={movie.backdrop} alt={movie.title} />
@@ -454,6 +518,130 @@ export default function DetailClient({
             </div>
           </figcaption>
         </figure>
+
+        {isSeries && (
+          <section className={cx(SHELL, "mt-[clamp(2.75rem,5.5vw,4.5rem)]")} aria-labelledby="episodes-heading">
+            <div className="mb-[clamp(1.1rem,2.2vw,1.75rem)] flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+              <div className="flex items-baseline gap-4">
+                <h2 id="episodes-heading" className="font-heading text-[clamp(1.4rem,2.3vw,1.85rem)] leading-none font-light tracking-[-0.02em]">
+                  Episodes
+                </h2>
+                <span className="text-[0.7rem] tracking-[0.18em] text-[#8a8a8a] uppercase tabular-nums">
+                  {movie.duration}
+                </span>
+              </div>
+
+              {/* The season selector is light glass: a frosted track with the
+                  chosen season lifted out of it in near-white. It scrolls
+                  sideways rather than wrapping when a show runs long. */}
+              <div
+                role="tablist"
+                aria-label="Seasons"
+                className="flex max-w-full gap-0.5 overflow-x-auto rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.07)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-[18px] backdrop-saturate-150 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {seasons.map((season) => {
+                  const active = season.number === listSeasonNumber;
+                  return (
+                    <button
+                      key={season.number}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      className={cx(
+                        "h-9 flex-none cursor-pointer rounded-full border-0 px-[1.05rem] text-[0.78rem] font-semibold tracking-[0.03em] whitespace-nowrap tabular-nums transition-[background-color,color,box-shadow] duration-250 ease-[ease] max-[480px]:h-8 max-[480px]:px-3.5 motion-reduce:transition-none",
+                        FOCUS_RING,
+                        active
+                          ? "bg-[rgba(255,255,255,0.92)] text-black shadow-[0_4px_14px_rgba(0,0,0,0.3)]"
+                          : "bg-transparent text-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white",
+                      )}
+                      onClick={() => setListSeasonNumber(season.number)}
+                    >
+                      <span className="max-[480px]:hidden">Season </span>
+                      <span className="hidden max-[480px]:inline">S</span>
+                      {season.number}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <ol className="list-none border-t border-[rgba(250,250,250,0.11)]">
+              {(seasons.find((season) => season.number === listSeasonNumber) ?? seasons[0]).episodes.map((episode) => {
+                const here = { season: listSeasonNumber, episode: episode.number };
+                const isNow = playing && pick !== "trailer" && pick.season === here.season && pick.episode === here.episode;
+                return (
+                  <li key={episode.number} className="border-b border-[rgba(250,250,250,0.11)]">
+                    <button
+                      type="button"
+                      aria-current={isNow}
+                      className={cx(
+                        "group/row grid w-full cursor-pointer grid-cols-[2.75rem_minmax(0,15rem)_minmax(0,1fr)] items-center gap-x-[clamp(1rem,2.4vw,2rem)] border-0 bg-transparent py-[clamp(0.95rem,1.8vw,1.35rem)] text-left text-ink transition-[background-color] duration-200 hover:bg-[rgba(255,255,255,0.03)] max-[640px]:grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)] max-[640px]:gap-x-3.5 max-[640px]:py-3 motion-reduce:transition-none",
+                        FOCUS_RING,
+                      )}
+                      onClick={() => playFromList(here)}
+                    >
+                      <span
+                        className={cx(
+                          "text-center font-heading text-[clamp(1.4rem,2.2vw,1.9rem)] font-light tabular-nums max-[640px]:hidden",
+                          isNow ? "text-[#ff3040]" : "text-[#5c5c5c]",
+                        )}
+                        aria-hidden="true"
+                      >
+                        {episode.number}
+                      </span>
+
+                      <span className="relative block aspect-video overflow-hidden bg-[#101010]">
+                        <img
+                          className="block h-full w-full object-cover transition-[scale] duration-500 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/row:scale-[1.04] motion-reduce:transition-none"
+                          src={episode.still || movie.backdrop}
+                          alt=""
+                          loading="lazy"
+                        />
+                        <span
+                          className={cx(
+                            "absolute inset-0 grid place-items-center bg-[rgba(0,0,0,0.28)] transition-opacity duration-200",
+                            isNow ? "opacity-100" : "opacity-0 group-hover/row:opacity-100 group-focus-visible/row:opacity-100",
+                          )}
+                          aria-hidden="true"
+                        >
+                          <span className="grid size-10 place-items-center rounded-full border border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.16)] backdrop-blur-[10px] max-[640px]:size-8">
+                            <svg className={cx("ml-0.5 h-3 w-2.5", isNow ? "text-[#ff3040]" : "text-white")} viewBox="0 0 12 14" focusable="false">
+                              <path d="M0 0v14l12-7z" fill="currentColor" />
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+
+                      <span className="min-w-0">
+                        <span className="flex items-baseline justify-between gap-4">
+                          <span className="line-clamp-2 font-heading text-[clamp(0.98rem,1.3vw,1.12rem)] leading-snug font-normal tracking-[0.005em] max-[640px]:text-[0.92rem]">
+                            {episode.title}
+                          </span>
+                          <span className="flex-none text-[0.78rem] text-[#8a8a8a] tabular-nums max-[640px]:hidden">{episode.duration}</span>
+                        </span>
+                        <span className="mt-1.5 block text-[0.64rem] font-medium tracking-[0.16em] text-[#8a8a8a] uppercase tabular-nums">
+                          {isNow ? (
+                            <span className="text-[#ff3040]">Now playing</span>
+                          ) : (
+                            <>
+                              {episodeCode(here.season, here.episode)}
+                              <span className="hidden max-[640px]:inline"> · {episode.duration}</span>
+                            </>
+                          )}
+                        </span>
+                        {episode.description && (
+                          <span className="mt-2 line-clamp-2 max-w-[70ch] text-[0.9rem] leading-[1.6] text-[#a6a69c] max-[640px]:hidden">
+                            {episode.description}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        )}
 
         <div className={SHELL}>
           <section className="mt-(--step)">

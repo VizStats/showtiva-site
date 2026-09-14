@@ -69,7 +69,13 @@ Kept separate so a bad copy edit cannot take down the movie catalog.
   "backdrop": "https://…",       // wide art for the detail page hero
   "genres": ["Drama", "Musical"], // array of strings
   "cast": [{ "name": "…", "role": "…", "image": "https://… | null" }],
-  "trailerUrl": null             // string | null  ⚠️ an IMAGE url, not a video (see §6)
+  "trailerUrl": null,            // string | null  — a playable .mp4/.webm (see §6)
+  "seasons": [                   // OPTIONAL — series only; its presence makes a title a series
+    { "number": 1, "episodes": [
+      { "number": 1, "title": "…", "duration": "24m", "description": "…",
+        "still": "https://… | null", "videoUrl": "https://….mp4 | null" }
+    ] }
+  ]
 }
 ```
 
@@ -93,7 +99,11 @@ send `cast: []` to restore inheritance.
 ### Editable fields (`PUT` / `PATCH`)
 
 `title`, `subtitle`, `type`, `duration`, `rating`, `year`, `description`,
-`image`, `backdrop`, `genres`, `cast`, `trailerUrl`
+`image`, `backdrop`, `genres`, `cast`, `trailerUrl`, `seasons`
+
+Send the whole `seasons` array to change any episode. Season and episode
+numbers must be positive and unique within their parent; every season needs at
+least one episode.
 
 Anything else → `400` with the allowed list in `details.editable`.
 
@@ -220,7 +230,7 @@ Editable and persisted, but they do not behave the way their name suggests.
 | Field | Reality |
 |---|---|
 | `subtitle` | **Renders nowhere.** No component reads it — the current hero shows duration, title and description only. Editing it has no visible effect. Either hide it in the dashboard or treat it as notes-only. |
-| `trailerUrl` | Rendered as the `src` of an **`<img>`**, not a video player. A YouTube link or `.mp4` will show a broken image. Supply a poster-frame **image URL**. Empty (`null`) falls back to the movie's `image`. |
+| `trailerUrl` / `videoUrl` | Played by the detail page's **`<video>`** player, so it must be a direct `.mp4` or `.webm` file. A YouTube page link cannot play and is ignored. `null` plays stand-in footage (Big Buck Bunny). |
 | `titleColor` | **Dead data** on rows. Stored and returned by the API, but no component reads it; heading colour comes from `accent`. Do not surface it as a colour control. |
 
 ---
