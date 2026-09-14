@@ -203,10 +203,22 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
   }, [safePage, totalPages]);
 
   const sortLabel = SORTS.find((s) => s.key === sort)?.label ?? SORTS[0].label;
-  // Categories show posters, collections show stills. See SectionAspect.
-  const isLandscape = section.aspect === "landscape";
+  /* The rail listed six rows flat, which said nothing about how they differ.
+     They are two kinds of thing, and SectionAspect already records which is
+     which: a category is a bucket a title belongs to by what it is (Movies,
+     Cartoons & Animation), a collection is a cut that keeps moving (Trending
+     Now, New Releases). Splitting on the stored shape means a row added later
+     lands in the right group without anyone remembering a list in here. */
+  const categories = sections.filter((s) => s.aspect === "portrait");
+  const collections = sections.filter((s) => s.aspect === "landscape");
+  const inCollections = section.aspect === "landscape";
+
   // The same row, so the same cards and the same destination as the catalog.
   const isShorts = section.id === SHORTS_SECTION_ID;
+
+  const goToSection = (id: string) => {
+    if (id) router.push(`/browse/${id}`);
+  };
   const filtersActive = Boolean(trimmed || genre || year || minRating);
   const isDirty = filtersActive || sort !== "rating";
 
@@ -319,36 +331,23 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
         </section>
 
         {/* ------------------------------------------------------- rail -- */}
-        <nav className="flex items-center gap-[18px] pt-5 max-[760px]:flex-col max-[760px]:items-start max-[760px]:gap-[10px] max-[640px]:pt-4" aria-label="Categories">
-          <span className={cx("flex-none text-[0.6rem] tracking-[0.18em] max-[640px]:hidden", MICRO)}>Categories</span>
-          {/* Wrapping put four rows of chips above the console on a phone.
-              Below 640px it is a single swipeable row instead — the bleed
-              into the gutter is what signals there is more to the right. */}
-          <ul className="flex min-w-0 list-none flex-wrap gap-x-[18px] gap-y-[6px] max-[640px]:-mx-(--gutter) max-[640px]:w-[calc(100%+2*var(--gutter))] max-[640px]:flex-nowrap max-[640px]:gap-x-4 max-[640px]:overflow-x-auto max-[640px]:px-(--gutter) max-[640px]:[scrollbar-width:none] max-[640px]:[&::-webkit-scrollbar]:hidden">
-            {sections.map((s) => {
-              const current = s.id === section.id;
-              return (
-                <li key={s.id}>
-                  {/* The underline takes the category's accent; the count too
-                      when active. */}
-                  <Link
-                    href={`/browse/${s.id}`}
-                    className={cx(
-                      "relative inline-flex min-h-8 items-center gap-[7px] border-0 px-px pt-0 pb-2 text-[0.74rem] whitespace-nowrap transition-[color] duration-200 ease-[ease] hover:text-ink after:absolute after:right-0 after:bottom-[2px] after:left-0 after:h-[2px] after:origin-center after:rounded-[999px] after:bg-(color:--rail-accent) after:transition-[opacity,transform] after:duration-200 after:ease-[ease] after:content-['']",
-                      current
-                        ? "font-extrabold text-ink after:opacity-100 after:[transform:scaleX(1)]"
-                        : `font-semibold ${INK_2} after:opacity-0 after:[transform:scaleX(0.4)]`,
-                    )}
-                    style={{ "--rail-accent": s.accent } as React.CSSProperties}
-                    aria-current={current ? "page" : undefined}
-                  >
-                    {s.title}
-                    <span className={cx(MONO, "text-[0.6rem] tabular-nums", current ? "text-(color:--rail-accent)" : INK_3)}>{s.movies.length}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        {/* Two pickers rather than six flat links. Whichever group holds the
+            row you are on goes solid and names it; the other stays quiet and
+            names its group. Same control as the filter row below, so the page
+            asks its questions one way. */}
+        <nav className="flex flex-wrap items-center gap-[10px] pt-5 max-[640px]:pt-4" aria-label="Browse by">
+          <FilterMenu
+            label="Category"
+            value={inCollections ? "" : section.id}
+            options={[{ value: "", label: "Categories" }, ...categories.map((s) => ({ value: s.id, label: s.title }))]}
+            onChange={goToSection}
+          />
+          <FilterMenu
+            label="Collection"
+            value={inCollections ? section.id : ""}
+            options={[{ value: "", label: "Collections" }, ...collections.map((s) => ({ value: s.id, label: s.title }))]}
+            onChange={goToSection}
+          />
         </nav>
 
         {/* ---------------------------------------------------- console -- */}
@@ -504,17 +503,12 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
             the first column lands on the page gutter. Below 640px a fixed
             track would leave a lone column with a big hole beside it, so there
             the cards do fill the row — two up on a phone. */}
+        {/* Posters throughout, whichever group the row belongs to. A grid is
+            read by scanning down a column, and mixing shapes between rows
+            would break that alignment for nothing — the still shape earns its
+            place on the catalog, where rows scroll sideways. */}
         {visible.length > 0 ? (
-          <ul
-            className={cx(
-              "mt-[30px] grid list-none gap-y-[26px] [justify-content:start]",
-              isLandscape
-                ? // A 16/9 still needs about two posters' width before it reads,
-                  // and one per row on a phone rather than two stamp-sized ones.
-                  "grid-cols-[repeat(auto-fill,340px)] gap-x-[14px] max-[900px]:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] max-[640px]:grid-cols-1 max-[640px]:gap-y-[18px]"
-                : "grid-cols-[repeat(auto-fill,190px)] gap-x-[10px] max-[640px]:grid-cols-[repeat(auto-fill,minmax(144px,1fr))] max-[640px]:gap-x-3 max-[640px]:gap-y-[22px]",
-            )}
-          >
+          <ul className="mt-[30px] grid list-none grid-cols-[repeat(auto-fill,190px)] gap-x-[10px] gap-y-[26px] [justify-content:start] max-[640px]:grid-cols-[repeat(auto-fill,minmax(144px,1fr))] max-[640px]:gap-x-3 max-[640px]:gap-y-[22px]">
             {visible.map((movie) => (
               <li
                 key={movie.id}
@@ -522,7 +516,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
               >
                 <PosterCard
                   movie={movie}
-                  aspect={section.aspect}
+                  aspect="portrait"
                   variant={isShorts ? "short" : "default"}
                   href={isShorts ? `/shorts/${movie.id}` : undefined}
                   saved={saved.has(movie.id)}
