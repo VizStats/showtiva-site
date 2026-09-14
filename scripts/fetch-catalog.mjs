@@ -67,6 +67,18 @@ const G = {
 /** Never appears anywhere in the catalog, whatever the row. */
 const BARRED = [G.horror, G.thriller, G.crime, G.war, G.action];
 
+G.documentary = 99;
+
+/* TV uses its own genre ids, and folds Action into "Action & Adventure" and
+   War into "War & Politics", so they are barred by those ids instead. */
+const TV_BARRED = [80, 10759, 10768];
+
+/* TV discover cannot filter by certification the way movie discover can, so
+   every show is checked against its US content rating individually. TV-14 is
+   the television counterpart of PG-13; TV-MA and anything unrated are left
+   out, because "unrated" is not the same as "safe". */
+const TV_ALLOWED_RATINGS = new Set(["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14"]);
+
 /* Shared floor. Raising the vote count is the strongest single lever on
    quality here: it filters out the obscure and the review-bombed alike. */
 const FLOOR = {
@@ -106,7 +118,7 @@ const ROWS = [
     query: { with_genres: `${G.drama}|${G.comedy}`, sort_by: "vote_average.desc", "vote_count.gte": 3000 },
   },
   {
-    id: "cartoons-animation",
+    id: "animation",
     keep: 10,
     pages: 3,
     query: { with_genres: String(G.animation), sort_by: "vote_average.desc", "vote_count.gte": 2000 },
@@ -124,10 +136,23 @@ const ROWS = [
     },
   },
   {
-    id: "magical-fantasy",
+    id: "tv-series",
+    kind: "tv",
     keep: 12,
-    pages: 4,
-    query: { with_genres: `${G.fantasy}|${G.scifi}`, sort_by: "vote_average.desc", "vote_count.gte": 2000 },
+    pages: 5,
+    // Pulls deeper than the film rows because the per-show rating check
+    // discards a share of what discover returns.
+    query: { sort_by: "vote_average.desc", "vote_count.gte": 800 },
+  },
+  {
+    id: "documentaries",
+    keep: 10,
+    pages: 6,
+    // Documentaries draw far fewer votes than features, so the floor drops.
+    // The certification filter stays, which will cost this row some titles:
+    // TMDB leaves unrated films out of a certification query, and plenty of
+    // documentaries never get rated. The row warns if it comes up short.
+    query: { with_genres: String(G.documentary), sort_by: "vote_average.desc", "vote_count.gte": 250 },
   },
   {
     id: "action-adventure",
@@ -149,15 +174,24 @@ async function tmdb(path, params = {}) {
   return res.json();
 }
 
-async function discover({ query, pages }) {
+async function discover({ query, pages, kind = "movie" }) {
   const out = [];
   for (let page = 1; page <= pages; page += 1) {
-    const data = await tmdb("/discover/movie", {
-      ...FLOOR,
-      ...query,
-      without_genres: BARRED.join(","),
-      page,
-    });
+    const params =
+      kind === "tv"
+        ? {
+            // No certification params: TV discover ignores them. The rating
+            // is checked per show in tvDetail instead.
+            "vote_average.gte": FLOOR["vote_average.gte"],
+            include_adult: "false",
+            with_original_language: "en",
+            ...query,
+            without_genres: TV_BARRED.join(","),
+            page,
+          }
+        : { ...FLOOR, ...query, without_genres: BARRED.join(","), page };
+
+    const data = await tmdb(`/discover/${kind}`, params);
     out.push(...(data.results ?? []));
     if (page >= (data.total_pages ?? 1)) break;
   }
@@ -213,6 +247,47 @@ async function detail(id) {
   };
 }
 
+/** "3 Seasons" reads better on a show's card than an episode length. */
+function seasons(count) {
+  if (!count) return "—";
+  return count === 1 ? "1 Season" : `${count} Seasons`;
+}
+
+async function tvDetail(id) {
+  const t = await tmdb(`/tv/${id}`, { append_to_response: "content_ratings,credits,videos" });
+
+  if (!t.poster_path || !t.backdrop_path) return null;
+
+  const us = (t.content_ratings?.results ?? []).find((r) => r.iso_3166_1 === "US");
+  if (!us || !TV_ALLOWED_RATINGS.has(us.rating)) return null;
+
+  const trailer = (t.videos?.results ?? []).find(
+    (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"),
+  );
+
+  return {
+    // Prefixed: TMDB numbers films and shows separately, so a bare id could
+    // collide with a film of the same name and number.
+    id: slug(`tv ${t.name}`, t.id),
+    title: t.name,
+    subtitle: t.tagline || null,
+    type: "TV",
+    duration: seasons(t.number_of_seasons),
+    rating: t.vote_average ? t.vote_average.toFixed(1) : "—",
+    year: (t.first_air_date || "").slice(0, 4),
+    description: t.overview || "",
+    image: `${IMG}/w500${t.poster_path}`,
+    backdrop: `${IMG}/w1280${t.backdrop_path}`,
+    genres: (t.genres ?? []).map((g) => g.name),
+    cast: (t.credits?.cast ?? []).slice(0, 6).map((c) => ({
+      name: c.name,
+      role: c.character || "",
+      image: c.profile_path ? `${IMG}/w185${c.profile_path}` : null,
+    })),
+    trailerUrl: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
+  };
+}
+
 async function main() {
   const existing = JSON.parse(await readFile(OUT, "utf8"));
 
@@ -236,12 +311,14 @@ async function main() {
 
     for (const candidate of candidates) {
       if (ids.length >= row.keep) break;
-      if (taken.has(candidate.id)) continue;
+      // Keyed by kind too, since a film and a show can share a TMDB number.
+      const key = `${row.kind ?? "movie"}:${candidate.id}`;
+      if (taken.has(key)) continue;
 
-      const record = await detail(candidate.id);
+      const record = row.kind === "tv" ? await tvDetail(candidate.id) : await detail(candidate.id);
       if (!record) continue;
 
-      taken.add(candidate.id);
+      taken.add(key);
       movies[record.id] = record;
       ids.push(record.id);
     }

@@ -109,8 +109,8 @@
       ]
     },
     {
-      "id": "cartoons-animation",
-      "title": "Cartoons & Animation",
+      "id": "animation",
+      "title": "Animation",
       "titleColor": "normal",
       "aspect": "portrait",
       "accent": "#b06bff",
@@ -149,8 +149,8 @@
       ]
     },
     {
-      "id": "magical-fantasy",
-      "title": "Magical Worlds & Fantasy",
+      "id": "tv-series",
+      "title": "TV & Series",
       "titleColor": "yellow",
       "aspect": "portrait",
       "accent": "#ff6b9d",
@@ -167,6 +167,24 @@
         "mf10",
         "mf11",
         "mf12"
+      ]
+    },
+    {
+      "id": "documentaries",
+      "title": "Documentaries",
+      "titleColor": "normal",
+      "aspect": "portrait",
+      "accent": "#38c7c9",
+      "movieIds": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10"
       ]
     },
     {
