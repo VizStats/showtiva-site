@@ -16,12 +16,23 @@ import type { Season } from "@/lib/content-types";
 /** What the player is showing for a series: an episode, or the trailer. */
 export type PlayerPick = { season: number; episode: number } | "trailer";
 
+/** A series to suggest from a film's episodes panel. */
+export interface SeriesSuggestion {
+  id: string;
+  title: string;
+  still: string;
+  meta: string;
+}
+
 export interface PlayerSeries {
+  /** Empty for a film: the panel then points to series that have episodes. */
   seasons: Season[];
   current: PlayerPick;
   /** Thumbnail for anything without a still of its own. */
   fallbackStill: string;
   onSelect: (pick: PlayerPick) => void;
+  suggestions?: SeriesSuggestion[];
+  onOpenTitle?: (id: string) => void;
 }
 
 /** One encode of the same film at a given frame height. */
@@ -47,7 +58,7 @@ interface MoviePlayerProps {
   media: PlayerMedia;
   poster: string;
   onClose: () => void;
-  /** Series only: powers the episodes panel. */
+  /** Powers the episodes panel, which every title has. */
   series?: PlayerSeries;
   /** Present when there is a next episode to go to. */
   onNext?: () => void;
@@ -149,6 +160,9 @@ const DISC_BASE =
 /* Sizes kept apart from the base, so a bigger disc never has two size
    utilities fighting over the same property. */
 const DISC = DISC_BASE + " size-11 max-[560px]:size-9 [&_svg]:size-5 max-[560px]:[&_svg]:size-[18px]";
+const EPISODES_PILL =
+  DISC_BASE +
+  " h-11 grid-flow-col gap-2 pr-4 pl-3.5 [&_svg]:size-5 max-[560px]:size-9 max-[560px]:gap-0 max-[560px]:px-0 max-[560px]:[&_svg]:size-[18px]";
 const DISC_SKIP_CENTRE = DISC_BASE + " size-12 min-[561px]:hidden [&_svg]:size-6";
 const DISC_HERO = DISC_BASE + " size-[clamp(4.5rem,8vw,6rem)] max-[560px]:size-[4.25rem] [&_svg]:size-[42%]";
 
@@ -940,26 +954,6 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
           </div>
 
           <div className="flex items-center gap-[clamp(0.45rem,0.9vw,0.7rem)] max-[560px]:gap-1.5">
-            {onNext && (
-              <button type="button" className={DISC} aria-label="Next episode" onClick={onNext}>
-                <NextIcon />
-              </button>
-            )}
-
-            {series && (
-              <button
-                type="button"
-                className={DISC}
-                aria-label="Episodes"
-                aria-haspopup="dialog"
-                aria-expanded={panelOpen}
-                data-player-menu
-                onClick={() => setMenu((open) => (open === "episodes" ? null : "episodes"))}
-              >
-                <EpisodesIcon />
-              </button>
-            )}
-
             <div className="relative" data-player-menu>
               <button
                 type="button"
@@ -1074,8 +1068,32 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
               )}
             </div>
 
+            {/* Right beside Settings and labelled, so it reads as a thing to
+                press rather than one more icon. On a phone the label goes and
+                it becomes a disc like its neighbours. */}
+            {series && (
+              <button
+                type="button"
+                className={EPISODES_PILL}
+                aria-label="Episodes"
+                aria-haspopup="dialog"
+                aria-expanded={panelOpen}
+                data-player-menu
+                onClick={() => setMenu((open) => (open === "episodes" ? null : "episodes"))}
+              >
+                <EpisodesIcon />
+                <span className="text-[0.8rem] font-semibold tracking-[0.01em] max-[560px]:hidden">Episodes</span>
+              </button>
+            )}
+
+            {onNext && (
+              <button type="button" className={DISC} aria-label="Next episode" onClick={onNext}>
+                <NextIcon />
+              </button>
+            )}
+
             {canPip && (
-              <button type="button" className={cx(DISC, series && "max-[400px]:hidden")} aria-label={inPip ? "Exit picture-in-picture" : "Picture-in-picture"} aria-pressed={inPip} onClick={togglePip}>
+              <button type="button" className={cx(DISC, onNext && "max-[400px]:hidden")} aria-label={inPip ? "Exit picture-in-picture" : "Picture-in-picture"} aria-pressed={inPip} onClick={togglePip}>
                 <PipIcon />
               </button>
             )}
@@ -1121,8 +1139,9 @@ function EpisodesPanel({
   progress: number;
   onDismiss: () => void;
 }) {
-  const { seasons, current, fallbackStill, onSelect } = series;
-  const [tab, setTab] = useState<"episodes" | "extras">(current === "trailer" ? "extras" : "episodes");
+  const { seasons, current, fallbackStill, onSelect, suggestions = [], onOpenTitle } = series;
+  // Always opens on Episodes: that is the button that was pressed.
+  const [tab, setTab] = useState<"episodes" | "extras">(current === "trailer" && seasons.length > 0 ? "extras" : "episodes");
   // Opens on the season being watched, not the first one.
   const [seasonNumber, setSeasonNumber] = useState(current === "trailer" ? seasons[0]?.number : current.season);
   const season = seasons.find((s) => s.number === seasonNumber) ?? seasons[0];
@@ -1210,6 +1229,28 @@ function EpisodesPanel({
               />
             );
           })}
+
+        {tab === "episodes" && seasons.length === 0 && (
+          <>
+            <div className="px-1.5 pt-4 pb-2">
+              <p className="text-[0.95rem] font-semibold text-white">No episodes for this one</p>
+              <p className="mt-1 text-[0.82rem] leading-relaxed text-[rgba(255,255,255,0.66)]">
+                It is a film, so it plays in one go. These series have seasons and episodes to switch between.
+              </p>
+            </div>
+            {suggestions.map((item) => (
+              <EpisodeCard
+                key={item.id}
+                still={item.still}
+                meta={item.meta}
+                title={item.title}
+                isCurrent={false}
+                progress={0}
+                onPick={() => onOpenTitle?.(item.id)}
+              />
+            ))}
+          </>
+        )}
 
         {tab === "extras" && (
           <EpisodeCard

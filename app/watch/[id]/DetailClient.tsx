@@ -238,6 +238,14 @@ export default function DetailClient({
   const pickIndex = pick === "trailer" ? -1 : episodeOrder.findIndex((e) => e.season === pick.season && e.episode === pick.episode);
   const nextPick = pickIndex >= 0 ? episodeOrder[pickIndex + 1] : undefined;
 
+  // For a film's episodes panel: somewhere that does have episodes.
+  const seriesSuggestions = isSeries
+    ? []
+    : allMovies
+        .filter((m) => (m.seasons?.length ?? 0) > 0)
+        .slice(0, 8)
+        .map((m) => ({ id: m.id, title: m.title, still: m.backdrop, meta: `Series · ${m.duration}` }));
+
   const choose = (next: PlayerPick) => {
     setPick(next);
     if (next !== "trailer") setListSeasonNumber(next.season);
@@ -480,7 +488,14 @@ export default function DetailClient({
                 }
                 poster={pickedEpisode?.still || movie.backdrop}
                 onClose={closePlayer}
-                series={isSeries ? { seasons, current: pick, fallbackStill: movie.backdrop, onSelect: choose } : undefined}
+                series={{
+                  seasons: isSeries ? seasons : [],
+                  current: pick,
+                  fallbackStill: movie.backdrop,
+                  onSelect: choose,
+                  suggestions: seriesSuggestions,
+                  onOpenTitle: (id) => router.push(`/watch/${id}`),
+                }}
                 onNext={nextPick ? () => choose(nextPick) : undefined}
               />
             ) : (
