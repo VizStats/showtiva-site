@@ -128,6 +128,11 @@ export default function DetailClient({
   // but browsing another season on the page does not change what is playing.
   const [listSeasonNumber, setListSeasonNumber] = useState(seasons[0]?.number ?? 1);
 
+  // The episode row scrolls sideways; the arrows know when there is nowhere
+  // further to go.
+  const episodeRowRef = useRef<HTMLOListElement | null>(null);
+  const [rowEdges, setRowEdges] = useState({ atStart: true, atEnd: false });
+
   // A title opens at its title, not part way down it.
   //
   // next/link keeps the scroll position when the incoming page is already
@@ -258,6 +263,45 @@ export default function DetailClient({
     if (playing) plateRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     else setPlaying(true);
   };
+
+  const readRowEdges = () => {
+    const row = episodeRowRef.current;
+    if (!row) return;
+    const atStart = row.scrollLeft <= 2;
+    const atEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 2;
+    setRowEdges((prev) => (prev.atStart === atStart && prev.atEnd === atEnd ? prev : { atStart, atEnd }));
+  };
+
+  // A page of cards at a time, less one, so the last card seen stays on
+  // screen as the anchor for where you were.
+  const scrollRow = (direction: 1 | -1) => {
+    const row = episodeRowRef.current;
+    if (!row) return;
+    const card = row.querySelector("li");
+    const step = card ? card.getBoundingClientRect().width + 16 : row.clientWidth * 0.8;
+    const perPage = Math.max(1, Math.floor(row.clientWidth / step) - 1);
+    row.scrollBy({ left: direction * step * perPage, behavior: "smooth" });
+  };
+
+  // Edges are measured whenever the row's size or content changes: on load,
+  // on resize, and when another season swaps the cards in.
+  useEffect(() => {
+    const row = episodeRowRef.current;
+    if (!row) return;
+    const observer = new ResizeObserver(() => readRowEdges());
+    observer.observe(row);
+    if (row.firstElementChild) observer.observe(row.firstElementChild);
+    return () => observer.disconnect();
+  }, [listSeasonNumber]);
+
+  // The episode playing slides into view in the row, wherever it was chosen.
+  useEffect(() => {
+    const row = episodeRowRef.current;
+    const card = row?.querySelector<HTMLElement>("[aria-current='true']")?.closest("li");
+    if (!row || !card) return;
+    const left = card.offsetLeft - row.offsetLeft - parseFloat(getComputedStyle(row).paddingLeft);
+    row.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [pick, listSeasonNumber, playing]);
 
   const toggleCurrentSaved = () => {
     requireAuth(() => setSaved((value) => !value));
@@ -540,120 +584,145 @@ export default function DetailClient({
 
         {isSeries && (
           <section className={cx(SHELL, "mt-[clamp(2.75rem,5.5vw,4.5rem)]")} aria-labelledby="episodes-heading">
-            <div className="mb-[clamp(1.1rem,2.2vw,1.75rem)] flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+            <div className="mb-[clamp(1.2rem,2.4vw,1.9rem)] flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
               <div className="flex items-baseline gap-4">
                 <h2 id="episodes-heading" className="font-heading text-[clamp(1.4rem,2.3vw,1.85rem)] leading-none font-light tracking-[-0.02em]">
                   Episodes
                 </h2>
-                <span className="text-[0.7rem] tracking-[0.18em] text-[#8a8a8a] uppercase tabular-nums">
-                  {movie.duration}
-                </span>
+                <span className="text-[0.7rem] tracking-[0.18em] text-[#8a8a8a] uppercase tabular-nums">{movie.duration}</span>
               </div>
 
-              {/* The season selector is light glass: a frosted track with the
-                  chosen season lifted out of it in near-white. It scrolls
-                  sideways rather than wrapping when a show runs long. */}
-              <div
-                role="tablist"
-                aria-label="Seasons"
-                className="flex max-w-full gap-0.5 overflow-x-auto rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.07)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-[18px] backdrop-saturate-150 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {seasons.map((season) => {
-                  const active = season.number === listSeasonNumber;
-                  return (
+              <div className="flex items-center gap-3">
+                {/* The season selector is light glass: a frosted track with the
+                    chosen season lifted out of it in near-white. */}
+                <div
+                  role="tablist"
+                  aria-label="Seasons"
+                  className="flex max-w-full gap-0.5 overflow-x-auto rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.07)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_12px_32px_rgba(0,0,0,0.4)] backdrop-blur-[18px] backdrop-saturate-150 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {seasons.map((season) => {
+                    const active = season.number === listSeasonNumber;
+                    return (
+                      <button
+                        key={season.number}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        className={cx(
+                          "h-9 flex-none cursor-pointer rounded-full border-0 px-[1.05rem] text-[0.78rem] font-semibold tracking-[0.03em] whitespace-nowrap tabular-nums transition-[background-color,color,box-shadow] duration-250 ease-[ease] max-[480px]:h-8 max-[480px]:px-3.5 motion-reduce:transition-none",
+                          FOCUS_RING,
+                          active
+                            ? "bg-[rgba(255,255,255,0.92)] text-black shadow-[0_4px_14px_rgba(0,0,0,0.3)]"
+                            : "bg-transparent text-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white",
+                        )}
+                        onClick={() => setListSeasonNumber(season.number)}
+                      >
+                        <span className="max-[480px]:hidden">Season </span>
+                        <span className="hidden max-[480px]:inline">S</span>
+                        {season.number}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Arrows for a mouse; a finger just swipes the row. */}
+                <div className="flex gap-2 pointer-coarse:hidden">
+                  {([-1, 1] as const).map((direction) => (
                     <button
-                      key={season.number}
+                      key={direction}
                       type="button"
-                      role="tab"
-                      aria-selected={active}
+                      aria-label={direction < 0 ? "Previous episodes" : "More episodes"}
+                      disabled={direction < 0 ? rowEdges.atStart : rowEdges.atEnd}
                       className={cx(
-                        "h-9 flex-none cursor-pointer rounded-full border-0 px-[1.05rem] text-[0.78rem] font-semibold tracking-[0.03em] whitespace-nowrap tabular-nums transition-[background-color,color,box-shadow] duration-250 ease-[ease] max-[480px]:h-8 max-[480px]:px-3.5 motion-reduce:transition-none",
+                        "grid size-11 cursor-pointer place-items-center rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.07)] text-white backdrop-blur-[18px] transition-[background-color,opacity] duration-200 hover:bg-[rgba(255,255,255,0.16)] disabled:cursor-default disabled:opacity-30 disabled:hover:bg-[rgba(255,255,255,0.07)]",
                         FOCUS_RING,
-                        active
-                          ? "bg-[rgba(255,255,255,0.92)] text-black shadow-[0_4px_14px_rgba(0,0,0,0.3)]"
-                          : "bg-transparent text-[rgba(255,255,255,0.72)] hover:bg-[rgba(255,255,255,0.1)] hover:text-white",
                       )}
-                      onClick={() => setListSeasonNumber(season.number)}
+                      onClick={() => scrollRow(direction)}
                     >
-                      <span className="max-[480px]:hidden">Season </span>
-                      <span className="hidden max-[480px]:inline">S</span>
-                      {season.number}
+                      <svg className="size-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                        <polyline points={direction < 0 ? "15 18 9 12 15 6" : "9 18 15 12 9 6"} />
+                      </svg>
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
 
-            <ol className="list-none border-t border-[rgba(250,250,250,0.11)]">
+            {/* Keyed by season, so a new season starts at its first episode
+                rather than wherever the last one was scrolled to. It bleeds
+                into the gutter, so the cut-off card at the edge says "more". */}
+            <ol
+              key={listSeasonNumber}
+              ref={episodeRowRef}
+              className="-mx-(--gutter) flex list-none snap-x snap-mandatory scroll-px-(--gutter) gap-[clamp(0.85rem,1.5vw,1.25rem)] overflow-x-auto overscroll-x-contain px-(--gutter) pt-1 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              onScroll={readRowEdges}
+            >
               {(seasons.find((season) => season.number === listSeasonNumber) ?? seasons[0]).episodes.map((episode) => {
                 const here = { season: listSeasonNumber, episode: episode.number };
                 const isNow = playing && pick !== "trailer" && pick.season === here.season && pick.episode === here.episode;
                 return (
-                  <li key={episode.number} className="border-b border-[rgba(250,250,250,0.11)]">
+                  <li key={episode.number} className="w-[clamp(16rem,24vw,20.5rem)] flex-none snap-start max-[640px]:w-[78vw]">
                     <button
                       type="button"
                       aria-current={isNow}
-                      className={cx(
-                        "group/row grid w-full cursor-pointer grid-cols-[2.75rem_minmax(0,15rem)_minmax(0,1fr)] items-center gap-x-[clamp(1rem,2.4vw,2rem)] border-0 bg-transparent py-[clamp(0.95rem,1.8vw,1.35rem)] text-left text-ink transition-[background-color] duration-200 hover:bg-[rgba(255,255,255,0.03)] max-[640px]:grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)] max-[640px]:gap-x-3.5 max-[640px]:py-3 motion-reduce:transition-none",
-                        FOCUS_RING,
-                      )}
+                      className={cx("group/ep block w-full cursor-pointer border-0 bg-transparent p-0 text-left text-ink", FOCUS_RING)}
                       onClick={() => playFromList(here)}
                     >
                       <span
                         className={cx(
-                          "text-center font-heading text-[clamp(1.4rem,2.2vw,1.9rem)] font-light tabular-nums max-[640px]:hidden",
-                          isNow ? "text-[#ff3040]" : "text-[#5c5c5c]",
+                          "relative block aspect-video overflow-hidden rounded-lg bg-[#101010] transition-[box-shadow] duration-300 motion-reduce:transition-none",
+                          isNow
+                            ? "shadow-[0_0_0_2px_#ff3040,0_18px_40px_rgba(255,48,64,0.18)]"
+                            : "shadow-[0_0_0_1px_rgba(255,255,255,0.08)] group-hover/ep:shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_18px_40px_rgba(0,0,0,0.5)]",
                         )}
-                        aria-hidden="true"
                       >
-                        {episode.number}
-                      </span>
-
-                      <span className="relative block aspect-video overflow-hidden bg-[#101010]">
                         <img
-                          className="block h-full w-full object-cover transition-[scale] duration-500 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/row:scale-[1.04] motion-reduce:transition-none"
+                          className="block h-full w-full object-cover transition-[scale] duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/ep:scale-[1.05] motion-reduce:transition-none"
                           src={episode.still || movie.backdrop}
                           alt=""
                           loading="lazy"
                         />
+                        <span className="absolute inset-0 bg-[image:linear-gradient(to_top,rgba(0,0,0,0.82),rgba(0,0,0,0)_58%)]" aria-hidden="true" />
+
+                        {isNow && (
+                          <span className="absolute top-2.5 left-2.5 rounded-full bg-[#ff3040] px-2.5 py-1 text-[0.58rem] leading-none font-bold tracking-[0.14em] text-white uppercase">
+                            Now playing
+                          </span>
+                        )}
+
+                        {/* A glass play disc on hover, and always on the one playing. */}
                         <span
                           className={cx(
-                            "absolute inset-0 grid place-items-center bg-[rgba(0,0,0,0.28)] transition-opacity duration-200",
-                            isNow ? "opacity-100" : "opacity-0 group-hover/row:opacity-100 group-focus-visible/row:opacity-100",
+                            "absolute top-1/2 left-1/2 grid size-12 -translate-1/2 place-items-center rounded-full border border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.16)] backdrop-blur-[10px] transition-opacity duration-200 motion-reduce:transition-none",
+                            isNow ? "opacity-100" : "opacity-0 group-hover/ep:opacity-100 group-focus-visible/ep:opacity-100",
                           )}
                           aria-hidden="true"
                         >
-                          <span className="grid size-10 place-items-center rounded-full border border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.16)] backdrop-blur-[10px] max-[640px]:size-8">
-                            <svg className={cx("ml-0.5 h-3 w-2.5", isNow ? "text-[#ff3040]" : "text-white")} viewBox="0 0 12 14" focusable="false">
-                              <path d="M0 0v14l12-7z" fill="currentColor" />
-                            </svg>
-                          </span>
+                          <svg className={cx("ml-0.5 h-3.5 w-3", isNow ? "text-[#ff3040]" : "text-white")} viewBox="0 0 12 14" focusable="false">
+                            <path d="M0 0v14l12-7z" fill="currentColor" />
+                          </svg>
+                        </span>
+
+                        <span
+                          className="absolute bottom-2 left-3 font-heading text-[clamp(1.9rem,2.8vw,2.5rem)] leading-none font-light text-[rgba(255,255,255,0.92)] tabular-nums [text-shadow:0_2px_14px_rgba(0,0,0,0.6)]"
+                          aria-hidden="true"
+                        >
+                          {String(episode.number).padStart(2, "0")}
+                        </span>
+                        <span className="absolute right-2.5 bottom-2.5 rounded-full border border-[rgba(255,255,255,0.16)] bg-[rgba(0,0,0,0.35)] px-2 py-[3px] text-[0.66rem] leading-none font-medium text-white tabular-nums backdrop-blur-[8px]">
+                          {episode.duration}
                         </span>
                       </span>
 
-                      <span className="min-w-0">
-                        <span className="flex items-baseline justify-between gap-4">
-                          <span className="line-clamp-2 font-heading text-[clamp(0.98rem,1.3vw,1.12rem)] leading-snug font-normal tracking-[0.005em] max-[640px]:text-[0.92rem]">
-                            {episode.title}
-                          </span>
-                          <span className="flex-none text-[0.78rem] text-[#8a8a8a] tabular-nums max-[640px]:hidden">{episode.duration}</span>
-                        </span>
-                        <span className="mt-1.5 block text-[0.64rem] font-medium tracking-[0.16em] text-[#8a8a8a] uppercase tabular-nums">
-                          {isNow ? (
-                            <span className="text-[#ff3040]">Now playing</span>
-                          ) : (
-                            <>
-                              {episodeCode(here.season, here.episode)}
-                              <span className="hidden max-[640px]:inline"> · {episode.duration}</span>
-                            </>
-                          )}
-                        </span>
-                        {episode.description && (
-                          <span className="mt-2 line-clamp-2 max-w-[70ch] text-[0.9rem] leading-[1.6] text-[#a6a69c] max-[640px]:hidden">
-                            {episode.description}
-                          </span>
-                        )}
+                      <span className="mt-3 block text-[0.62rem] font-medium tracking-[0.18em] text-[#8a8a8a] uppercase tabular-nums">
+                        {episodeCode(here.season, here.episode)}
                       </span>
+                      <span className="mt-1 block truncate font-heading text-[clamp(0.98rem,1.25vw,1.08rem)] leading-snug font-normal tracking-[0.005em]">
+                        {episode.title}
+                      </span>
+                      {episode.description && (
+                        <span className="mt-1.5 line-clamp-2 text-[0.84rem] leading-[1.55] text-[#9b9b92]">{episode.description}</span>
+                      )}
                     </button>
                   </li>
                 );

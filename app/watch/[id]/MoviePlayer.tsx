@@ -325,7 +325,16 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
   const [awake, setAwake] = useState(true);
   const [menu, setMenu] = useState<"language" | "settings" | "episodes" | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
-  const [hoverRatio, setHoverRatio] = useState<number | null>(null);
+  // Where the scrubber preview sits: the time it shows, and its x within the
+  // track, already clamped so the frame never runs off the player's edge.
+  const [preview, setPreview] = useState<{ ratio: number; x: number } | null>(null);
+  const [previewFailed, setPreviewFailed] = useState(false);
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const previewVideoRef = useRef<HTMLVideoElement | null>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // One seek at a time: the latest wanted time waits for the current seek to
+  // land, so fast mouse movement never queues up a backlog of stale frames.
+  const previewSeekRef = useRef<{ busy: boolean; pending: number | null }>({ busy: false, pending: null });
   const [pulse, setPulse] = useState<"back" | "forward" | null>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -443,18 +452,66 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
     setCurrent(ratio * duration);
   };
 
+  const seekPreview = (time: number) => {
+    const video = previewVideoRef.current;
+    const state = previewSeekRef.current;
+    if (!video) return;
+    // Before metadata there is nothing to seek; loadedmetadata picks it up.
+    if (state.busy || video.readyState < 1) {
+      state.pending = time;
+      return;
+    }
+    state.busy = true;
+    // fastSeek lands on the nearest keyframe, which is plenty for a thumbnail
+    // and far quicker where the browser has it.
+    if (typeof video.fastSeek === "function") video.fastSeek(time);
+    else video.currentTime = time;
+  };
+
+  const onPreviewReady = () => {
+    const state = previewSeekRef.current;
+    state.busy = false;
+    // Copy the landed frame onto the canvas. The canvas holds the last good
+    // frame while the next seek is in flight, where a visible <video> would
+    // flash black between them.
+    const video = previewVideoRef.current;
+    const canvas = previewCanvasRef.current;
+    if (video && canvas && video.readyState >= 2) {
+      canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+    if (state.pending === null) return;
+    const time = state.pending;
+    state.pending = null;
+    seekPreview(time);
+  };
+
+  const showPreviewAt = (clientX: number) => {
+    const track = trackRef.current?.getBoundingClientRect();
+    const root = rootRef.current?.getBoundingClientRect();
+    if (!track || !root || !duration) return;
+    const ratio = Math.min(1, Math.max(0, (clientX - track.left) / track.width));
+    const half = (previewRef.current?.offsetWidth ?? 200) / 2;
+    const edge = 12;
+    const inRoot = Math.min(root.width - half - edge, Math.max(half + edge, clientX - root.left));
+    setPreview({ ratio, x: inRoot - (track.left - root.left) });
+    seekPreview(ratio * duration);
+  };
+
   const onScrubDown = (event: React.PointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     setScrubbing(true);
     seekToRatio(ratioAt(event.clientX));
+    showPreviewAt(event.clientX);
   };
   const onScrubMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const ratio = ratioAt(event.clientX);
-    if (event.pointerType === "mouse") setHoverRatio(ratio);
+    // A mouse previews by hovering; a finger only while dragging.
+    if (event.pointerType === "mouse" || scrubbing) showPreviewAt(event.clientX);
     if (scrubbing) seekToRatio(ratio);
   };
-  const onScrubUp = () => {
+  const onScrubUp = (event: React.PointerEvent<HTMLDivElement>) => {
     setScrubbing(false);
+    if (event.pointerType !== "mouse") setPreview(null);
     wake();
   };
   const onScrubKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -564,6 +621,9 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
     ...media.fallbacks,
   ];
   const sourceKey = sources.join("|");
+  // The scrubber's thumbnails come from the smallest encode: a frame the size
+  // of a stamp does not need the 4K file seeking around behind it.
+  const previewSrc = media.renditions[0]?.url ?? media.fallbacks[0];
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !sourceKey) return;
@@ -891,11 +951,17 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
             onPointerMove={onScrubMove}
             onPointerUp={onScrubUp}
             onPointerCancel={onScrubUp}
-            onPointerLeave={() => setHoverRatio(null)}
+            onPointerLeave={() => {
+              if (!scrubbing) setPreview(null);
+            }}
             onKeyDown={onScrubKey}
           >
             <div className="relative h-[3px] w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.24)] transition-[height] duration-150 group-hover/scrub:h-[5px] motion-reduce:transition-none">
               <div className="absolute inset-y-0 left-0 bg-[rgba(255,255,255,0.38)]" style={{ width: `${bufferedRatio * 100}%` }} />
+              {/* How far a click would take you, lighter than what is played. */}
+              {preview && !scrubbing && (
+                <div className="absolute inset-y-0 left-0 bg-[rgba(255,255,255,0.55)]" style={{ width: `${preview.ratio * 100}%` }} />
+              )}
               <div className="absolute inset-y-0 left-0 bg-[#ff3040]" style={{ width: `${progress * 100}%` }} />
             </div>
             <div
@@ -906,15 +972,45 @@ export default function MoviePlayer({ title, episodeLabel, media, poster, onClos
               style={{ left: `${progress * 100}%` }}
               aria-hidden="true"
             />
-            {hoverRatio !== null && duration > 0 && (
-              <span
-                className="pointer-events-none absolute bottom-[calc(100%+0.4rem)] -translate-x-1/2 rounded-md bg-[rgba(0,0,0,0.78)] px-2 py-1 text-[0.72rem] text-white"
-                style={{ left: `${hoverRatio * 100}%` }}
-                aria-hidden="true"
+            {/* The frame at the pointer, with its time beneath. Always mounted,
+                just hidden, so the small preview file has its metadata ready
+                before the first hover. */}
+            <div
+              ref={previewRef}
+              className={cx(
+                "pointer-events-none absolute bottom-[calc(100%+0.85rem)] left-0 flex -translate-x-1/2 flex-col items-center gap-2 transition-opacity duration-150 motion-reduce:transition-none",
+                preview && duration > 0 ? "opacity-100" : "invisible opacity-0",
+              )}
+              style={{ left: preview ? `${preview.x}px` : undefined }}
+              aria-hidden="true"
+            >
+              <div
+                className={cx(
+                  "aspect-video w-[clamp(9.5rem,15vw,13rem)] overflow-hidden rounded-xl border-2 border-[rgba(255,255,255,0.85)] bg-black shadow-[0_14px_36px_rgba(0,0,0,0.6)]",
+                  previewFailed && "hidden",
+                )}
               >
-                {formatTime(hoverRatio * duration)}
+                <canvas ref={previewCanvasRef} width={320} height={180} className="block h-full w-full" />
+                {/* The source of the frames, never shown itself. */}
+                <video
+                  ref={previewVideoRef}
+                  key={previewSrc}
+                  className="hidden"
+                  src={previewSrc}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  tabIndex={-1}
+                  onLoadedMetadata={onPreviewReady}
+                  onLoadedData={onPreviewReady}
+                  onSeeked={onPreviewReady}
+                  onError={() => setPreviewFailed(true)}
+                />
+              </div>
+              <span className="rounded-md bg-[rgba(0,0,0,0.82)] px-2.5 py-1 text-[0.82rem] leading-none font-bold text-white tabular-nums shadow-[0_4px_14px_rgba(0,0,0,0.4)]">
+                {formatTime((preview?.ratio ?? 0) * duration)}
               </span>
-            )}
+            </div>
           </div>
 
           <span className="min-w-[2.6rem] text-right">{formatTime(duration)}</span>
