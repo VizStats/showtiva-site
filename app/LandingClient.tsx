@@ -73,10 +73,18 @@ export default function LandingClient({
       setIsMinimized(true);
 
       // Marked at the end of the intro rather than on arrival, so it means
-      // "you have seen this" rather than "you loaded the page once". A year,
-      // Lax, so it survives a session but never rides a cross-site request.
+      // "you have seen this" rather than "you loaded the page once".
+      //
+      // Expires at the next local midnight rather than counting 24 hours
+      // forward, which is what makes it strictly daily: an elapsed-time
+      // window set at 9pm would still be running at 8pm tomorrow, pushing the
+      // intro later every day until it skipped one. setHours(24,...) rolls to
+      // the start of the viewer's own next day, so the browser drops this on
+      // the date boundary wherever they are — no timezone guessing anywhere.
       try {
-        document.cookie = `${INTRO_SEEN_COOKIE}=1; path=/; max-age=31536000; samesite=lax`;
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        document.cookie = `${INTRO_SEEN_COOKIE}=1; path=/; expires=${midnight.toUTCString()}; samesite=lax`;
       } catch {
         // A browser refusing cookies just means the intro plays again.
       }

@@ -19,9 +19,13 @@ type PageProps = {
 export default async function Home({ searchParams }: PageProps) {
   const params = await searchParams;
 
-  // The landing is a first-visit screen. Anyone who has already sat through
-  // the intro goes straight to the catalog, and because the cookie arrives
-  // with the request that happens before a frame of the landing renders.
+  // The landing is a once-a-day screen. Anyone who has already sat through
+  // the intro today goes straight to the catalog, and because the cookie
+  // arrives with the request that happens before a frame of it renders.
+  //
+  // Presence is the whole test: the client expires the cookie at its own next
+  // local midnight, so the browser deletes it on the date boundary and this
+  // never has to compare dates or know the viewer's timezone.
   //
   // `?role=` is the exception: it is how the landing is previewed per
   // audience, so an explicit role always shows the page.

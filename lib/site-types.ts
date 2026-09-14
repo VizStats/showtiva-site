@@ -45,13 +45,22 @@ export interface LandingContent {
 
 /** Brand assets shared by the header, footer and landing logo. */
 /**
- * Set once the intro has actually played through, and read on the way in.
+ * Set once the intro has played through, and read on the way in. Its presence
+ * means "already seen today".
  *
  * A cookie rather than localStorage because the decision has to be made on
  * the server: localStorage would mean rendering the landing, discovering it
  * was already seen, and bouncing — a flash of the thing we are trying not to
  * show. The cookie arrives with the request, so the redirect happens before
  * anything renders.
+ *
+ * Once a DAY, not once per 24 hours. The difference is the whole point: a
+ * rolling 24h window set at 9pm would still be running at 8pm the next day,
+ * so the landing would drift a little later each time and skip days
+ * entirely. The client expires it at its own next local midnight instead, so
+ * the browser drops it on the date boundary and the first visit of each new
+ * day gets the intro. Nothing here has to know the viewer's timezone — the
+ * browser that set it does.
  */
 export const INTRO_SEEN_COOKIE = "showtiva_intro_seen";
 
