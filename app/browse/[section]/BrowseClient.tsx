@@ -77,7 +77,7 @@ const MICRO = `${MONO} uppercase ${INK_3}`;
    one shape, one weight of colour, and nothing boxed. A control that is doing
    something reads solid; one sitting at its default stays quiet. */
 const SEARCH_SHELL =
-  "flex h-9 min-w-0 flex-1 basis-[min(100%,260px)] items-center gap-[9px] rounded-full bg-[rgba(255,255,225,0.07)] px-4 transition-[background-color] duration-200 ease-[ease] focus-within:bg-[rgba(255,255,225,0.12)]";
+  "flex h-9 min-w-0 max-w-[26rem] flex-1 basis-[min(100%,200px)] items-center gap-[9px] rounded-full bg-[rgba(255,255,225,0.07)] px-4 transition-[background-color] duration-200 ease-[ease] focus-within:bg-[rgba(255,255,225,0.12)]";
 
 /* Same pill as the filter menus, for controls that toggle rather than choose. */
 const SEG_TRACK = "inline-flex flex-none items-center gap-1 rounded-full bg-[rgba(255,255,225,0.07)] p-1";
@@ -203,14 +203,12 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
   }, [safePage, totalPages]);
 
   const sortLabel = SORTS.find((s) => s.key === sort)?.label ?? SORTS[0].label;
-  /* The rail listed six rows flat, which said nothing about how they differ.
-     They are two kinds of thing, and SectionAspect already records which is
-     which: a category is a bucket a title belongs to by what it is (Movies,
-     Cartoons & Animation), a collection is a cut that keeps moving (Trending
-     Now, New Releases). Splitting on the stored shape means a row added later
-     lands in the right group without anyone remembering a list in here. */
+  /* Only categories are offered to switch between: buckets a title belongs to
+     by what it is (Movies, Animation). Collections (Trending Now, New
+     Releases) are reached from their rows on the catalog, not listed here.
+     SectionAspect records which is which, so a row added later lands on the
+     right side without a list in here to update. */
   const categories = sections.filter((s) => s.aspect === "portrait");
-  const collections = sections.filter((s) => s.aspect === "landscape");
   const inCollections = section.aspect === "landscape";
 
   // The same row, so the same cards and the same destination as the catalog.
@@ -330,32 +328,21 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
           </h1>
         </section>
 
-        {/* ------------------------------------------------------- rail -- */}
-        {/* Two pickers rather than six flat links. Whichever group holds the
-            row you are on goes solid and names it; the other stays quiet and
-            names its group. Same control as the filter row below, so the page
-            asks its questions one way. */}
-        <nav className="flex flex-wrap items-center gap-[10px] pt-5 max-[640px]:pt-4" aria-label="Browse by">
-          <FilterMenu
-            label="Category"
-            value={inCollections ? "" : section.id}
-            options={[{ value: "", label: "Categories" }, ...categories.map((s) => ({ value: s.id, label: s.title }))]}
-            onChange={goToSection}
-          />
-          <FilterMenu
-            label="Collection"
-            value={inCollections ? section.id : ""}
-            options={[{ value: "", label: "Collections" }, ...collections.map((s) => ({ value: s.id, label: s.title }))]}
-            onChange={goToSection}
-          />
-        </nav>
-
         {/* ---------------------------------------------------- console -- */}
-        <section className="mt-[26px] flex w-[min(100%,1190px)] flex-col gap-[10px]" aria-label="Filters">
-          {/* One row of pills: a search field and four menus. Everything
-              wraps, so a phone gets the same controls in two or three rows
-              instead of a separate collapsed panel. */}
+        <section className="mt-[22px] flex w-[min(100%,1190px)] flex-col gap-[10px]" aria-label="Filters">
+          {/* One row of pills: the category, a search field and four menus.
+              Everything wraps, so a phone gets the same controls in two or
+              three rows instead of a separate collapsed panel. */}
           <div className="flex flex-wrap items-center gap-[10px]">
+            {/* On a collection page nothing here is current, so it names its
+                group instead. */}
+            <FilterMenu
+              label="Category"
+              value={inCollections ? "" : section.id}
+              options={[{ value: "", label: "Categories" }, ...categories.map((s) => ({ value: s.id, label: s.title }))]}
+              onChange={goToSection}
+            />
+
             <div className={SEARCH_SHELL}>
               <label className="sr-only" htmlFor="v1-search">
                 {chrome.watch.search} titles
@@ -393,51 +380,55 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
               )}
             </div>
 
-            <FilterMenu
-              label="Genre"
-              value={genre}
-              options={[
-                { value: "", label: "All genres" },
-                // A row that names its own genres offers those, in its order.
-                ...(section.genres ?? facets.genres).map((g) => ({ value: g, label: g })),
-              ]}
-              onChange={(v) => {
-                setGenre(v);
-                setPage(1);
-              }}
-            />
+            {/* The refining menus hold the right edge, level with the scope
+                switch beneath them, so the row spans the column. */}
+            <div className="flex flex-wrap items-center gap-[10px] min-[900px]:ml-auto">
+              <FilterMenu
+                label="Genre"
+                value={genre}
+                options={[
+                  { value: "", label: "All genres" },
+                  // A row that names its own genres offers those, in its order.
+                  ...(section.genres ?? facets.genres).map((g) => ({ value: g, label: g })),
+                ]}
+                onChange={(v) => {
+                  setGenre(v);
+                  setPage(1);
+                }}
+              />
 
-            <FilterMenu
-              label="Year"
-              value={year}
-              options={[{ value: "", label: "Any year" }, ...facets.years.map((y) => ({ value: String(y), label: String(y) }))]}
-              onChange={(v) => {
-                setYear(v);
-                setPage(1);
-              }}
-            />
+              <FilterMenu
+                label="Year"
+                value={year}
+                options={[{ value: "", label: "Any year" }, ...facets.years.map((y) => ({ value: String(y), label: String(y) }))]}
+                onChange={(v) => {
+                  setYear(v);
+                  setPage(1);
+                }}
+              />
 
-            <FilterMenu
-              label="Rating"
-              value={minRating}
-              options={[{ value: "", label: "Any rating" }, ...RATING_TIERS.map((t) => ({ value: t.value, label: t.label }))]}
-              onChange={(v) => {
-                setMinRating(v);
-                setPage(1);
-              }}
-            />
+              <FilterMenu
+                label="Rating"
+                value={minRating}
+                options={[{ value: "", label: "Any rating" }, ...RATING_TIERS.map((t) => ({ value: t.value, label: t.label }))]}
+                onChange={(v) => {
+                  setMinRating(v);
+                  setPage(1);
+                }}
+              />
 
-            {/* Sort always has a value, so "rating" is its neutral one. */}
-            <FilterMenu
-              label="Sort"
-              value={sort}
-              neutralValue="rating"
-              options={SORTS.map((so) => ({ value: so.key, label: so.label }))}
-              onChange={(v) => {
-                setSort(v as SortKey);
-                setPage(1);
-              }}
-            />
+              {/* Sort always has a value, so "rating" is its neutral one. */}
+              <FilterMenu
+                label="Sort"
+                value={sort}
+                neutralValue="rating"
+                options={SORTS.map((so) => ({ value: so.key, label: so.label }))}
+                onChange={(v) => {
+                  setSort(v as SortKey);
+                  setPage(1);
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-[18px] px-1 max-[760px]:flex-col max-[760px]:items-stretch">
