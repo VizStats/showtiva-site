@@ -34,12 +34,6 @@ interface DetailClientProps {
   footer: FooterContent;
   labels: DetailLabels;
   popoverLabels: PopoverLabels;
-  /**
-   * "v1": the info block above a full-bleed still.
-   * "v2": the still fills the opening screen and blurs into the page towards
-   * its foot, with the info block set inside that blur.
-   */
-  layout?: "v1" | "v2";
 }
 
 /* ------------------------------------------------------------- styling -- */
@@ -112,9 +106,7 @@ export default function DetailClient({
   footer,
   labels,
   popoverLabels,
-  layout = "v1",
 }: DetailClientProps) {
-  const isV2 = layout === "v2";
   const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -429,13 +421,10 @@ export default function DetailClient({
           className={cx(
             ACTION,
             "[--pad:clamp(1.05rem,1.8vw,1.5rem)] max-[480px]:[--pad:0.7rem] relative isolate ml-[calc(var(--edge-gap)-var(--slant))] bg-[rgba(250,250,250,0.28)] pr-(--pad) pl-[calc(var(--pad)+var(--slant))] text-ink slant-trail before:absolute before:inset-px before:z-[-1] before:content-[''] before:[clip-path:polygon(0_0,100%_0,100%_100%,var(--slant)_100%)] hover:bg-ink",
-            isV2
-              ? saved
-                ? "before:bg-[rgba(26,26,25,0.72)] hover:before:bg-[rgba(35,35,34,0.8)]"
-                : "before:bg-[rgba(0,0,0,0.5)] backdrop-blur-[10px]"
-              : saved
-                ? "before:bg-[#1a1a19] hover:before:bg-[#232322]"
-                : "before:bg-black",
+            // Its inner layer is smoked glass over the banner's blur.
+            saved
+              ? "before:bg-[rgba(26,26,25,0.72)] hover:before:bg-[rgba(35,35,34,0.8)]"
+              : "before:bg-[rgba(0,0,0,0.5)] backdrop-blur-[10px]",
           )}
           aria-pressed={saved}
           onClick={toggleCurrentSaved}
@@ -457,9 +446,9 @@ export default function DetailClient({
         className={cx(
           SHELL,
           "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 pt-[clamp(1.25rem,2vw,1.75rem)] pb-[clamp(1.25rem,2.4vw,2rem)] max-[760px]:pb-[clamp(2rem,8vw,3rem)]",
-          // v2: over the banner rather than above it. Back in the flow while
+          // Over the banner rather than above it. Back in the flow while
           // playing, so it never sits on top of the player's own controls.
-          isV2 && !playing && "absolute inset-x-0 top-0 z-20 [&_button]:text-[rgba(255,255,255,0.82)]",
+          !playing && "absolute inset-x-0 top-0 z-20 [&_button]:text-[rgba(255,255,255,0.82)]",
         )}
       >
         {/* A <button> rather than a link, because it calls router.back(). Two
@@ -548,108 +537,53 @@ export default function DetailClient({
       </header>
 
       <main className="flex-1 pb-[clamp(6rem,10vw,10rem)]">
-        {/* Compact info block above a full-bleed still: roughly 30/70 of the
-            opening screen, so the artwork stays the dominant element. */}
-        {!isV2 && <section className={cx(SHELL, "pb-[clamp(0.9rem,1.6vw,1.35rem)]")}>{info}</section>}
+        {/* The opening screen is the title's still, full-bleed, blurring and
+            darkening into the page towards its foot, with the title and
+            description set inside that blur. Playing, it becomes the theatre. */}
+        <div
+          ref={plateRef}
+          className={cx(
+            "group/frame relative w-full overflow-hidden",
+            playing
+              ? "h-[92vh] bg-black"
+              : "h-[min(100svh,62rem)] min-h-[40rem] bg-[#101010] max-[760px]:h-[max(100svh,40rem)] max-[760px]:min-h-0",
+          )}
+        >
+          {playing ? (
+            playerNode
+          ) : (
+            <>
+              <img className="absolute inset-0 block h-full w-full object-cover object-[center_28%]" src={movie.backdrop} alt="" />
 
-        {/* Full-bleed and deliberately huge — the page's centrepiece. The 70vh
-            floor holds it near two-thirds of the opening screen even on short,
-            wide windows where 21:9 alone would compute much shorter. Playing,
-            the frame drops its poster proportions and becomes a theatre. */}
-        {isV2 && (
-          <div
-            ref={plateRef}
-            className={cx(
-              "group/frame relative w-full overflow-hidden",
-              playing
-                ? "h-[92vh] bg-black"
-                : "h-[min(100svh,62rem)] min-h-[40rem] bg-[#101010] max-[760px]:h-[max(100svh,40rem)] max-[760px]:min-h-0",
-            )}
-          >
-            {playing ? (
-              playerNode
-            ) : (
-              <>
-                <img className="absolute inset-0 block h-full w-full object-cover object-[center_28%]" src={movie.backdrop} alt="" />
+              {/* Black frosted band behind the floating header. A gradient
+                  alone let a bright or busy still show through behind the
+                  white labels and icons; blurring what is under them as well
+                  keeps them legible on any picture. Masked, so the band fades
+                  out instead of ending in a hard line. */}
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[clamp(7.5rem,14vw,10rem)] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.62)_45%,rgba(0,0,0,0)_100%)] backdrop-blur-[18px] [mask-image:linear-gradient(to_bottom,black_50%,transparent)] max-[760px]:h-[7rem]"
+                aria-hidden="true"
+              />
 
-                {/* Shade under the floating header, so its controls read over
-                    a bright sky. */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.7),rgba(0,0,0,0))]" aria-hidden="true" />
+              {/* A progressive blur: three frosted layers, each stronger and
+                  starting lower, each faded in by its own mask. One blur
+                  with one mask shows a visible band where it begins; stacked,
+                  the picture softens gradually towards the foot. */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" aria-hidden="true" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[50%] backdrop-blur-[10px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]" aria-hidden="true" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] backdrop-blur-[26px] backdrop-saturate-[1.15] [mask-image:linear-gradient(to_bottom,transparent,black_50%)]" aria-hidden="true" />
 
-                {/* A progressive blur: three frosted layers, each stronger and
-                    starting lower, each faded in by its own mask. One blur
-                    with one mask shows a visible band where it begins; stacked,
-                    the picture softens gradually towards the foot. */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" aria-hidden="true" />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[50%] backdrop-blur-[10px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]" aria-hidden="true" />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] backdrop-blur-[26px] backdrop-saturate-[1.15] [mask-image:linear-gradient(to_bottom,transparent,black_50%)]" aria-hidden="true" />
+              {/* Darkens as it blurs and lands on the page's black, so the
+                  banner has no bottom edge. */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.3)_40%,rgba(0,0,0,0.74)_74%,#000_100%)]" aria-hidden="true" />
 
-                {/* Darkens as it blurs and lands on the page's black, so the
-                    banner has no bottom edge. */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.3)_40%,rgba(0,0,0,0.74)_74%,#000_100%)]" aria-hidden="true" />
+              <div className={cx(SHELL, "absolute inset-x-0 bottom-0 z-[2] pb-[clamp(2.25rem,5.5vw,4.5rem)] [&_h1]:[text-shadow:0_6px_30px_rgba(0,0,0,0.45)] [&_ul]:text-[rgba(255,255,255,0.74)]")}>
+                {info}
+              </div>
+            </>
+          )}
+        </div>
 
-                <div className={cx(SHELL, "absolute inset-x-0 bottom-0 z-[2] pb-[clamp(2.25rem,5.5vw,4.5rem)] [&_h1]:[text-shadow:0_6px_30px_rgba(0,0,0,0.45)] [&_ul]:text-[rgba(255,255,255,0.74)]")}>
-                  {info}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {!isV2 && (
-        <figure className="w-full min-w-0">
-          <div
-            ref={plateRef}
-            className={cx(
-              "group/frame relative w-full overflow-hidden transition-[height] duration-[0.45s] ease-[cubic-bezier(0.2,0.7,0.2,1)]",
-              playing
-                ? "h-[92vh] max-h-none min-h-0 cursor-default bg-black aspect-auto"
-                : // The fade-to-page gradient belongs to the poster state, not the theatre.
-                  "max-h-[88vh] min-h-[68vh] bg-[#101010] aspect-[21/9] after:pointer-events-none after:absolute after:inset-0 after:bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0)_30%,rgba(0,0,0,0)_58%,#000000_100%)] after:content-[''] max-[899px]:max-h-none max-[899px]:min-h-0 max-[899px]:aspect-[16/10] max-[760px]:aspect-[4/3]",
-            )}
-          >
-            {playing ? (
-              playerNode
-            ) : (
-              <>
-                <img className="block h-full w-full object-cover object-[center_40%]" src={movie.backdrop} alt={movie.title} />
-                <button
-                type="button"
-                className={cx(
-                  "absolute top-1/2 left-1/2 z-[1] grid aspect-square w-[clamp(58px,7vw,84px)] cursor-pointer place-items-center rounded-[50%] border border-[rgba(250,250,250,0.5)] bg-[rgba(0,0,0,0.15)] text-ink transition-[background-color,border-color] duration-[0.35s] ease-[ease] [transform:translate(-50%,-50%)] hover:border-ink hover:bg-[rgba(250,250,250,0.12)] motion-reduce:transition-none",
-                  FOCUS_RING,
-                )}
-                aria-label={labels.trailerPlay}
-                onClick={startPlayer}
-              >
-                <svg
-                  className="ml-[0.2em] h-auto w-[clamp(11px,1.4vw,15px)]"
-                  viewBox="0 0 12 14"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path d="M0 0v14l12-7z" fill="currentColor" />
-                </svg>
-              </button>
-              </>
-            )}
-          </div>
-
-          {/* The plate is full-bleed, so its caption re-applies the page shell
-              to line up with the rest of the content. */}
-          <figcaption className={SHELL}>
-            <div className="mt-[clamp(0.9rem,1.4vw,1.2rem)] flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-[rgba(250,250,250,0.11)] pt-[clamp(0.7rem,1.1vw,0.95rem)]">
-              <span className="flex min-w-0 flex-col gap-[0.55rem]">
-                <span className="text-[0.66rem] font-medium tracking-[0.28em] text-[#8a8a8a] uppercase">{labels.trailerHeading}</span>
-                <span className="font-heading text-[clamp(0.95rem,1.4vw,1.15rem)] font-normal tracking-[0.01em]">
-                  {movie.title} — {labels.trailerTitleSuffix}
-                </span>
-              </span>
-              <span className="text-[0.72rem] tracking-[0.16em] text-[#8a8a8a] uppercase">{labels.trailerStudio}</span>
-            </div>
-          </figcaption>
-        </figure>
-        )}
 
         {isSeries && (
           <section className={cx(SHELL, "mt-[clamp(2.75rem,5.5vw,4.5rem)]")} aria-labelledby="episodes-heading">

@@ -1,62 +1,11 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
-import { getAllMovies, getMovieById, getRelated } from "@/lib/content";
-import { getChrome } from "@/lib/site";
+// The blurred-banner layout was tried here as "v2" and is now the title page
+// itself, so this address only forwards to it.
 
-import DetailClient from "../DetailClient";
-
-// Layout v2 of the title page: the banner fills the opening screen and
-// blurs into the page, with the title and description set inside the blur.
-// Same data and behaviour as /watch/[id]; only the opening screen differs.
-//
-// Read the store per request so content edits appear without a rebuild.
-export const dynamic = "force-dynamic";
-
-// `params` is a Promise in this Next version and must be awaited.
 type PageProps = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export default async function TitleV2Redirect({ params }: PageProps) {
   const { id } = await params;
-  const movie = await getMovieById(id);
-  if (!movie) return { title: "Title not found" };
-
-  return {
-    title: movie.title,
-    description: movie.description,
-  };
-}
-
-export default async function MovieDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  const movie = await getMovieById(id);
-
-  // Renders watch/[id]/not-found.tsx and returns a real 404 status.
-  if (!movie) notFound();
-
-  // No cast here any more: the detail page does not show one, so it does not
-  // read defaultCast either. The stored cast and /api/cast are untouched.
-  // allMovies feeds the global search overlay in the header.
-  const [related, allMovies, chrome] = await Promise.all([
-    getRelated(movie.id, 12),
-    getAllMovies(),
-    getChrome(),
-  ]);
-
-  return (
-    // Keyed by title: moving from one title to another through the related
-    // grid keeps this component mounted, which would carry the open player
-    // and the chosen episode across into a different show.
-    <DetailClient
-      key={movie.id}
-      movie={movie}
-      related={related}
-      allMovies={allMovies}
-      brand={chrome.brand}
-      footer={chrome.footer}
-      labels={chrome.detail}
-      popoverLabels={chrome.popover}
-      layout="v2"
-    />
-  );
+  redirect(`/watch/${encodeURIComponent(id)}`);
 }
