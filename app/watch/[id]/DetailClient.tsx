@@ -459,9 +459,11 @@ export default function DetailClient({
       <main className="flex-1 pb-[clamp(6rem,10vw,10rem)]">
         {/* The opening screen is the title's still, full-bleed, blurring and
             darkening into the page towards its foot, with the title and
-            description set inside that blur. The same height as the catalog's banner:
-            75% of the screen, 62% on a phone. */}
-        <div className="relative h-[75vh] min-h-[34rem] w-full overflow-hidden bg-[#101010] max-[768px]:h-[62vh] max-[768px]:min-h-[440px]">
+            description set inside that blur. 65% of the screen, 58% on a phone. The
+            floor is only what the title, description and buttons need: a higher
+            one outvoted the percentage on laptop-height windows, so the banner
+            never looked any shorter there. */}
+        <div className="relative h-[65vh] min-h-[27rem] w-full overflow-hidden bg-[#101010] max-[768px]:h-[58vh] max-[768px]:min-h-[400px]">
           <img className="absolute inset-0 block h-full w-full object-cover object-[center_28%]" src={movie.backdrop} alt="" />
 
           {/* Black frosted band behind the floating header. A gradient
