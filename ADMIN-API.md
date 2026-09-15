@@ -155,7 +155,7 @@ from `heroSlideIds`, so no dangling references remain.
   "heroTitle": { /* see below */ },
   "heroDesc": "We feed families clean, safe…",
   "bannerHeadline": "Trusted Entertainment Studio",
-  "bannerDesc": "Every single animation is fully vetted…",
+  "bannerDesc": "Every single title is fully vetted…",
   "videos": ["/bg_video_1.mp4", "…"]   // background stripes, in display order
 }
 ```

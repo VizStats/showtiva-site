@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  The streaming home for family-safe animated stories.
+  The streaming home for wholesome films and shows.
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 
 ---
 
-ShowTiva is a curated, family-safe destination for animated films, shorts and imaginative entertainment. Every title is human-vetted before it is published, the whole platform sits under a PG ceiling, and creators keep full ownership of their work.
+ShowTiva is a curated, family-safe destination for films, series, shorts, documentaries and imaginative entertainment. Every title is human-vetted before it is published, the whole platform sits under a PG ceiling, and creators keep full ownership of their work.
 
 This repository is the web front end. It is an early, UI-first build: the catalog is placeholder data, sign-in is a demo that runs entirely in the browser, and the player has no video source yet. A preview is deployed at [showtiva-site.vercel.app](https://showtiva-site.vercel.app).
 

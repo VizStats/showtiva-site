@@ -177,7 +177,7 @@ export default function AuthForm({ mode, brand, surface = "page" }: AuthFormProp
             <img className="block h-5 w-auto" src={brand.wordmark} alt="" />
           </span>
           <p className="mt-4 text-[1rem] leading-[1.6] text-[rgba(255,255,225,0.76)] [text-shadow:0_2px_22px_rgba(0,0,0,0.72)] max-[899px]:hidden">
-            Experience premium stories, hand-drawn 2D animation, and magical worlds curated by creators worldwide.
+            Experience premium stories, wholesome films and shows, and magical worlds curated from creators worldwide.
           </p>
         </div>
       </aside>

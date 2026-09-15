@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "ShowTiva", template: "%s — ShowTiva" },
-  description: "The Ultimate Cinema Hub",
+  description: "Trusted, curated films and shows the whole family can watch together. Every title vetted before it is published.",
 };
 
 export default function RootLayout({
