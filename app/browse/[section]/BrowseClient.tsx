@@ -44,11 +44,71 @@ const SORTS: { key: SortKey; label: string }[] = [
 ];
 
 /** The catalog stores rating as a numeric string, so tiers are derived here
- *  rather than shipped as a facet. */
-const RATING_TIERS: { value: string; label: string }[] = [
-  { value: "9", label: "9.0 and above" },
-  { value: "8", label: "8.0 and above" },
-  { value: "7", label: "7.0 and above" },
+ *  rather than shipped as a facet. Each reads as a score, a star row out of
+ *  five (a 10-point score halved) and a word for what that score means. */
+const RATING_TIERS: { value: string; score: number; word: string }[] = [
+  { value: "9", score: 9, word: "Masterpieces" },
+  { value: "8", score: 8, word: "Excellent" },
+  { value: "7", score: 7, word: "Great" },
+];
+
+/* The same gold as the ★ on every card, so a tier reads as that score. */
+const STAR_GOLD = "text-[#f5c518]";
+
+const StarGlyph = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+    <path
+      fill="currentColor"
+      d="M12 2.6l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17.2l-5.9 3.2 1.3-6.5-4.9-4.5 6.6-.8z"
+    />
+  </svg>
+);
+
+/** Five stars filled to `score` out of ten; a half star shows as half. */
+function StarRow({ score }: { score: number }) {
+  const filled = `${Math.min(100, (score / 10) * 100)}%`;
+  const row = (tone: string) => (
+    <span className={cx("flex gap-[2px]", tone)}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <StarGlyph key={i} className="size-[13px] flex-none" />
+      ))}
+    </span>
+  );
+  return (
+    <span className="relative inline-flex" aria-hidden="true">
+      {row("text-[rgba(255,255,225,0.16)]")}
+      <span className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: filled }}>
+        {row(STAR_GOLD)}
+      </span>
+    </span>
+  );
+}
+
+const RATING_OPTIONS = [
+  { value: "", label: "Any rating" },
+  ...RATING_TIERS.map((tier) => ({
+    value: tier.value,
+    label: `${tier.score} and up, ${tier.word.toLowerCase()}`,
+    pill: (
+      <>
+        {/* A deeper gold than the cards': the pill turns cream once a tier is
+            chosen, and the card gold washes out against it. */}
+        <StarGlyph className="size-[14px] flex-none text-[#d99a00]" />
+        <span className="tabular-nums">{tier.score}+</span>
+      </>
+    ),
+    content: (
+      <span className="flex items-center gap-3">
+        <span className="w-7 font-heading text-[1rem] leading-none font-extrabold tracking-[-0.02em] text-ink tabular-nums">
+          {tier.score}+
+        </span>
+        <span className="flex flex-col gap-1">
+          <StarRow score={tier.score} />
+          <span className="text-[0.7rem] leading-none font-medium text-[rgba(255,255,225,0.55)]">{tier.word}</span>
+        </span>
+      </span>
+    ),
+  })),
 ];
 
 type Scope = "section" | "all";
@@ -234,7 +294,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
     chips.push({
       id: "rating",
       label: "Rating",
-      value: `${Number.parseFloat(minRating).toFixed(1)}+`,
+      value: `★ ${Number.parseFloat(minRating)}+`,
       onClear: () => { setMinRating(""); setPage(1); },
     });
   }
@@ -410,7 +470,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
               <FilterMenu
                 label="Rating"
                 value={minRating}
-                options={[{ value: "", label: "Any rating" }, ...RATING_TIERS.map((t) => ({ value: t.value, label: t.label }))]}
+                options={RATING_OPTIONS}
                 onChange={(v) => {
                   setMinRating(v);
                   setPage(1);

@@ -17,7 +17,12 @@ import { cx } from "@/lib/cx";
 
 export interface FilterOption {
   value: string;
+  /** Plain text: the accessible name, and what shows when nothing richer is given. */
   label: string;
+  /** Richer row in the open panel, e.g. stars beside a figure. */
+  content?: React.ReactNode;
+  /** Compact form for the closed pill. */
+  pill?: React.ReactNode;
 }
 
 interface FilterMenuProps {
@@ -37,7 +42,7 @@ const PILL_OFF =
 const PILL_ON = "bg-ink text-black hover:bg-[#f0f0d6]";
 
 const PANEL =
-  "absolute top-[calc(100%+8px)] left-0 z-[60] max-h-[min(320px,58vh)] w-[max(100%,208px)] origin-top-left animate-menu-in overflow-y-auto rounded-2xl bg-[#141414] p-[6px] shadow-[0_26px_64px_rgba(0,0,0,0.7)] backdrop-blur-[18px] motion-reduce:animate-none";
+  "absolute top-[calc(100%+8px)] left-0 z-[60] max-h-[min(320px,58vh)] w-[max(100%,224px)] origin-top-left animate-menu-in overflow-y-auto rounded-2xl bg-[#141414] p-[6px] shadow-[0_26px_64px_rgba(0,0,0,0.7)] backdrop-blur-[18px] motion-reduce:animate-none";
 
 const ITEM =
   "flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border-0 bg-transparent px-3 py-[9px] text-left font-body text-[0.85rem] transition-[background-color,color] duration-150 ease-[ease]";
@@ -115,7 +120,7 @@ export default function FilterMenu({
         aria-label={`${label}: ${current?.label ?? ""}`}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="truncate">{current?.label}</span>
+        <span className="inline-flex min-w-0 items-center gap-1.5 truncate">{current?.pill ?? current?.label}</span>
         <svg
           className={cx(
             "flex-none transition-[transform] duration-200 ease-[ease] motion-reduce:transition-none",
@@ -152,7 +157,11 @@ export default function FilterMenu({
                   triggerRef.current?.focus();
                 }}
               >
-                <span className="truncate">{option.label}</span>
+                {option.content ? (
+                  <span className="min-w-0 flex-1">{option.content}</span>
+                ) : (
+                  <span className="truncate">{option.label}</span>
+                )}
                 {selected && (
                   <svg
                     className="flex-none text-[#fc3343]"
