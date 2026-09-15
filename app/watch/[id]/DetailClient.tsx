@@ -40,7 +40,7 @@ interface DetailClientProps {
 
 /* Page-wide tokens: the shell width, the gutter, and the rhythm unit. */
 const PAGE =
-  "relative flex w-full min-h-dvh flex-1 flex-col bg-black font-body text-ink antialiased [--gutter:clamp(1.25rem,5vw,4rem)] [--shell-max:1240px] [--step:clamp(3.5rem,7.5vw,6.5rem)]";
+  "relative flex w-full min-h-dvh flex-1 flex-col bg-black font-body text-ink antialiased [--gutter:48px] [--shell-max:1480px] max-[768px]:[--gutter:20px] [--step:clamp(3.5rem,7.5vw,6.5rem)]";
 const SHELL = "mx-auto w-full max-w-(--shell-max) px-(--gutter)";
 const FOCUS_RING = "focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink";
 
@@ -725,7 +725,7 @@ export default function DetailClient({
                 on the catalog. Below 560px the cards fill the row instead, two
                 up, so a fixed track cannot leave a lone column with a hole. */}
             {related.length > 0 ? (
-              <ul className="grid list-none grid-cols-[repeat(auto-fill,190px)] [justify-content:start] gap-x-[10px] gap-y-[clamp(1.5rem,2.4vw,2rem)] max-[559px]:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] max-[559px]:gap-y-6">
+              <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-x-[10px] gap-y-[clamp(1.5rem,2.4vw,2rem)] max-[559px]:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] max-[559px]:gap-y-6">
                 {related.map((item) => (
                   <li key={item.id} className="min-w-0">
                     <PosterCard

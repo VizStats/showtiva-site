@@ -338,7 +338,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
     // Relative on purpose: the hover popover is positioned in document
     // coordinates and resolves against this element. The gutter narrows in
     // two steps on small screens.
-    <div className="relative flex min-h-screen flex-col bg-black font-body text-ink [--gutter:48px] [--maxw:calc(1190px+2*var(--gutter))] [--mono:ui-monospace,SFMono-Regular,'SF_Mono',Menlo,Consolas,monospace] max-[900px]:[--gutter:28px] max-[480px]:[--gutter:18px]">
+    <div className="relative flex min-h-screen flex-col bg-black font-body text-ink [--gutter:48px] [--maxw:1480px] [--mono:ui-monospace,SFMono-Regular,'SF_Mono',Menlo,Consolas,monospace] max-[768px]:[--gutter:20px]">
       {/* ------------------------------------------------------ top bar -- */}
       <header className={cx("sticky top-0 z-40 border-b bg-[rgba(0,0,0,0.92)] backdrop-blur-[14px]", LINE)}>
         <div className="mx-auto flex h-[66px] max-w-(--maxw) items-center justify-between gap-5 px-(--gutter) max-[480px]:gap-3">
@@ -350,7 +350,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
             <img src={chrome.brand.wordmark} alt={chrome.brand.wordmarkAlt} className="block h-[17px] w-auto max-[480px]:h-[14px]" />
           </Link>
 
-          <div className="mr-[max(0px,calc(100%-1190px))] flex min-w-0 items-center gap-4 max-[480px]:gap-3">
+          <div className="flex min-w-0 items-center gap-4 max-[480px]:gap-3">
             <button
               type="button"
               className={cx("inline-flex size-[34px] cursor-pointer items-center justify-center rounded-[999px] border-0 bg-transparent p-0 no-underline transition-[color] duration-200 ease-[ease] hover:text-ink", INK_2)}
@@ -366,7 +366,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
       </header>
 
       <main className="mx-auto w-full max-w-(--maxw) flex-1 px-(--gutter) pb-[132px]">
-        <div className="w-[min(100%,1190px)] pt-[22px]">
+        <div className="pt-[22px]">
           <Link
             href="/watch"
             aria-label={chrome.detail.goBack}
@@ -387,7 +387,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
         </section>
 
         {/* ---------------------------------------------------- console -- */}
-        <section className="mt-[22px] flex w-[min(100%,1190px)] flex-col gap-[10px]" aria-label="Filters">
+        <section className="mt-[22px] flex flex-col gap-[10px]" aria-label="Filters">
           {/* One row of pills: the category, a search field and four menus.
               Everything wraps, so a phone gets the same controls in two or
               three rows instead of a separate collapsed panel. */}
@@ -630,7 +630,7 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
 
         {/* -------------------------------------------------- pagination -- */}
         {filtered.length > 0 && (
-          <div className="mt-[38px] flex w-[min(100%,1190px)] flex-wrap items-center justify-between gap-4 pt-5 max-[480px]:justify-center">
+          <div className="mt-[38px] flex flex-wrap items-center justify-between gap-4 pt-5 max-[480px]:justify-center">
             <p className={cx("text-[0.78rem] tabular-nums", INK_3)}>
               Showing <strong className="font-bold text-ink">{shownFrom}</strong>–
               <strong className="font-bold text-ink">{shownTo}</strong> of {filtered.length}
