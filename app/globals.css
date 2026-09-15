@@ -32,6 +32,8 @@
   --animate-skip-flash: skipFlash 0.62s ease both;
   /* The player's episodes panel glides in from the right edge. */
   --animate-sheet-in: sheetIn 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  /* The title page's player window settles in from slightly smaller. */
+  --animate-player-pop: playerPop 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   /* Landing page intro: the video stripes drop in, the logo bounces in, the
      rotating headline word flips in letter by letter, and the "Coming soon"
      button wears a rotating conic border. */
@@ -72,6 +74,10 @@
     0% { opacity: 0; transform: translateY(-50%) scale(0.72); }
     28% { opacity: 1; transform: translateY(-50%) scale(1); }
     100% { opacity: 0; transform: translateY(-50%) scale(1.16); }
+  }
+  @keyframes playerPop {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
   }
   @keyframes sheetIn {
     from { opacity: 0; transform: translateX(32px); }

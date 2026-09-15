@@ -44,12 +44,6 @@ const PAGE =
 const SHELL = "mx-auto w-full max-w-(--shell-max) px-(--gutter)";
 const FOCUS_RING = "focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-ink";
 
-/* How far a finger has to travel, in one unbroken drag, before the page is
-   handed back while the theatre is open. Short enough that a real attempt to
-   leave always works first time; long enough that the small movements a hand
-   makes while holding a phone never do. */
-const DRAG_RELEASE_PX = 80;
-
 /* Stand-in footage. No title in the store has a playable file yet (a TMDB
    trailer is a YouTube page, which a <video> cannot play), so the player runs
    Big Buck Bunny — an open-licence (CC BY 3.0, Blender Foundation), all-ages
@@ -111,11 +105,10 @@ export default function DetailClient({
   const [saved, setSaved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // Play expands the still into a full-height theatre and brings it to the top
-  // of the viewport, so the screen is what you are looking at rather than
-  // something below the fold.
+  // Play opens the film in a window centred over the page, with the page
+  // blurred behind it. The player's own fullscreen button takes it to the
+  // whole screen from there.
   const [playing, setPlaying] = useState(false);
-  const plateRef = useRef<HTMLDivElement | null>(null);
 
   // A series plays episodes; Play starts wherever the pick is, S1:E1 until
   // something else is chosen. A film only ever plays its trailer.
@@ -145,64 +138,15 @@ export default function DetailClient({
     window.scrollTo(0, 0);
   }, [movie.id]);
 
-  // Scrolling belongs in an effect, not the click handler: at click time the
-  // frame is still at its poster height, so it would scroll to the wrong place.
+  // While the window is open the page behind it stays put: no scrolling the
+  // blurred page around under the film.
   useEffect(() => {
     if (!playing) return;
-    plateRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [playing]);
-
-  // On a touch screen the page holds still while the theatre is open, so a
-  // stray finger cannot slide the video off the top mid-scene. It is a soft
-  // hold rather than a trap: a deliberate drag past DRAG_RELEASE_PX reads as
-  // "I do want to leave", and the page is handed back for the rest of the
-  // session. Closing the player arms it again.
-  //
-  // The lock is overflow, not preventDefault on touchmove: a prevented first
-  // touchmove cancels panning for that whole gesture in Chrome, so there
-  // would be no way to let go part-way through one. Touch events still fire
-  // against a non-scrolling body, which is what measures the drag.
-  useEffect(() => {
-    if (!playing) return;
-    if (!window.matchMedia("(pointer: coarse)").matches) return;
-
-    const previousOverflow = document.body.style.overflow;
-    let locked = false;
-    let released = false;
-    let startY = 0;
-
-    const unlock = () => {
-      if (!locked) return;
-      document.body.style.overflow = previousOverflow;
-      locked = false;
-    };
-
-    // startPlayer scrolls the theatre to the top of the viewport; locking
-    // before that lands would leave it half way up the screen.
-    const lockTimer = setTimeout(() => {
-      document.body.style.overflow = "hidden";
-      locked = true;
-    }, 600);
-
-    const onTouchStart = (event: TouchEvent) => {
-      startY = event.touches[0]?.clientY ?? 0;
-    };
-    const onTouchMove = (event: TouchEvent) => {
-      if (released) return;
-      const y = event.touches[0]?.clientY ?? 0;
-      if (Math.abs(y - startY) < DRAG_RELEASE_PX) return;
-      released = true;
-      unlock();
-    };
-
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-
+    const html = document.documentElement;
+    const previous = html.style.overflow;
+    html.style.overflow = "hidden";
     return () => {
-      clearTimeout(lockTimer);
-      unlock();
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
+      html.style.overflow = previous;
     };
   }, [playing]);
 
@@ -256,12 +200,10 @@ export default function DetailClient({
     if (next !== "trailer") setListSeasonNumber(next.season);
   };
 
-  // From the list on the page: the player may be out of sight, so bring it
-  // back up as well as starting the episode.
+  // From the list on the page: opens the window on that episode.
   const playFromList = (next: PlayerPick) => {
     choose(next);
-    if (playing) plateRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    else setPlaying(true);
+    setPlaying(true);
   };
 
   const readRowEdges = () => {
@@ -446,9 +388,8 @@ export default function DetailClient({
         className={cx(
           SHELL,
           "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 pt-[clamp(1.25rem,2vw,1.75rem)] pb-[clamp(1.25rem,2.4vw,2rem)] max-[760px]:pb-[clamp(2rem,8vw,3rem)]",
-          // Over the banner rather than above it. Back in the flow while
-          // playing, so it never sits on top of the player's own controls.
-          !playing && "absolute inset-x-0 top-0 z-20 [&_button]:text-[rgba(255,255,255,0.82)]",
+          // Over the banner rather than above it.
+          "absolute inset-x-0 top-0 z-20 [&_button]:text-[rgba(255,255,255,0.82)]",
         )}
       >
         {/* A <button> rather than a link, because it calls router.back(). Just
@@ -518,51 +459,37 @@ export default function DetailClient({
       <main className="flex-1 pb-[clamp(6rem,10vw,10rem)]">
         {/* The opening screen is the title's still, full-bleed, blurring and
             darkening into the page towards its foot, with the title and
-            description set inside that blur. Playing, it becomes the theatre. */}
-        <div
-          ref={plateRef}
-          className={cx(
-            "group/frame relative w-full overflow-hidden",
-            playing
-              ? "h-[92vh] bg-black"
-              : "h-[min(100svh,62rem)] min-h-[40rem] bg-[#101010] max-[760px]:h-[max(100svh,40rem)] max-[760px]:min-h-0",
-          )}
-        >
-          {playing ? (
-            playerNode
-          ) : (
-            <>
-              <img className="absolute inset-0 block h-full w-full object-cover object-[center_28%]" src={movie.backdrop} alt="" />
+            description set inside that blur. The same height as the catalog's banner:
+            75% of the screen, 62% on a phone. */}
+        <div className="relative h-[75vh] min-h-[34rem] w-full overflow-hidden bg-[#101010] max-[768px]:h-[62vh] max-[768px]:min-h-[440px]">
+          <img className="absolute inset-0 block h-full w-full object-cover object-[center_28%]" src={movie.backdrop} alt="" />
 
-              {/* Black frosted band behind the floating header. A gradient
-                  alone let a bright or busy still show through behind the
-                  white labels and icons; blurring what is under them as well
-                  keeps them legible on any picture. Masked, so the band fades
-                  out instead of ending in a hard line. */}
-              <div
-                className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[clamp(7.5rem,14vw,10rem)] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.62)_45%,rgba(0,0,0,0)_100%)] backdrop-blur-[18px] [mask-image:linear-gradient(to_bottom,black_50%,transparent)] max-[760px]:h-[7rem]"
-                aria-hidden="true"
-              />
+          {/* Black frosted band behind the floating header. A gradient
+              alone let a bright or busy still show through behind the
+              white labels and icons; blurring what is under them as well
+              keeps them legible on any picture. Masked, so the band fades
+              out instead of ending in a hard line. */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-[clamp(7.5rem,14vw,10rem)] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.62)_45%,rgba(0,0,0,0)_100%)] backdrop-blur-[18px] [mask-image:linear-gradient(to_bottom,black_50%,transparent)] max-[760px]:h-[7rem]"
+            aria-hidden="true"
+          />
 
-              {/* A progressive blur: three frosted layers, each stronger and
-                  starting lower, each faded in by its own mask. One blur
-                  with one mask shows a visible band where it begins; stacked,
-                  the picture softens gradually towards the foot. */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" aria-hidden="true" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[50%] backdrop-blur-[10px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]" aria-hidden="true" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] backdrop-blur-[26px] backdrop-saturate-[1.15] [mask-image:linear-gradient(to_bottom,transparent,black_50%)]" aria-hidden="true" />
+          {/* A progressive blur: three frosted layers, each stronger and
+              starting lower, each faded in by its own mask. One blur
+              with one mask shows a visible band where it begins; stacked,
+              the picture softens gradually towards the foot. */}
+          <div className="pointer-events-none absolute inset-x-0 -bottom-12 h-[calc(60%+3rem)] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-x-0 -bottom-12 h-[calc(50%+3rem)] backdrop-blur-[10px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-x-0 -bottom-12 h-[calc(40%+3rem)] backdrop-blur-[26px] backdrop-saturate-[1.15] [mask-image:linear-gradient(to_bottom,transparent,black_50%)]" aria-hidden="true" />
 
-              {/* Darkens as it blurs and lands on the page's black, so the
-                  banner has no bottom edge. */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.3)_40%,rgba(0,0,0,0.74)_74%,#000_100%)]" aria-hidden="true" />
+          {/* Darkens as it blurs and lands on the page's black, so the
+              banner has no bottom edge. */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 -bottom-px h-[70%] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.32)_38%,rgba(0,0,0,0.78)_70%,#000_92%)]" aria-hidden="true" />
 
-              <div className={cx(SHELL, "absolute inset-x-0 bottom-0 z-[2] pb-[clamp(2.25rem,5.5vw,4.5rem)] [&_h1]:[text-shadow:0_6px_30px_rgba(0,0,0,0.45)] [&_ul]:text-[rgba(255,255,255,0.74)]")}>
-                {info}
-              </div>
-            </>
-          )}
+          <div className={cx(SHELL, "absolute inset-x-0 bottom-0 z-[2] pb-[clamp(2.25rem,5.5vw,4.5rem)] [&_h1]:[text-shadow:0_6px_30px_rgba(0,0,0,0.45)] [&_ul]:text-[rgba(255,255,255,0.74)]")}>
+            {info}
+          </div>
         </div>
-
 
         {isSeries && (
           <section className={cx(SHELL, "mt-[clamp(2.75rem,5.5vw,4.5rem)]")} aria-labelledby="episodes-heading">
@@ -746,6 +673,22 @@ export default function DetailClient({
       </main>
 
       <SiteFooter brand={brand} footer={footer} />
+
+      {playing && (
+        <div
+          className="fixed inset-0 z-[70] grid animate-overlay-fade place-items-center bg-[rgba(0,0,0,0.55)] p-[clamp(1rem,4vw,3rem)] backdrop-blur-[14px] backdrop-saturate-[0.9] motion-reduce:animate-none"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Playing ${movie.title}`}
+        >
+          {/* 16:9 on a wide screen, sized to fit both ways. A phone held
+              upright gets a taller box, so the controls have room; the film
+              letterboxes inside it and fullscreen is one press away. */}
+          <div className="relative aspect-video w-[min(100%,1120px,calc((100svh-6rem)*16/9))] animate-player-pop overflow-hidden rounded-[clamp(0.75rem,1.4vw,1.25rem)] bg-black shadow-[0_40px_120px_rgba(0,0,0,0.75),0_0_0_1px_rgba(255,255,255,0.08)] motion-reduce:animate-none max-[640px]:aspect-[4/5] max-[640px]:w-full">
+            {playerNode}
+          </div>
+        </div>
+      )}
 
       <SearchOverlay
         open={searchOpen}
