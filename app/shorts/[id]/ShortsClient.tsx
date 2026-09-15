@@ -131,10 +131,10 @@ export default function ShortsClient({ shorts, startIndex, brand }: ShortsClient
         <Link
           href="/watch"
           aria-label="Back to catalog"
-          className="pointer-events-auto grid size-11 place-items-center rounded-[999px] bg-[rgba(0,0,0,0.38)] text-ink backdrop-blur-[10px] transition-[background-color] duration-200 ease-[ease] hover:bg-[rgba(255,255,255,0.16)] max-[768px]:bg-transparent max-[768px]:backdrop-blur-none max-[768px]:drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] max-[768px]:hover:bg-transparent"
+          className="pointer-events-auto -ml-2 grid size-11 place-items-center text-ink drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] transition-[opacity] duration-200 ease-[ease] hover:opacity-80"
         >
-          {/* Bare angle on a phone: the disc is there to hold the glyph off a
-              bright frame, and a shadow does that without the furniture. */}
+          {/* The bare angle, as on every way back in the app. A shadow holds
+              it off a bright frame without a disc behind it. */}
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6" />
           </svg>

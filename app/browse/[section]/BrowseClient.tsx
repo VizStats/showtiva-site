@@ -171,12 +171,10 @@ const IconClose = (
   </svg>
 );
 
-/* Tailed on a pointer, where it sits beside the label as one lockup; the
-   bare angle on a phone, matching every other way back. */
+/* The bare left angle, as on every way back in the app: no label, no tail. */
 const IconArrowLeft = (
-  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <line x1="19" y1="12" x2="5" y2="12" className="max-[768px]:hidden" />
-    <polyline points="11 18 5 12 11 6" />
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
@@ -371,10 +369,10 @@ export default function BrowseClient({ section, sections, allMovies, facets, chr
         <div className="w-[min(100%,1190px)] pt-[22px]">
           <Link
             href="/watch"
-            className={cx("group/back inline-flex h-[34px] items-center gap-2 text-[0.76rem] font-semibold tracking-[0.02em] whitespace-nowrap transition-[color] duration-200 ease-[ease] hover:text-ink max-[480px]:gap-[6px]", INK_2)}
+            aria-label={chrome.detail.goBack}
+            className={cx("group/back -ml-2.5 inline-grid size-11 place-items-center rounded-full transition-[color] duration-200 ease-[ease] hover:text-ink", INK_2)}
           >
             <span className="inline-flex transition-[transform] duration-200 ease-[ease] group-hover/back:[transform:translateX(-3px)] motion-reduce:transition-none">{IconArrowLeft}</span>
-            {chrome.detail.goBack}
           </Link>
         </div>
 

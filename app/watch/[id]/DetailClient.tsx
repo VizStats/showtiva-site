@@ -451,42 +451,24 @@ export default function DetailClient({
           !playing && "absolute inset-x-0 top-0 z-20 [&_button]:text-[rgba(255,255,255,0.82)]",
         )}
       >
-        {/* A <button> rather than a link, because it calls router.back(). Two
-            tracked-out words; wrapping them would read as a mistake. */}
+        {/* A <button> rather than a link, because it calls router.back(). Just
+            the angle, as on every way back in the app: no label, no tail. The
+            name lives in aria-label. */}
         <button
           type="button"
           className={cx(
-            "group/back inline-flex cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-[0.7rem] font-medium tracking-[0.22em] whitespace-nowrap text-[#8a8a8a] uppercase transition-[color] duration-300 ease-[ease] hover:text-ink pointer-coarse:min-h-11 pointer-coarse:min-w-11 motion-reduce:transition-none",
+            "group/back -ml-2.5 inline-grid size-11 cursor-pointer place-items-center justify-self-start rounded-full border-0 bg-transparent p-0 text-[#8a8a8a] transition-[color] duration-300 ease-[ease] hover:text-ink motion-reduce:transition-none",
             FOCUS_RING,
           )}
-          // The label is hidden below 768px, and display:none takes it out
-          // of the accessibility tree with it — so the name lives here.
           aria-label={labels.goBack}
           onClick={() => router.back()}
         >
-          {/* The tailed arrow reads as a pair with the label beside it. With
-              the label gone below 768px it is just the angle. */}
           <svg
-            className="h-3 w-[18px] flex-none transition-[transform] duration-[0.35s] ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/back:[transform:translateX(-4px)] max-[768px]:hidden motion-reduce:transition-none"
-            viewBox="0 0 18 12"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              d="M6.2 1 1 6l5.2 5M1 6h17"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <svg
-            className="hidden size-[19px] flex-none max-[768px]:block"
+            className="size-[22px] flex-none transition-[transform] duration-300 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover/back:[transform:translateX(-3px)] motion-reduce:transition-none"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.1"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
@@ -494,9 +476,6 @@ export default function DetailClient({
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          {/* Arrow only on a phone: the words cost width the lockup and the
-              two icons need in the same row. */}
-          <span className="max-[768px]:hidden">{labels.goBack}</span>
         </button>
 
         {/* On entry the lockup glides in from the left. Animated on the two
