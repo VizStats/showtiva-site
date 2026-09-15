@@ -94,7 +94,7 @@ export interface FooterColumn {
  * from stored markup, which would be an injection vector. An unrecognised
  * platform falls back to a generic link icon.
  */
-export const SOCIAL_PLATFORMS = ["twitter", "instagram", "youtube"] as const;
+export const SOCIAL_PLATFORMS = ["x", "twitter", "instagram", "youtube"] as const;
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 
 export interface FooterSocial {

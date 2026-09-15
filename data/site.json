@@ -67,19 +67,19 @@
         "links": [
           {
             "label": "Trending Now",
-            "href": "/watch#trending-now"
+            "href": "/browse/trending-now"
           },
           {
-            "label": "Popular Movies",
-            "href": "/watch#movies"
+            "label": "Movies",
+            "href": "/browse/movies"
           },
           {
-            "label": "Wholesome Series",
-            "href": "/watch#wholesome-series"
+            "label": "TV & Series",
+            "href": "/browse/tv-series"
           },
           {
             "label": "New Releases",
-            "href": "/watch#new-release"
+            "href": "/browse/new-release"
           }
         ]
       },
@@ -88,19 +88,19 @@
         "links": [
           {
             "label": "About Us",
-            "href": "#"
+            "href": "/about"
           },
           {
-            "label": "Careers",
-            "href": "#"
+            "label": "Creators",
+            "href": "/creators"
           },
           {
             "label": "Press Kit",
-            "href": "#"
+            "href": "/press"
           },
           {
             "label": "Contact",
-            "href": "#"
+            "href": "/contact"
           }
         ]
       },
@@ -109,38 +109,38 @@
         "links": [
           {
             "label": "Terms of Use",
-            "href": "#"
+            "href": "/terms"
           },
           {
             "label": "Privacy Policy",
-            "href": "#"
+            "href": "/privacy"
           },
           {
             "label": "Cookie Preferences",
-            "href": "#"
+            "href": "/cookies"
           },
           {
             "label": "Ad Choices",
-            "href": "#"
+            "href": "/ad-choices"
           }
         ]
       }
     ],
     "socials": [
       {
-        "platform": "twitter",
-        "label": "Twitter",
-        "href": "#"
+        "platform": "x",
+        "label": "ShowTiva on X",
+        "href": "https://x.com/search?q=ShowTiva"
       },
       {
         "platform": "instagram",
-        "label": "Instagram",
-        "href": "#"
+        "label": "ShowTiva on Instagram",
+        "href": "https://www.instagram.com/explore/search/keyword/?q=ShowTiva"
       },
       {
         "platform": "youtube",
-        "label": "YouTube",
-        "href": "#"
+        "label": "ShowTiva on YouTube",
+        "href": "https://www.youtube.com/results?search_query=ShowTiva"
       }
     ]
   },

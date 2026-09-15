@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { Brand, FooterContent } from "@/lib/site-types";
 
 /**
@@ -6,9 +8,9 @@ import type { Brand, FooterContent } from "@/lib/site-types";
  * An unrecognised platform falls back to a generic link glyph.
  */
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
-  twitter: (
-    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
-  ),
+  // The X mark is a solid glyph, not an outline, so it fills rather than
+  // strokes. "twitter" stays as an alias for stores written before the rename.
+  x: <path fill="currentColor" stroke="none" d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3Zm-1.08 16.18h1.7L7.4 4.73H5.58l11.09 14.45Z" />,
   instagram: (
     <>
       <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
@@ -23,6 +25,8 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
     </>
   ),
 };
+
+SOCIAL_ICONS.twitter = SOCIAL_ICONS.x;
 
 const GENERIC_ICON = (
   <>
@@ -47,7 +51,7 @@ export default function SiteFooter({ brand, footer }: SiteFooterProps) {
         <div className="absolute inset-0 bg-[image:radial-gradient(circle_at_center,transparent_30%,#000000_100%)]" />
       </div>
 
-      <div className="relative z-[2] mx-auto flex max-w-[1480px] flex-col gap-[60px] px-12 max-[768px]:px-6">
+      <div className="relative z-[2] mx-auto flex max-w-[1480px] flex-col gap-[60px] px-12 max-[768px]:px-5">
         <div className="flex flex-wrap justify-between gap-12">
           {/* Branding column */}
           <div className="max-w-[420px] flex-[1_1_320px]">
@@ -69,12 +73,12 @@ export default function SiteFooter({ brand, footer }: SiteFooterProps) {
                 <ul className="m-0 flex list-none flex-col gap-3 p-0">
                   {column.links.map((link) => (
                     <li key={`${link.label}-${link.href}`}>
-                      <a
+                      <Link
                         href={link.href}
                         className="inline-block font-body text-[0.9rem] text-[rgba(255,255,225,0.5)] no-underline transition-[color,transform] duration-250 ease-[ease] hover:text-[#ff2e3d] hover:[transform:translateX(4px)]"
                       >
                         {link.label}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -92,6 +96,8 @@ export default function SiteFooter({ brand, footer }: SiteFooterProps) {
               <a
                 key={social.platform}
                 href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-[38px] w-[38px] items-center justify-center rounded-[50%] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] text-[rgba(255,255,225,0.6)] transition-all duration-250 ease-[ease] hover:border-[#ff2e3d] hover:bg-[#ff2e3d] hover:text-ink hover:shadow-[0_4px_15px_rgba(255,46,61,0.4)] hover:[transform:translateY(-3px)]"
                 aria-label={social.label}
               >
