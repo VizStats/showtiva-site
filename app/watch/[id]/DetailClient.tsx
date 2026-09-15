@@ -34,6 +34,12 @@ interface DetailClientProps {
   footer: FooterContent;
   labels: DetailLabels;
   popoverLabels: PopoverLabels;
+  /**
+   * "v1": the info block above a full-bleed still.
+   * "v2": the still fills the opening screen and blurs into the page towards
+   * its foot, with the info block set inside that blur.
+   */
+  layout?: "v1" | "v2";
 }
 
 /* ------------------------------------------------------------- styling -- */
@@ -106,7 +112,9 @@ export default function DetailClient({
   footer,
   labels,
   popoverLabels,
+  layout = "v1",
 }: DetailClientProps) {
+  const isV2 = layout === "v2";
   const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -327,6 +335,119 @@ export default function DetailClient({
     { key: "type", text: kind },
     { key: "quality", text: labels.qualityBadge },
   ].filter((item) => item.text.trim().length > 0);
+  const playerNode = (
+    <MoviePlayer
+      title={movie.title}
+      episodeLabel={
+        pickedEpisode && pick !== "trailer"
+          ? `S${pick.season}:E${pick.episode} · ${pickedEpisode.title}`
+          : isSeries
+            ? "Trailer"
+            : undefined
+      }
+      media={
+        pickedEpisode && pick !== "trailer"
+          ? mediaFor(pickedEpisode.videoUrl, standInOffset(pick.season, pick.episode))
+          : mediaFor(movie.trailerUrl)
+      }
+      poster={pickedEpisode?.still || movie.backdrop}
+      onClose={closePlayer}
+      series={{
+        seasons: isSeries ? seasons : [],
+        current: pick,
+        fallbackStill: movie.backdrop,
+        onSelect: choose,
+        suggestions: seriesSuggestions,
+        onOpenTitle: (id) => router.push(`/watch/${id}`),
+      }}
+      onNext={nextPick ? () => choose(nextPick) : undefined}
+    />
+  );
+
+  // Title, meta, description and the action pair: above the still in v1,
+  // inside the banner's blur in v2.
+  const info = (
+    <>
+      {/* `balance` still will not break a single long word; on a 320px
+          screen the display size is 34px, wide enough to run off the edge. */}
+      <h1 className="mt-[clamp(1.35rem,2.1vw,1.7rem)] font-heading text-[clamp(2.2rem,4.2vw,3.4rem)] leading-[1.02] font-light tracking-[-0.03em] break-words text-balance max-[760px]:tracking-[-0.018em]">
+        {movie.title}
+      </h1>
+      {movie.subtitle && (
+        <p className="mt-[clamp(0.7rem,1vw,0.9rem)] font-heading text-[clamp(0.78rem,1.15vw,0.98rem)] font-normal tracking-[0.3em] text-[#8a8a8a] uppercase max-[430px]:tracking-[0.24em]">
+          {movie.subtitle}
+        </p>
+      )}
+
+      {/* Hairlines hang off the left edge of every item but the first,
+          which breaks the moment the rail wraps; below 560px it always
+          does, so they give way to plain spacing. */}
+      {meta.length > 0 && (
+        <ul className="mt-[clamp(1rem,1.55vw,1.28rem)] flex list-none flex-wrap items-center gap-x-0 gap-y-2 text-[0.84rem] tracking-[0.06em] text-[#8a8a8a] tabular-nums max-[560px]:gap-x-[1.15rem]">
+          {meta.map((item) => (
+            <li
+              key={item.key}
+              className="not-first:ml-[clamp(0.85rem,1.8vw,1.5rem)] not-first:border-l not-first:border-[rgba(250,250,250,0.11)] not-first:pl-[clamp(0.85rem,1.8vw,1.5rem)] max-[560px]:not-first:ml-0 max-[560px]:not-first:border-l-0 max-[560px]:not-first:pl-0"
+            >
+              {item.accent ? <span className="text-[#ff3040]">{item.text}</span> : item.text}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Three lines: enough to read the premise while keeping the block
+          inside its share of the opening screen. Full text stays in the
+          DOM, so screen readers and SEO are unaffected. */}
+      <p className="mt-[clamp(1.05rem,1.7vw,1.35rem)] line-clamp-3 max-w-[78ch] font-[family-name:'Segoe_UI',Roboto,-apple-system,BlinkMacSystemFont,sans-serif] text-[clamp(1rem,1.12vw,1.1rem)] leading-[1.78] font-medium tracking-[0] text-[#c7c7bd]">
+        {movie.description}
+      </p>
+
+      <div className="mt-[clamp(1.18rem,1.9vw,1.58rem)] flex flex-nowrap gap-0 [--edge-gap:10px]">
+        <button
+          type="button"
+          className={cx(ACTION, "[--pad:clamp(2.5rem,4.4vw,3.6rem)] max-[480px]:[--pad:2.1rem] bg-ink pr-[calc(var(--pad)+var(--slant))] pl-(--pad) text-black slant-lead hover:bg-[#e8e8cd]")}
+          onClick={startPlayer}
+        >
+          <svg
+            className="h-3 w-[10px] flex-none"
+            viewBox="0 0 12 14"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M0 0v14l12-7z" fill="currentColor" />
+          </svg>
+          <span>{labels.play}</span>
+        </button>
+
+        {/* The hairline outline is a clipped layer rather than a border,
+            because clip-path shears a real border off along the cut edge:
+            the element is the outline colour and ::before insets by 1px in
+            the page colour. Saved reads as engaged, not disabled: a quiet
+            fill, label at full strength. */}
+        <button
+          type="button"
+          className={cx(
+            ACTION,
+            "[--pad:clamp(1.05rem,1.8vw,1.5rem)] max-[480px]:[--pad:0.7rem] relative isolate ml-[calc(var(--edge-gap)-var(--slant))] bg-[rgba(250,250,250,0.28)] pr-(--pad) pl-[calc(var(--pad)+var(--slant))] text-ink slant-trail before:absolute before:inset-px before:z-[-1] before:content-[''] before:[clip-path:polygon(0_0,100%_0,100%_100%,var(--slant)_100%)] hover:bg-ink",
+            isV2
+              ? saved
+                ? "before:bg-[rgba(26,26,25,0.72)] hover:before:bg-[rgba(35,35,34,0.8)]"
+                : "before:bg-[rgba(0,0,0,0.5)] backdrop-blur-[10px]"
+              : saved
+                ? "before:bg-[#1a1a19] hover:before:bg-[#232322]"
+                : "before:bg-black",
+          )}
+          aria-pressed={saved}
+          onClick={toggleCurrentSaved}
+        >
+          {/* Wrapped so the button's counter-skew rule can reach the label —
+              a bare text node would stay sheared with the button. */}
+          <span>{saved ? labels.inWatchlist : labels.watchlist}</span>
+        </button>
+      </div>
+    </>
+  );
+
   return (
     // Relative on purpose: the hover popover is positioned in document
     // coordinates and resolves against this element, which starts at 0,0 and
@@ -336,6 +457,9 @@ export default function DetailClient({
         className={cx(
           SHELL,
           "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 pt-[clamp(1.25rem,2vw,1.75rem)] pb-[clamp(1.25rem,2.4vw,2rem)] max-[760px]:pb-[clamp(2rem,8vw,3rem)]",
+          // v2: over the banner rather than above it. Back in the flow while
+          // playing, so it never sits on top of the player's own controls.
+          isV2 && !playing && "absolute inset-x-0 top-0 z-20 [&_button]:text-[rgba(255,255,255,0.82)]",
         )}
       >
         {/* A <button> rather than a link, because it calls router.back(). Two
@@ -426,84 +550,53 @@ export default function DetailClient({
       <main className="flex-1 pb-[clamp(6rem,10vw,10rem)]">
         {/* Compact info block above a full-bleed still: roughly 30/70 of the
             opening screen, so the artwork stays the dominant element. */}
-        <section className={cx(SHELL, "pb-[clamp(0.9rem,1.6vw,1.35rem)]")}>
-          {/* `balance` still will not break a single long word; on a 320px
-              screen the display size is 34px, wide enough to run off the edge. */}
-          <h1 className="mt-[clamp(1.35rem,2.1vw,1.7rem)] font-heading text-[clamp(2.2rem,4.2vw,3.4rem)] leading-[1.02] font-light tracking-[-0.03em] break-words text-balance max-[760px]:tracking-[-0.018em]">
-            {movie.title}
-          </h1>
-          {movie.subtitle && (
-            <p className="mt-[clamp(0.7rem,1vw,0.9rem)] font-heading text-[clamp(0.78rem,1.15vw,0.98rem)] font-normal tracking-[0.3em] text-[#8a8a8a] uppercase max-[430px]:tracking-[0.24em]">
-              {movie.subtitle}
-            </p>
-          )}
-
-          {/* Hairlines hang off the left edge of every item but the first,
-              which breaks the moment the rail wraps; below 560px it always
-              does, so they give way to plain spacing. */}
-          {meta.length > 0 && (
-            <ul className="mt-[clamp(1rem,1.55vw,1.28rem)] flex list-none flex-wrap items-center gap-x-0 gap-y-2 text-[0.84rem] tracking-[0.06em] text-[#8a8a8a] tabular-nums max-[560px]:gap-x-[1.15rem]">
-              {meta.map((item) => (
-                <li
-                  key={item.key}
-                  className="not-first:ml-[clamp(0.85rem,1.8vw,1.5rem)] not-first:border-l not-first:border-[rgba(250,250,250,0.11)] not-first:pl-[clamp(0.85rem,1.8vw,1.5rem)] max-[560px]:not-first:ml-0 max-[560px]:not-first:border-l-0 max-[560px]:not-first:pl-0"
-                >
-                  {item.accent ? <span className="text-[#ff3040]">{item.text}</span> : item.text}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Three lines: enough to read the premise while keeping the block
-              inside its share of the opening screen. Full text stays in the
-              DOM, so screen readers and SEO are unaffected. */}
-          <p className="mt-[clamp(1.05rem,1.7vw,1.35rem)] line-clamp-3 max-w-[78ch] font-[family-name:'Segoe_UI',Roboto,-apple-system,BlinkMacSystemFont,sans-serif] text-[clamp(1rem,1.12vw,1.1rem)] leading-[1.78] font-medium tracking-[0] text-[#c7c7bd]">
-            {movie.description}
-          </p>
-
-          <div className="mt-[clamp(1.18rem,1.9vw,1.58rem)] flex flex-nowrap gap-0 [--edge-gap:10px]">
-            <button
-              type="button"
-              className={cx(ACTION, "[--pad:clamp(2.5rem,4.4vw,3.6rem)] max-[480px]:[--pad:2.1rem] bg-ink pr-[calc(var(--pad)+var(--slant))] pl-(--pad) text-black slant-lead hover:bg-[#e8e8cd]")}
-              onClick={startPlayer}
-            >
-              <svg
-                className="h-3 w-[10px] flex-none"
-                viewBox="0 0 12 14"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="M0 0v14l12-7z" fill="currentColor" />
-              </svg>
-              <span>{labels.play}</span>
-            </button>
-
-            {/* The hairline outline is a clipped layer rather than a border,
-                because clip-path shears a real border off along the cut edge:
-                the element is the outline colour and ::before insets by 1px in
-                the page colour. Saved reads as engaged, not disabled: a quiet
-                fill, label at full strength. */}
-            <button
-              type="button"
-              className={cx(
-                ACTION,
-                "[--pad:clamp(1.05rem,1.8vw,1.5rem)] max-[480px]:[--pad:0.7rem] relative isolate ml-[calc(var(--edge-gap)-var(--slant))] bg-[rgba(250,250,250,0.28)] pr-(--pad) pl-[calc(var(--pad)+var(--slant))] text-ink slant-trail before:absolute before:inset-px before:z-[-1] before:content-[''] before:[clip-path:polygon(0_0,100%_0,100%_100%,var(--slant)_100%)] hover:bg-ink",
-                saved ? "before:bg-[#1a1a19] hover:before:bg-[#232322]" : "before:bg-black",
-              )}
-              aria-pressed={saved}
-              onClick={toggleCurrentSaved}
-            >
-              {/* Wrapped so the button's counter-skew rule can reach the label —
-                  a bare text node would stay sheared with the button. */}
-              <span>{saved ? labels.inWatchlist : labels.watchlist}</span>
-            </button>
-          </div>
-        </section>
+        {!isV2 && <section className={cx(SHELL, "pb-[clamp(0.9rem,1.6vw,1.35rem)]")}>{info}</section>}
 
         {/* Full-bleed and deliberately huge — the page's centrepiece. The 70vh
             floor holds it near two-thirds of the opening screen even on short,
             wide windows where 21:9 alone would compute much shorter. Playing,
             the frame drops its poster proportions and becomes a theatre. */}
+        {isV2 && (
+          <div
+            ref={plateRef}
+            className={cx(
+              "group/frame relative w-full overflow-hidden",
+              playing
+                ? "h-[92vh] bg-black"
+                : "h-[min(100svh,62rem)] min-h-[40rem] bg-[#101010] max-[760px]:h-[max(100svh,40rem)] max-[760px]:min-h-0",
+            )}
+          >
+            {playing ? (
+              playerNode
+            ) : (
+              <>
+                <img className="absolute inset-0 block h-full w-full object-cover object-[center_28%]" src={movie.backdrop} alt="" />
+
+                {/* Shade under the floating header, so its controls read over
+                    a bright sky. */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0.7),rgba(0,0,0,0))]" aria-hidden="true" />
+
+                {/* A progressive blur: three frosted layers, each stronger and
+                    starting lower, each faded in by its own mask. One blur
+                    with one mask shows a visible band where it begins; stacked,
+                    the picture softens gradually towards the foot. */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" aria-hidden="true" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[50%] backdrop-blur-[10px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]" aria-hidden="true" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] backdrop-blur-[26px] backdrop-saturate-[1.15] [mask-image:linear-gradient(to_bottom,transparent,black_50%)]" aria-hidden="true" />
+
+                {/* Darkens as it blurs and lands on the page's black, so the
+                    banner has no bottom edge. */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-[image:linear-gradient(to_bottom,rgba(0,0,0,0)_0%,rgba(0,0,0,0.3)_40%,rgba(0,0,0,0.74)_74%,#000_100%)]" aria-hidden="true" />
+
+                <div className={cx(SHELL, "absolute inset-x-0 bottom-0 z-[2] pb-[clamp(2.25rem,5.5vw,4.5rem)] [&_h1]:[text-shadow:0_6px_30px_rgba(0,0,0,0.45)] [&_ul]:text-[rgba(255,255,255,0.74)]")}>
+                  {info}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {!isV2 && (
         <figure className="w-full min-w-0">
           <div
             ref={plateRef}
@@ -516,32 +609,7 @@ export default function DetailClient({
             )}
           >
             {playing ? (
-              <MoviePlayer
-                title={movie.title}
-                episodeLabel={
-                  pickedEpisode && pick !== "trailer"
-                    ? `S${pick.season}:E${pick.episode} · ${pickedEpisode.title}`
-                    : isSeries
-                      ? "Trailer"
-                      : undefined
-                }
-                media={
-                  pickedEpisode && pick !== "trailer"
-                    ? mediaFor(pickedEpisode.videoUrl, standInOffset(pick.season, pick.episode))
-                    : mediaFor(movie.trailerUrl)
-                }
-                poster={pickedEpisode?.still || movie.backdrop}
-                onClose={closePlayer}
-                series={{
-                  seasons: isSeries ? seasons : [],
-                  current: pick,
-                  fallbackStill: movie.backdrop,
-                  onSelect: choose,
-                  suggestions: seriesSuggestions,
-                  onOpenTitle: (id) => router.push(`/watch/${id}`),
-                }}
-                onNext={nextPick ? () => choose(nextPick) : undefined}
-              />
+              playerNode
             ) : (
               <>
                 <img className="block h-full w-full object-cover object-[center_40%]" src={movie.backdrop} alt={movie.title} />
@@ -581,6 +649,7 @@ export default function DetailClient({
             </div>
           </figcaption>
         </figure>
+        )}
 
         {isSeries && (
           <section className={cx(SHELL, "mt-[clamp(2.75rem,5.5vw,4.5rem)]")} aria-labelledby="episodes-heading">
